@@ -49,7 +49,8 @@ export default async function Page() {
         <DataTable
           columns={columns}
           data={courses}
-          multipleDeleteMethod={deleteManyCourses}
+          isMultipleDeleteEnabled
+          multipleDeleteAction={deleteManyCourses}
         />
       </PageContent>
     </>

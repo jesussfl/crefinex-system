@@ -71,11 +71,7 @@ export default async function Page() {
         </TabsList>
         <TabsContent value="students">
           <PageContent>
-            <DataTable
-              columns={columns}
-              data={students}
-              multipleDeleteMethod={deleteManyCourses}
-            />
+            <DataTable columns={columns} data={students} />
           </PageContent>
         </TabsContent>
         <TabsContent value="representative">

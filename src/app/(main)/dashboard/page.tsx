@@ -38,7 +38,7 @@ import { Boxes } from 'lucide-react'
 
 import Link from 'next/link'
 import { auth } from '@/auth'
-import { Overview } from '@/modules/common/components/overview/overview'
+// import { Overview } from '@/modules/common/components/overview/overview'
 
 import { getUserPermissions } from '@/lib/auth'
 
