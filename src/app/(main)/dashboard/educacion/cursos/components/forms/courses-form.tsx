@@ -37,6 +37,7 @@ type FormValues = {
   price?: number
   image?: string
 }
+
 interface Props {
   defaultValues?: FormValues
 }

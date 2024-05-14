@@ -41,10 +41,10 @@ model Session {
 }
 
 model Usuario {
-  id          String         @id @default(cuid())
+  id          String                @id @default(cuid())
   nombre      String
-  cedula      String?        @unique
-  tipo_cedula Tipos_Cedulas?
+  cedula      String?               @unique
+  tipo_cedula Documentos_Identidad?
 
   email         String?     @unique
   contrasena    String?     @map("password")
@@ -107,13 +107,14 @@ model Permiso {
 
 //#endregion
 
-enum Tipos_Cedulas {
+enum Documentos_Identidad {
   V
   E
   J
   G
   R
   P
+  Partida_Nacimiento
 }
 
 enum Generos {
@@ -131,16 +132,56 @@ model Auditoria {
   ultima_actualizacion DateTime @updatedAt
 }
 
-model Student {
-  id        Int      @id @default(autoincrement())
+model Representative {
+  id Int @id @default(autoincrement())
+
   names     String
   lastNames String
   birthDate DateTime
 
+  gender       Genders
+  phone_number String?
+  email        String?
+  address      String?
+  country      String
+
+  id_document_type   Documentos_Identidad
+  id_document_number String               @unique
+  id_document_image  String
+
+  students Student[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum Genders {
+  Masculino
+  Femenino
+}
+
+model Student {
+  id        Int    @id @default(autoincrement())
+  names     String
+  lastNames String
+
+  birthDate          DateTime
+  gender             Genders
+  phone_number       String?
+  email              String?
+  address            String?
+  country            String
+  id_document_type   Documentos_Identidad?
+  id_document_number String?
+  id_document_image  String?
 
   courses Students_Courses[]
+
+  representative                    Representative? @relation(fields: [id_document_number_representative], references: [id_document_number])
+  id_document_number_representative String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Modalities {

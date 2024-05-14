@@ -15,7 +15,24 @@ import { getAllStudents } from './lib/actions/students'
 import Link from 'next/link'
 import { buttonVariants } from '@/modules/common/components/button'
 import { deleteManyCourses } from '../cursos/lib/actions'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/modules/common/components/card/card'
 // import ButtonExport from './components/button-export'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/modules/common/components/tabs/tabs'
+import {
+  deleteManyRepresentatives,
+  getAllRepresentatives,
+} from './lib/actions/representatives'
+import { representativeColumns } from './components/columns/representative-columns'
 
 export const metadata: Metadata = {
   title: 'Estudiantes',
@@ -24,6 +41,7 @@ export const metadata: Metadata = {
 }
 export default async function Page() {
   const students = await getAllStudents()
+  const representatives = await getAllRepresentatives()
   return (
     <>
       <PageHeader>
@@ -46,14 +64,43 @@ export default async function Page() {
           </Link>
         </HeaderRightSide>
       </PageHeader>
-
-      <PageContent>
-        <DataTable
-          columns={columns}
-          data={students}
-          multipleDeleteMethod={deleteManyCourses}
-        />
-      </PageContent>
+      <Tabs defaultValue="students">
+        <TabsList className="mx-5">
+          <TabsTrigger value="students">Estudiantes</TabsTrigger>
+          <TabsTrigger value="representative">Representantes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="students">
+          <PageContent>
+            <DataTable
+              columns={columns}
+              data={students}
+              multipleDeleteMethod={deleteManyCourses}
+            />
+          </PageContent>
+        </TabsContent>
+        <TabsContent value="representative">
+          <PageContent>
+            <Card>
+              <CardHeader className="flex flex-row justify-between">
+                <CardTitle>Lista de Representantes</CardTitle>
+                <Link
+                  href="/dashboard/educacion/estudiantes/representante/nuevo"
+                  className={buttonVariants({ variant: 'secondary' })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Agregar Representante
+                </Link>
+              </CardHeader>
+              <CardContent>
+                <DataTable
+                  columns={representativeColumns}
+                  data={representatives}
+                />
+              </CardContent>
+            </Card>
+          </PageContent>
+        </TabsContent>
+      </Tabs>
     </>
   )
 }
