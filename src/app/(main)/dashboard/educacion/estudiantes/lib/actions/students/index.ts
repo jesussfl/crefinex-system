@@ -48,6 +48,9 @@ export const getStudentByIdDocument = async (id: string) => {
     where: {
       id_document_number: id,
     },
+    include: {
+      representative: true,
+    },
   })
 
   if (!student) {

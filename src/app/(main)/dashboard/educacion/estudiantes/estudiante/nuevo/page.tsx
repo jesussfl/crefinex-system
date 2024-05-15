@@ -18,12 +18,7 @@ export const metadata: Metadata = {
   description: 'Desde aquí puedes agregar estudiantes',
 }
 
-export default async function Page({
-  params: { studentId },
-}: {
-  params: { studentId: string }
-}) {
-  const student = await getStudentByIdDocument(studentId)
+export default async function Page() {
   return (
     <>
       <PageHeader className="mb-0">
@@ -39,7 +34,7 @@ export default async function Page({
         </HeaderLeftSide>
       </PageHeader>
       <PageContent className="pt-5 space-y-4 md:px-[20px]">
-        <StudentsForm defaultValues={student} />
+        <StudentsForm />
       </PageContent>
     </>
   )
