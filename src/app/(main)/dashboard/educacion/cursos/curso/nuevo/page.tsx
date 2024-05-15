@@ -5,16 +5,18 @@ import {
   PageHeader,
   PageHeaderTitle,
 } from '@/modules/layout/templates/page'
-import { PackagePlus } from 'lucide-react'
+import { BookUp2, UserCircle2 } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
-import StudentsForm from '../components/forms/students-form'
+import CoursesForm from '../../components/forms/courses-form'
+import { getAllStudents } from '../../../estudiantes/lib/actions/students'
 
 export const metadata: Metadata = {
-  title: 'Agregar Estudiante',
-  description: 'Desde aquí puedes agregar estudiantes',
+  title: 'Agregar Curso',
+  description: 'Desde aquí puedes agregar cursos',
 }
 
 export default async function Page() {
+  const students = await getAllStudents()
   return (
     <>
       <PageHeader className="mb-0">
@@ -23,14 +25,14 @@ export default async function Page() {
 
           <div>
             <PageHeaderTitle>
-              <PackagePlus size={24} />
-              Agregar un estudiante
+              <BookUp2 size={24} />
+              Agregar Curso
             </PageHeaderTitle>
           </div>
         </HeaderLeftSide>
       </PageHeader>
       <PageContent className="pt-5 space-y-4 md:px-[20px]">
-        <StudentsForm />
+        <CoursesForm students={students} />
       </PageContent>
     </>
   )

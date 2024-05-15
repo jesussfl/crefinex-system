@@ -1,4 +1,4 @@
-import { PackagePlus, Plus } from 'lucide-react'
+import { BookUp2, PackagePlus, Plus } from 'lucide-react'
 import { Metadata } from 'next'
 import {
   HeaderLeftSide,
@@ -27,7 +27,7 @@ export default async function Page() {
       <PageHeader>
         <HeaderLeftSide>
           <PageHeaderTitle>
-            <PackagePlus size={24} />
+            <BookUp2 size={24} />
             Cursos de Crefinex
           </PageHeaderTitle>
           <PageHeaderDescription>
@@ -36,22 +36,17 @@ export default async function Page() {
         </HeaderLeftSide>
         <HeaderRightSide>
           <Link
-            href="/dashboard/educacion/estudiantes/registro"
+            href="/dashboard/educacion/cursos/curso/nuevo"
             className={buttonVariants({ variant: 'default' })}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Registrar Curso
+            Registrar Curso Nuevo
           </Link>
         </HeaderRightSide>
       </PageHeader>
 
       <PageContent>
-        <DataTable
-          columns={columns}
-          data={courses}
-          isMultipleDeleteEnabled
-          multipleDeleteAction={deleteManyCourses}
-        />
+        <DataTable columns={columns} data={courses} />
       </PageContent>
     </>
   )

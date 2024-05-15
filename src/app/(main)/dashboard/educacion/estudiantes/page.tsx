@@ -1,8 +1,7 @@
-import { PackagePlus, Plus } from 'lucide-react'
+import { Plus, Users2 } from 'lucide-react'
 import { Metadata } from 'next'
 import {
   HeaderLeftSide,
-  HeaderRightSide,
   PageContent,
   PageHeader,
   PageHeaderDescription,
@@ -14,7 +13,6 @@ import { DataTable } from '@/modules/common/components/table/data-table'
 import { getAllStudents } from './lib/actions/students'
 import Link from 'next/link'
 import { buttonVariants } from '@/modules/common/components/button'
-import { deleteManyCourses } from '../cursos/lib/actions'
 import {
   Card,
   CardContent,
@@ -28,10 +26,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/modules/common/components/tabs/tabs'
-import {
-  deleteManyRepresentatives,
-  getAllRepresentatives,
-} from './lib/actions/representatives'
+import { getAllRepresentatives } from './lib/actions/representatives'
 import { representativeColumns } from './components/columns/representative-columns'
 
 export const metadata: Metadata = {
@@ -47,7 +42,7 @@ export default async function Page() {
       <PageHeader>
         <HeaderLeftSide>
           <PageHeaderTitle>
-            <PackagePlus size={24} />
+            <Users2 size={24} />
             Estudiantes de Crefinex
           </PageHeaderTitle>
           <PageHeaderDescription>

@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/modules/common/components/select/select'
-import { createStudent } from '../../lib/actions/students'
+import { createStudent, updateStudent } from '../../lib/actions/students'
 import { cn } from '@/utils/utils'
 import { format } from 'date-fns'
 import PhoneInput from 'react-phone-input-2'
@@ -43,6 +43,7 @@ import {
   PopoverTrigger,
 } from '@/modules/common/components/popover/popover'
 import { CaretSortIcon } from '@radix-ui/react-icons'
+import { getDirtyValues } from '@/utils/helpers/get-dirty-values'
 
 interface Props {
   defaultValues?: Student
@@ -113,18 +114,18 @@ export default function StudentsForm({ defaultValues }: Props) {
         return
       }
 
-      //   const dirtyValues = getDirtyValues(dirtyFields, values) as FormValues
+      const dirtyValues = getDirtyValues(dirtyFields, values) as FormValues
 
-      //   updateCategory(defaultValues.id, dirtyValues).then((data) => {
-      //     if (data?.success) {
-      //       toast({
-      //         title: 'Accesorio actualizado',
-      //         description: 'El accesorio se ha actualizado correctamente',
-      //         variant: 'success',
-      //       })
-      //     }
-      //     router.back()
-      //   })
+      updateStudent(dirtyValues, defaultValues.id).then((data) => {
+        if (data?.success) {
+          toast({
+            title: 'Estudiante actualizado',
+            description: 'El estudiante se ha actualizado correctamente',
+            variant: 'success',
+          })
+        }
+        router.back()
+      })
     })
   }
 
@@ -197,7 +198,7 @@ export default function StudentsForm({ defaultValues }: Props) {
               rules={{ required: 'Este campo es obligatorio' }}
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel>Cedula del Representante:</FormLabel>
+                  <FormLabel>Cédula del Representante:</FormLabel>
 
                   <Popover>
                     <PopoverTrigger asChild>
@@ -361,7 +362,7 @@ export default function StudentsForm({ defaultValues }: Props) {
                 }}
                 render={({ field }) => (
                   <FormItem className="flex-1 gap-4 justify-between">
-                    <FormLabel className="">Género</FormLabel>
+                    <FormLabel className="">Sexo</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -410,7 +411,7 @@ export default function StudentsForm({ defaultValues }: Props) {
               />
               <FormField
                 control={form.control}
-                name="address"
+                name="state"
                 rules={{
                   required: 'Este campo es necesario',
                   minLength: {
@@ -424,7 +425,32 @@ export default function StudentsForm({ defaultValues }: Props) {
                 }}
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>Dirección</FormLabel>
+                    <FormLabel>Estado</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="city"
+                rules={{
+                  required: 'Este campo es necesario',
+                  minLength: {
+                    value: 3,
+                    message: 'Debe tener al menos 3 caracteres',
+                  },
+                  maxLength: {
+                    value: 100,
+                    message: 'Debe tener un maximo de 100 caracteres',
+                  },
+                }}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Ciudad</FormLabel>
                     <FormControl>
                       <Input {...field} value={field.value || ''} />
                     </FormControl>
@@ -434,6 +460,31 @@ export default function StudentsForm({ defaultValues }: Props) {
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name="address"
+              rules={{
+                required: 'Este campo es necesario',
+                minLength: {
+                  value: 3,
+                  message: 'Debe tener al menos 3 caracteres',
+                },
+                maxLength: {
+                  value: 100,
+                  message: 'Debe tener un maximo de 100 caracteres',
+                },
+              }}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel>Dirección</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ''} />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name={`phone_number`}

@@ -88,6 +88,47 @@ export const createStudent = async (data: Prisma.StudentCreateInput) => {
     success: 'Estudiante creado exitosamente',
   }
 }
+export const updateStudent = async (
+  data: Prisma.StudentUpdateInput,
+  id: number
+) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    return sessionResponse
+  }
+
+  const permissionsResponse = validateUserPermissions({
+    sectionName: SECTION_NAMES.CURSOS,
+    actionName: 'ACTUALIZAR',
+    userPermissions: sessionResponse.session?.user.rol.permisos,
+  })
+
+  if (!permissionsResponse.success) {
+    return permissionsResponse
+  }
+
+  const student = await prisma.student.update({
+    where: {
+      id,
+    },
+    data,
+  })
+
+  if (!student) {
+    return {
+      error: 'Parece que hubo un problema',
+      success: false,
+    }
+  }
+  await registerAuditAction('Se editó el estudiante: ' + student.names)
+  revalidatePath('/dashboard/cursos/estudiantes')
+
+  return {
+    error: false,
+    success: true,
+  }
+}
 
 export const deleteManyStudents = async (ids: number[]) => {
   const sessionResponse = await validateUserSession()

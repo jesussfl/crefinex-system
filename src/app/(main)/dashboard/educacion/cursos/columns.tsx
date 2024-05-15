@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/modules/common/components/dropdown-menu/dropdown-menu'
 import { format } from 'date-fns'
+import Link from 'next/link'
 
 export const columns: ColumnDef<Courses>[] = [
   SELECT_COLUMN,
@@ -72,7 +73,7 @@ export const columns: ColumnDef<Courses>[] = [
     },
     cell: ({ row }) => {
       return row.original.start_date
-        ? format(new Date(row.original.start_date), 'dd/MM/yyyy HH:mm')
+        ? format(new Date(row.original.start_date), 'dd/MM/yyyy')
         : 'Sin fecha de inicio'
     },
   },
@@ -93,7 +94,7 @@ export const columns: ColumnDef<Courses>[] = [
     },
     cell: ({ row }) => {
       return row.original.end_date
-        ? format(new Date(row.original.end_date), 'dd/MM/yyyy HH:mm')
+        ? format(new Date(row.original.end_date), 'dd/MM/yyyy')
         : 'Sin fecha de culminación'
     },
   },
@@ -133,7 +134,9 @@ export const columns: ColumnDef<Courses>[] = [
             >
               Copiar código
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            <Link href={`/dashboard/educacion/cursos/curso/${data.id}`}>
+              <DropdownMenuItem>Editar</DropdownMenuItem>
+            </Link>
           </DropdownMenuContent>
         </DropdownMenu>
       )

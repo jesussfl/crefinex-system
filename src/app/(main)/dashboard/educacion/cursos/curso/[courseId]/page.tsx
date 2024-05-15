@@ -7,14 +7,22 @@ import {
 } from '@/modules/layout/templates/page'
 import { PackagePlus } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
-import CoursesForm from '../components/forms/courses-form'
+import CoursesForm from '../../components/forms/courses-form'
+import { getCourseById } from '../../lib/actions'
+import { getAllStudents } from '../../../estudiantes/lib/actions/students'
 
 export const metadata: Metadata = {
-  title: 'Agregar Estudiante',
-  description: 'Desde aquí puedes agregar estudiantes',
+  title: 'Editar Curso',
+  description: 'Desde aquí puedes editar un curso',
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({
+  params: { courseId },
+}: {
+  params: { courseId: string }
+}) {
+  const course = await getCourseById(Number(courseId))
+  const students = await getAllStudents()
   return (
     <>
       <PageHeader className="mb-0">
@@ -24,13 +32,13 @@ export default async function Page({ params }: { params: { id: string } }) {
           <div>
             <PageHeaderTitle>
               <PackagePlus size={24} />
-              Agregar un curso
+              Editar curso
             </PageHeaderTitle>
           </div>
         </HeaderLeftSide>
       </PageHeader>
-      <PageContent className="pt-5 space-y-4 md:px-[20px] xl:px-[100px] 2xl:px-[250px]">
-        <CoursesForm />
+      <PageContent className="pt-5 space-y-4 md:px-[20px]">
+        <CoursesForm defaultValues={course} students={students} />
       </PageContent>
     </>
   )

@@ -5,13 +5,9 @@ import {
   PageHeader,
   PageHeaderTitle,
 } from '@/modules/layout/templates/page'
-import { PackagePlus } from 'lucide-react'
+import { UserCircle2 } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
 import StudentsForm from '../../components/forms/students-form'
-import {
-  getStudentById,
-  getStudentByIdDocument,
-} from '../../lib/actions/students'
 
 export const metadata: Metadata = {
   title: 'Agregar Estudiante',
@@ -27,8 +23,8 @@ export default async function Page() {
 
           <div>
             <PageHeaderTitle>
-              <PackagePlus size={24} />
-              Agregar un estudiante
+              <UserCircle2 size={24} />
+              Agregar estudiante
             </PageHeaderTitle>
           </div>
         </HeaderLeftSide>

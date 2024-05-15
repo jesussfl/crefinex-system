@@ -17,6 +17,7 @@ import {
 } from '@/modules/common/components/dropdown-menu/dropdown-menu'
 import { format } from 'date-fns'
 import { getAge } from '@/utils/helpers/get-age'
+import Link from 'next/link'
 
 export const representativeColumns: ColumnDef<Representative>[] = [
   SELECT_COLUMN,
@@ -58,9 +59,6 @@ export const representativeColumns: ColumnDef<Representative>[] = [
         </Button>
       )
     },
-    cell: ({ row }) => {
-      return format(new Date(row.original.birthDate), 'dd/MM/yyyy')
-    },
   },
 
   {
@@ -90,7 +88,7 @@ export const representativeColumns: ColumnDef<Representative>[] = [
           className="text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Género
+          Sexo
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
@@ -139,6 +137,38 @@ export const representativeColumns: ColumnDef<Representative>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
           Pais
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+  {
+    accessorKey: 'state',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Estado
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+  {
+    accessorKey: 'city',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Ciudad
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
@@ -201,7 +231,11 @@ export const representativeColumns: ColumnDef<Representative>[] = [
             >
               Copiar código
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            <Link
+              href={`/dashboard/educacion/estudiantes/representante/${data.id_document_number}`}
+            >
+              <DropdownMenuItem>Editar</DropdownMenuItem>
+            </Link>
           </DropdownMenuContent>
         </DropdownMenu>
       )

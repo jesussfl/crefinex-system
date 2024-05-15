@@ -88,7 +88,7 @@ export const columns: ColumnDef<Student>[] = [
           className="text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Género
+          Sexo
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
@@ -137,6 +137,38 @@ export const columns: ColumnDef<Student>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
           Pais
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+  {
+    accessorKey: 'state',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Estado
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+  {
+    accessorKey: 'city',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Ciudad
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )

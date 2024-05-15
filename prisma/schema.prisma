@@ -144,6 +144,8 @@ model Representative {
   email        String?
   address      String?
   country      String
+  city String?
+  state String?
 
   id_document_type   Documentos_Identidad
   id_document_number String               @unique
@@ -171,6 +173,8 @@ model Student {
   email              String?
   address            String?
   country            String
+  city String?
+  state String?
   id_document_type   Documentos_Identidad?
   id_document_number String?               @unique
   id_document_image  String?
@@ -198,15 +202,15 @@ model Courses {
   price       Decimal?
   modality    Modalities
   image       String?
-
+  level String?
   students Students_Courses[]
 }
 
 model Students_Courses {
   id Int @id @default(autoincrement())
 
-  course     Courses? @relation(fields: [id_course], references: [id])
-  id_course  Int?
-  student    Student? @relation(fields: [id_student], references: [id])
-  id_student Int?
+  course     Courses @relation(fields: [id_course], references: [id])
+  id_course  Int
+  student    Student @relation(fields: [id_student], references: [id])
+  id_student Int
 }

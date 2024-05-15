@@ -37,7 +37,11 @@ import { format } from 'date-fns'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import { handleEmailValidation } from '@/utils/helpers/validate-email'
-import { createRepresentative } from '../../lib/actions/representatives'
+import {
+  createRepresentative,
+  updateRepresentative,
+} from '../../lib/actions/representatives'
+import { getDirtyValues } from '@/utils/helpers/get-dirty-values'
 interface Props {
   defaultValues?: Representative
 }
@@ -92,18 +96,18 @@ export default function RepresentativesForm({ defaultValues }: Props) {
         return
       }
 
-      //   const dirtyValues = getDirtyValues(dirtyFields, values) as FormValues
+      const dirtyValues = getDirtyValues(dirtyFields, values) as FormValues
 
-      //   updateCategory(defaultValues.id, dirtyValues).then((data) => {
-      //     if (data?.success) {
-      //       toast({
-      //         title: 'Accesorio actualizado',
-      //         description: 'El accesorio se ha actualizado correctamente',
-      //         variant: 'success',
-      //       })
-      //     }
-      //     router.back()
-      //   })
+      updateRepresentative(dirtyValues, defaultValues.id).then((data) => {
+        if (data?.success) {
+          toast({
+            title: 'Representante actualizado',
+            description: 'El representante se ha actualizado correctamente',
+            variant: 'success',
+          })
+        }
+        router.back()
+      })
     })
   }
 
@@ -324,7 +328,7 @@ export default function RepresentativesForm({ defaultValues }: Props) {
             />
             <FormField
               control={form.control}
-              name="address"
+              name="state"
               rules={{
                 required: 'Este campo es necesario',
                 minLength: {
@@ -338,7 +342,32 @@ export default function RepresentativesForm({ defaultValues }: Props) {
               }}
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel>Dirección</FormLabel>
+                  <FormLabel>Estado</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ''} />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="city"
+              rules={{
+                required: 'Este campo es necesario',
+                minLength: {
+                  value: 3,
+                  message: 'Debe tener al menos 3 caracteres',
+                },
+                maxLength: {
+                  value: 100,
+                  message: 'Debe tener un maximo de 100 caracteres',
+                },
+              }}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel>Ciudad</FormLabel>
                   <FormControl>
                     <Input {...field} value={field.value || ''} />
                   </FormControl>
@@ -348,6 +377,31 @@ export default function RepresentativesForm({ defaultValues }: Props) {
               )}
             />
           </div>
+          <FormField
+            control={form.control}
+            name="address"
+            rules={{
+              required: 'Este campo es necesario',
+              minLength: {
+                value: 3,
+                message: 'Debe tener al menos 3 caracteres',
+              },
+              maxLength: {
+                value: 100,
+                message: 'Debe tener un maximo de 100 caracteres',
+              },
+            }}
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel>Dirección</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value || ''} />
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name={`phone_number`}

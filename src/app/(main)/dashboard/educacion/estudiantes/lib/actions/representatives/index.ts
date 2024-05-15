@@ -41,6 +41,25 @@ export const getRepresentativeById = async (id: number) => {
     data: representative,
   }
 }
+export const getRepresentativeByIdDocument = async (id: string) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    throw new Error('You must be signed in to perform this action')
+  }
+
+  const representative = await prisma.representative.findUnique({
+    where: {
+      id_document_number: id,
+    },
+  })
+
+  if (!representative) {
+    throw new Error('Representante no encontrado')
+  }
+
+  return representative
+}
 
 export const createRepresentative = async (data: any) => {
   const sessionResponse = await validateUserSession()
@@ -103,5 +122,49 @@ export const deleteManyRepresentatives = async (ids: number[]) => {
   return {
     error: false,
     success: 'Representantes eliminados exitosamente',
+  }
+}
+
+export const updateRepresentative = async (
+  data: Prisma.RepresentativeUpdateInput,
+  id: number
+) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    return sessionResponse
+  }
+
+  const permissionsResponse = validateUserPermissions({
+    sectionName: SECTION_NAMES.CURSOS,
+    actionName: 'ACTUALIZAR',
+    userPermissions: sessionResponse.session?.user.rol.permisos,
+  })
+
+  if (!permissionsResponse.success) {
+    return permissionsResponse
+  }
+
+  const representative = await prisma.representative.update({
+    where: {
+      id,
+    },
+    data,
+  })
+
+  if (!representative) {
+    return {
+      error: 'Parece que hubo un problema',
+      success: false,
+    }
+  }
+  await registerAuditAction(
+    'Se editó el representante: ' + representative.names
+  )
+  revalidatePath('/dashboard/cursos/representante')
+
+  return {
+    error: false,
+    success: true,
   }
 }
