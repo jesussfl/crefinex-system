@@ -1,29 +1,14 @@
 import {
   Home,
-  Package,
-  Box,
-  Bomb,
   Users2,
-  PieChart,
   Settings,
-  Boxes,
-  Warehouse,
-  UserSquare2,
-  Contact2,
   FolderSearch,
-  FileText,
-  PackagePlus,
-  PackageMinus,
   HelpCircle,
   UserCircle,
-  LocateIcon,
-  IterationCcw,
   Book,
   BookUser,
 } from 'lucide-react'
 import { SideMenuItem } from '@/types/types'
-
-const DEFAULT_ICON_SIZE = 20
 
 /**
  * Object array which represents the items in a side menu.
@@ -67,11 +52,10 @@ export const SIDE_MENU_ITEMS: SideMenuItem[] = [
     icon: Home,
   },
   {
-    title: 'Cursos',
+    title: 'Educación',
     path: '/dashboard/educacion',
     icon: Book,
     submenu: true,
-    requiredPermissions: [SECTION_NAMES.CURSOS, SECTION_NAMES.TODAS],
     submenuItems: [
       {
         title: 'Cursos',

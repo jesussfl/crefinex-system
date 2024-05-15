@@ -54,15 +54,6 @@ export default async function Page() {
             Visualiza todos los estudiantes de Crefinex
           </PageHeaderDescription>
         </HeaderLeftSide>
-        <HeaderRightSide>
-          <Link
-            href="/dashboard/educacion/estudiantes/registro"
-            className={buttonVariants({ variant: 'default' })}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Registrar Estudiante
-          </Link>
-        </HeaderRightSide>
       </PageHeader>
       <Tabs defaultValue="students">
         <TabsList className="mx-5">
@@ -71,17 +62,33 @@ export default async function Page() {
         </TabsList>
         <TabsContent value="students">
           <PageContent>
-            <DataTable columns={columns} data={students} />
+            <Card>
+              <CardHeader className="flex flex-row justify-between">
+                <CardTitle className="text-md">Lista de Estudiantes</CardTitle>
+                <Link
+                  href="/dashboard/educacion/estudiantes/estudiante/nuevo"
+                  className={buttonVariants({ variant: 'default' })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Agregar Estudiante
+                </Link>
+              </CardHeader>
+              <CardContent>
+                <DataTable columns={columns} data={students} />
+              </CardContent>
+            </Card>
           </PageContent>
         </TabsContent>
         <TabsContent value="representative">
           <PageContent>
             <Card>
               <CardHeader className="flex flex-row justify-between">
-                <CardTitle>Lista de Representantes</CardTitle>
+                <CardTitle className="text-md">
+                  Lista de Representantes
+                </CardTitle>
                 <Link
                   href="/dashboard/educacion/estudiantes/representante/nuevo"
-                  className={buttonVariants({ variant: 'secondary' })}
+                  className={buttonVariants({ variant: 'default' })}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Agregar Representante

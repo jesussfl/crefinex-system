@@ -147,7 +147,7 @@ model Representative {
 
   id_document_type   Documentos_Identidad
   id_document_number String               @unique
-  id_document_image  String
+  id_document_image  String?
 
   students Student[]
 
@@ -172,7 +172,7 @@ model Student {
   address            String?
   country            String
   id_document_type   Documentos_Identidad?
-  id_document_number String?
+  id_document_number String?               @unique
   id_document_image  String?
 
   courses Students_Courses[]

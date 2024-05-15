@@ -7,7 +7,7 @@ import {
 } from '@/modules/layout/templates/page'
 import { PackagePlus } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
-import StudentsForm from '../components/forms/students-form'
+import StudentsForm from '../../components/forms/students-form'
 
 export const metadata: Metadata = {
   title: 'Agregar Estudiante',

@@ -17,6 +17,7 @@ import {
 } from '@/modules/common/components/dropdown-menu/dropdown-menu'
 import { format } from 'date-fns'
 import { getAge } from '@/utils/helpers/get-age'
+import Link from 'next/link'
 
 export const columns: ColumnDef<Student>[] = [
   SELECT_COLUMN,
@@ -57,9 +58,6 @@ export const columns: ColumnDef<Student>[] = [
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
-    },
-    cell: ({ row }) => {
-      return format(new Date(row.original.birthDate), 'dd/MM/yyyy')
     },
   },
 
@@ -201,6 +199,11 @@ export const columns: ColumnDef<Student>[] = [
             >
               Copiar código
             </DropdownMenuItem>
+            <Link
+              href={`/dashboard/educacion/estudiantes/estudiante/${data.id_document_number}`}
+            >
+              <DropdownMenuItem>Editar</DropdownMenuItem>
+            </Link>
             <DropdownMenuSeparator />
           </DropdownMenuContent>
         </DropdownMenu>

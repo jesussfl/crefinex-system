@@ -25,15 +25,37 @@ export const getStudentById = async (id: number) => {
     throw new Error('You must be signed in to perform this action')
   }
 
-  const brand = await prisma.student.findUnique({
+  const student = await prisma.student.findUnique({
     where: {
       id,
     },
   })
 
-  return brand
-}
+  if (!student) {
+    throw new Error('Estudiante no encontrado')
+  }
 
+  return student
+}
+export const getStudentByIdDocument = async (id: string) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    throw new Error('You must be signed in to perform this action')
+  }
+
+  const student = await prisma.student.findUnique({
+    where: {
+      id_document_number: id,
+    },
+  })
+
+  if (!student) {
+    throw new Error('Estudiante no encontrado')
+  }
+
+  return student
+}
 export const createStudent = async (data: Prisma.StudentCreateInput) => {
   const sessionResponse = await validateUserSession()
 

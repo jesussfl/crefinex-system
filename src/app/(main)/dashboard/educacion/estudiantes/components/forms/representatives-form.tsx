@@ -37,6 +37,7 @@ import { format } from 'date-fns'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import { handleEmailValidation } from '@/utils/helpers/validate-email'
+import { createRepresentative } from '../../lib/actions/representatives'
 interface Props {
   defaultValues?: Representative
 }
@@ -58,7 +59,7 @@ export default function RepresentativesForm({ defaultValues }: Props) {
 
     startTransition(() => {
       if (!isEditing) {
-        createStudent(values).then((data) => {
+        createRepresentative(values).then((data) => {
           if (data?.error) {
             toast({
               title: 'Parece que hubo un problema',
@@ -133,7 +134,7 @@ export default function RepresentativesForm({ defaultValues }: Props) {
               }}
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel>Nombres del Estudiante</FormLabel>
+                  <FormLabel>Nombres del Representante</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -158,7 +159,7 @@ export default function RepresentativesForm({ defaultValues }: Props) {
               }}
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel>Apellidos del Estudiante</FormLabel>
+                  <FormLabel>Apellidos del Representante</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -192,9 +193,6 @@ export default function RepresentativesForm({ defaultValues }: Props) {
                       <SelectItem value="V">Venezolano</SelectItem>
                       <SelectItem value="E">Extranjero</SelectItem>
                       <SelectItem value="P">Pasaporte</SelectItem>
-                      <SelectItem value="Partida_Nacimiento">
-                        Partida de Nacimiento
-                      </SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -231,49 +229,44 @@ export default function RepresentativesForm({ defaultValues }: Props) {
           <div className="flex gap-4">
             <FormField
               control={form.control}
-              name={`birthDate`}
+              name="birthDate"
               rules={{
-                required: true,
+                required: 'Este campo es necesario',
               }}
               render={({ field }) => (
-                <FormItem className="flex-1 gap-5 ">
-                  <FormLabel>Fecha de nacimiento</FormLabel>
-
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-full pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'dd/MM/yyyy')
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className=" p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={new Date(field.value)}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date('1900-01-01')
+                <FormItem className="flex-1">
+                  <FormLabel>Fecha de Nacimiento</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      id="birthDate"
+                      {...field}
+                      value={
+                        field.value
+                          ? format(new Date(field.value), 'yyyy-MM-dd')
+                          : ''
+                      }
+                      onBlur={() => {
+                        form.trigger('birthDate')
+                      }}
+                      onChange={(e) => {
+                        if (!e.target.value) {
+                          //@ts-ignore
+                          form.setValue('birthDate', null)
+                          return
                         }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+
+                        form.setValue('birthDate', new Date(e.target.value))
+                      }}
+                      className="w-full"
+                    />
+                  </FormControl>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="gender"

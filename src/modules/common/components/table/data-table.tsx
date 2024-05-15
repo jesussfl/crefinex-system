@@ -210,7 +210,7 @@ export function DataTable<TData extends { id: any }, TValue>({
           isMultipleDeleteEnabled={false}
         />
       )}
-      <div className="bg-background rounded-md border">
+      <div className="bg-background rounded-md border border-input">
         <TableContainer>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
