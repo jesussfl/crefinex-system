@@ -144,8 +144,8 @@ model Representative {
   email        String?
   address      String?
   country      String
-  city String?
-  state String?
+  city         String?
+  state        String?
 
   id_document_type   Documentos_Identidad
   id_document_number String               @unique
@@ -173,8 +173,8 @@ model Student {
   email              String?
   address            String?
   country            String
-  city String?
-  state String?
+  city               String?
+  state              String?
   id_document_type   Documentos_Identidad?
   id_document_number String?               @unique
   id_document_image  String?
@@ -194,7 +194,7 @@ enum Modalities {
 }
 
 model Courses {
-  id          Int        @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
   title       String
   description String
   start_date  DateTime?
@@ -202,15 +202,24 @@ model Courses {
   price       Decimal?
   modality    Modalities
   image       String?
-  level String?
-  students Students_Courses[]
+  level       String?
+  students    Students_Courses[]
+}
+
+enum Student_Status {
+  Culminado
+  Desertor
+  Cursando
+  Preinscrito
+  No_Admitido
 }
 
 model Students_Courses {
   id Int @id @default(autoincrement())
 
-  course     Courses @relation(fields: [id_course], references: [id])
+  course     Courses         @relation(fields: [id_course], references: [id])
   id_course  Int
-  student    Student @relation(fields: [id_student], references: [id])
+  student    Student         @relation(fields: [id_student], references: [id])
   id_student Int
+  status     Student_Status?
 }

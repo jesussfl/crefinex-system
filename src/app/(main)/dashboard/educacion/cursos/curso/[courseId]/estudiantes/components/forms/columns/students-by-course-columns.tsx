@@ -3,10 +3,10 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUpDown, MoreHorizontal } from 'lucide-react'
 
-import { Button, buttonVariants } from '@/modules/common/components/button'
+import { Button } from '@/modules/common/components/button'
 
 import { SELECT_COLUMN } from '@/utils/constants/columns'
-import { Courses, Prisma } from '@prisma/client'
+import { Representative, Student, Student_Status } from '@prisma/client'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,32 +16,21 @@ import {
   DropdownMenuTrigger,
 } from '@/modules/common/components/dropdown-menu/dropdown-menu'
 import { format } from 'date-fns'
+import { getAge } from '@/utils/helpers/get-age'
 import Link from 'next/link'
-import ModalForm from '@/modules/common/components/modal-form'
-import { DataTable } from '@/modules/common/components/table/data-table'
-import {
-  CardDescription,
-  CardTitle,
-} from '@/modules/common/components/card/card'
-import { cn } from '@/utils/utils'
-import { SelectedStudentsColumns } from './components/columns/selected-students-columns'
-type CoursesType = Prisma.CoursesGetPayload<{
-  include: {
-    students: {
-      include: {
-        student: true
-      }
-    }
-  }
-}>
-export const columns: ColumnDef<CoursesType>[] = [
+
+export type StudentByCourseType = Student & {
+  status: Student_Status
+}
+export const studentsByCourseColumns: ColumnDef<StudentByCourseType>[] = [
   SELECT_COLUMN,
   {
     accessorKey: 'id',
     header: 'ID',
   },
   {
-    accessorKey: 'title',
+    id: 'fullName',
+    accessorFn: (row) => `${row.names} ${row.lastNames}`,
     header: ({ column }) => {
       return (
         <Button
@@ -50,14 +39,50 @@ export const columns: ColumnDef<CoursesType>[] = [
           className="text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Título
+          Nombre Completo
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+
+  {
+    id: 'age',
+    accessorFn: (row) => getAge(new Date(row.birthDate)),
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="text-xs"
+        >
+          Edad
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+
+  {
+    id: 'id_document_number',
+    accessorFn: (row) => `${row.id_document_type}-${row.id_document_number}`,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Documento de identidad
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
     },
   },
   {
-    accessorKey: 'description',
+    accessorKey: 'status',
     header: ({ column }) => {
       return (
         <Button
@@ -66,14 +91,14 @@ export const columns: ColumnDef<CoursesType>[] = [
           className="text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Descripción
+          Estado
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
     },
   },
   {
-    accessorKey: 'level',
+    accessorKey: 'phone_number',
     header: ({ column }) => {
       return (
         <Button
@@ -82,97 +107,77 @@ export const columns: ColumnDef<CoursesType>[] = [
           className="text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Nivel
+          Numero de Telefono
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
     },
   },
   {
-    accessorKey: 'start_date',
+    accessorKey: 'email',
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           size={'sm'}
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           className="text-xs"
-        >
-          Fecha de inicio
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      return row.original.start_date
-        ? format(new Date(row.original.start_date), 'dd/MM/yyyy')
-        : 'Sin fecha de inicio'
-    },
-  },
-  {
-    accessorKey: 'end_date',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size={'sm'}
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="text-xs"
         >
-          Fecha de culminación
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      return row.original.end_date
-        ? format(new Date(row.original.end_date), 'dd/MM/yyyy')
-        : 'Sin fecha de culminación'
-    },
-  },
-  {
-    accessorKey: 'price',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="text-xs"
-        >
-          Precio
+          Correo
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
     },
   },
   {
-    accessorKey: 'students',
+    accessorKey: 'country',
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           size={'sm'}
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Estudiantes
+          Pais
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
     },
-    cell: ({ row }) => {
-      const data = row.original
+  },
+  {
+    accessorKey: 'state',
+    header: ({ column }) => {
       return (
-        <Link
-          href={`/dashboard/educacion/cursos/curso/${data.id}/estudiantes`}
-          className={cn(buttonVariants({ variant: 'default', size: 'sm' }))}
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Ver estudiantes
-        </Link>
+          Estado
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
       )
     },
   },
+  {
+    accessorKey: 'city',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Ciudad
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+
   {
     id: 'acciones',
     cell: ({ row }) => {
@@ -193,9 +198,12 @@ export const columns: ColumnDef<CoursesType>[] = [
             >
               Copiar código
             </DropdownMenuItem>
-            <Link href={`/dashboard/educacion/cursos/curso/${data.id}`}>
+            <Link
+              href={`/dashboard/educacion/estudiantes/estudiante/${data.id_document_number}`}
+            >
               <DropdownMenuItem>Editar</DropdownMenuItem>
             </Link>
+            <DropdownMenuSeparator />
           </DropdownMenuContent>
         </DropdownMenu>
       )

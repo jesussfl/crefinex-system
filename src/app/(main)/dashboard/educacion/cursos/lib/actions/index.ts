@@ -111,6 +111,48 @@ export const createCourse = async (data: FormValues) => {
   }
 }
 
+export const updateCourse = async (data: FormValues, id: number) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    return sessionResponse
+  }
+
+  const permissionsResponse = validateUserPermissions({
+    sectionName: SECTION_NAMES.CURSOS,
+    actionName: 'ACTUALIZAR',
+    userPermissions: sessionResponse.session?.user.rol.permisos,
+  })
+
+  if (!permissionsResponse.success) {
+    return permissionsResponse
+  }
+
+  await prisma.courses.update({
+    where: {
+      id,
+    },
+    data: {
+      ...data,
+      students: {
+        deleteMany: {},
+        create: data.students.map((student) => {
+          return {
+            id_student: student.id_student,
+          }
+        }),
+      },
+    },
+  })
+
+  await registerAuditAction('Se actualizó el curso: ' + data.title)
+  revalidatePath('/dashboard/educacion/cursos')
+
+  return {
+    error: false,
+    success: 'Curso actualizado exitosamente',
+  }
+}
 export const deleteManyCourses = async (ids: number[]) => {
   const sessionResponse = await validateUserSession()
 

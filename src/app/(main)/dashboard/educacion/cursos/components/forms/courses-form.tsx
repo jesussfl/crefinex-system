@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/modules/common/components/select/select'
-import { createCourse } from '../../lib/actions'
+import { createCourse, updateCourse } from '../../lib/actions'
 import { format } from 'date-fns'
 import ModalForm from '@/modules/common/components/modal-form'
 import { DataTable } from '@/modules/common/components/table/data-table'
@@ -76,14 +76,12 @@ export default function CoursesForm({ defaultValues, students }: Props) {
     control: form.control,
     name: `students`,
   })
-  const { isDirty, dirtyFields } = useFormState({ control: form.control })
   const [isPending, startTransition] = useTransition()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedData, setSelectedData] = useState<Student[]>([])
   const [selectedItems, setSelectedItems] = useState<{
     [key: number]: boolean
   }>({})
-  const toogleModal = () => setIsModalOpen(!isModalOpen)
 
   useEffect(() => {
     if (isEditEnabled) {
@@ -108,6 +106,7 @@ export default function CoursesForm({ defaultValues, students }: Props) {
       if (lastSelectedRow) {
         append({
           id_student: lastSelectedRow.id,
+          status: null,
         })
         setSelectedData((prev) => {
           if (prev.find((item) => item.id === lastSelectedRow.id)) {
@@ -144,7 +143,6 @@ export default function CoursesForm({ defaultValues, students }: Props) {
 
     startTransition(() => {
       if (!isEditing) {
-        //@ts-ignore
         createCourse(values).then((data) => {
           if (data?.error) {
             toast({
@@ -169,27 +167,30 @@ export default function CoursesForm({ defaultValues, students }: Props) {
 
         return
       }
+      //@ts-ignore
+      updateCourse(values, defaultValues.id).then((data) => {
+        if (data?.error) {
+          toast({
+            title: 'Parece que hubo un problema',
+            description: data.error,
+            variant: 'destructive',
+          })
 
-      if (!isDirty) {
-        toast({
-          title: 'No se han detectado cambios',
-        })
+          return
+        }
+
+        if (data?.success) {
+          toast({
+            title: 'Curso actualizado',
+            description: 'El curso se ha creado correctamente',
+            variant: 'success',
+          })
+
+          router.back()
+        }
 
         return
-      }
-
-      //   const dirtyValues = getDirtyValues(dirtyFields, values) as FormValues
-
-      //   updateCategory(defaultValues.id, dirtyValues).then((data) => {
-      //     if (data?.success) {
-      //       toast({
-      //         title: 'Accesorio actualizado',
-      //         description: 'El accesorio se ha actualizado correctamente',
-      //         variant: 'success',
-      //       })
-      //     }
-      //     router.back()
-      //   })
+      })
     })
   }
 
@@ -256,7 +257,7 @@ export default function CoursesForm({ defaultValues, students }: Props) {
               </FormItem>
             )}
           />
-          <div className="flex flex-row flex-1 items-center gap-5 ">
+          <div className="flex gap-5 ">
             <FormField
               control={form.control}
               name="level"
@@ -264,7 +265,7 @@ export default function CoursesForm({ defaultValues, students }: Props) {
                 required: 'El nivel es requerida',
               }}
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex-1">
                   <FormLabel>Nivel del curso</FormLabel>
                   <Select
                     onValueChange={field.onChange}
@@ -308,7 +309,7 @@ export default function CoursesForm({ defaultValues, students }: Props) {
                 required: 'La modalidad es requerida',
               }}
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex-1">
                   <FormLabel>Modalidad del curso</FormLabel>
                   <Select
                     onValueChange={field.onChange}
