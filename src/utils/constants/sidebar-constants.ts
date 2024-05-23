@@ -76,7 +76,7 @@ export const SIDE_MENU_ITEMS: SideMenuItem[] = [
     title: 'Usuarios',
     path: '/dashboard/usuarios',
     icon: UserCircle,
-    requiredPermissions: [SECTION_NAMES.USUARIOS, SECTION_NAMES.TODAS],
+    // requiredPermissions: [SECTION_NAMES.USUARIOS, SECTION_NAMES.TODAS],
   },
 
   {

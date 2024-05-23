@@ -1,5 +1,5 @@
 import { Option } from '@/modules/common/components/multiple-selector'
-import { Prisma, Rol } from '@prisma/client'
+import { Documentos_Identidad, Genders, Prisma, Rol } from '@prisma/client'
 export type RolesWithPermissionsArray = Rol & {
   permisos: Option[]
 }
@@ -28,4 +28,22 @@ export type ComboboxData = {
 
 export type CourseColumns = {
   title: string
+}
+
+export type RepresentativeFormType = {
+  names: string
+  lastNames: string
+  birthDate: Date
+
+  profession?: string
+  gender: Genders
+  phone_number: string
+  email?: string
+  address: string
+  country: string
+  city: string
+  state: string
+  id_document_type: Documentos_Identidad
+  id_document_number: string
+  id_document_image?: string
 }

@@ -2,6 +2,7 @@ import { Plus, Users2 } from 'lucide-react'
 import { Metadata } from 'next'
 import {
   HeaderLeftSide,
+  HeaderRightSide,
   PageContent,
   PageHeader,
   PageHeaderDescription,
@@ -10,7 +11,10 @@ import {
 
 import { columns } from './columns'
 import { DataTable } from '@/modules/common/components/table/data-table'
-import { getAllStudents } from './lib/actions/students'
+import {
+  getAllOnlineStudents,
+  getAllPresencialStudents,
+} from './lib/actions/students'
 import Link from 'next/link'
 import { buttonVariants } from '@/modules/common/components/button'
 import {
@@ -19,15 +23,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/modules/common/components/card/card'
-// import ButtonExport from './components/button-export'
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@/modules/common/components/tabs/tabs'
-import { getAllRepresentatives } from './lib/actions/representatives'
-import { representativeColumns } from './components/columns/representative-columns'
 
 export const metadata: Metadata = {
   title: 'Estudiantes',
@@ -35,8 +36,8 @@ export const metadata: Metadata = {
     'Desde aquí puedes visualizar a todos los estudiantes de Crefinex',
 }
 export default async function Page() {
-  const students = await getAllStudents()
-  const representatives = await getAllRepresentatives()
+  const onlineStudents = await getAllOnlineStudents()
+  const presencialStudents = await getAllPresencialStudents()
   return (
     <>
       <PageHeader>
@@ -49,51 +50,43 @@ export default async function Page() {
             Visualiza todos los estudiantes de Crefinex
           </PageHeaderDescription>
         </HeaderLeftSide>
+        <HeaderRightSide>
+          <Link
+            href="/dashboard/educacion/estudiantes/estudiante/nuevo"
+            className={buttonVariants({ variant: 'default' })}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Agregar Estudiante
+          </Link>
+        </HeaderRightSide>
       </PageHeader>
-      <Tabs defaultValue="students">
+      <Tabs defaultValue="presencial">
         <TabsList className="mx-5">
-          <TabsTrigger value="students">Estudiantes</TabsTrigger>
-          <TabsTrigger value="representative">Representantes</TabsTrigger>
+          <TabsTrigger value="presencial">Estudiantes Presencial</TabsTrigger>
+          <TabsTrigger value="online">Estudiantes Online </TabsTrigger>
         </TabsList>
-        <TabsContent value="students">
-          <PageContent>
-            <Card>
-              <CardHeader className="flex flex-row justify-between">
-                <CardTitle className="text-md">Lista de Estudiantes</CardTitle>
-                <Link
-                  href="/dashboard/educacion/estudiantes/estudiante/nuevo"
-                  className={buttonVariants({ variant: 'default' })}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Agregar Estudiante
-                </Link>
-              </CardHeader>
-              <CardContent>
-                <DataTable columns={columns} data={students} />
-              </CardContent>
-            </Card>
-          </PageContent>
-        </TabsContent>
-        <TabsContent value="representative">
+        <TabsContent value="presencial">
           <PageContent>
             <Card>
               <CardHeader className="flex flex-row justify-between">
                 <CardTitle className="text-md">
-                  Lista de Representantes
+                  Estudiantes Presencial
                 </CardTitle>
-                <Link
-                  href="/dashboard/educacion/estudiantes/representante/nuevo"
-                  className={buttonVariants({ variant: 'default' })}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Agregar Representante
-                </Link>
               </CardHeader>
               <CardContent>
-                <DataTable
-                  columns={representativeColumns}
-                  data={representatives}
-                />
+                <DataTable columns={columns} data={presencialStudents} />
+              </CardContent>
+            </Card>
+          </PageContent>
+        </TabsContent>
+        <TabsContent value="online">
+          <PageContent>
+            <Card>
+              <CardHeader className="flex flex-row justify-between">
+                <CardTitle className="text-md">Estudiantes Online</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DataTable columns={columns} data={onlineStudents} />
               </CardContent>
             </Card>
           </PageContent>

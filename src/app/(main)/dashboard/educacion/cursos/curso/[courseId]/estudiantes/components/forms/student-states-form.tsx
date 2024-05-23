@@ -30,6 +30,10 @@ import ModalForm from '@/modules/common/components/modal-form'
 import { CardTitle } from '@/modules/common/components/card/card'
 import { DataTable } from '@/modules/common/components/table/data-table'
 import { columns } from '@/app/(main)/dashboard/educacion/estudiantes/columns'
+import {
+  StudentByCourseType,
+  studentsByCourseColumns,
+} from './columns/students-by-course-columns'
 type StudentsRelation = Omit<
   Students_Courses,
   'id_course' | 'id' | 'fecha_creacion' | 'ultima_actualizacion'
@@ -41,7 +45,7 @@ type FormValues = {
 }
 interface Props {
   id: number
-  students: Student[]
+  students: StudentByCourseType[]
   close?: () => void
 }
 
@@ -152,7 +156,7 @@ export default function ChangeStudentStateForm({ id, students, close }: Props) {
           </FormDescription>
 
           <DataTable
-            columns={columns}
+            columns={studentsByCourseColumns}
             data={students}
             onSelectedRowsChange={handleTableSelect}
             isColumnFilterEnabled={false}

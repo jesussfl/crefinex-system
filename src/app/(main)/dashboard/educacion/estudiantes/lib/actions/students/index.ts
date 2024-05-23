@@ -6,6 +6,7 @@ import { validateUserSession } from '@/utils/helpers/validate-user-session'
 import { validateUserPermissions } from '@/utils/helpers/validate-user-permissions'
 import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
 import { registerAuditAction } from '@/lib/actions/audit'
+import { StudentFormType } from '../../../components/forms/students-form'
 export const getAllStudents = async () => {
   const sessionResponse = await validateUserSession()
 
@@ -16,6 +17,52 @@ export const getAllStudents = async () => {
   const brands = await prisma.student.findMany()
 
   return brands
+}
+export const getAllOnlineStudents = async () => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    throw new Error('You must be signed in to perform this action')
+  }
+
+  const onlineStudents = await prisma.student.findMany({
+    where: {
+      modalidad: 'Online',
+    },
+  })
+
+  return onlineStudents
+}
+export const getAllPresencialStudents = async () => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    throw new Error('You must be signed in to perform this action')
+  }
+
+  const presencialStudents = await prisma.student.findMany({
+    where: {
+      modalidad: 'Presencial',
+    },
+  })
+
+  return presencialStudents
+}
+
+export const getAllSchedulesByCourseId = async (course_id: number) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    throw new Error('You must be signed in to perform this action')
+  }
+
+  const schedules = await prisma.schedule.findMany({
+    where: {
+      course_id,
+    },
+  })
+
+  return schedules
 }
 export const getStudentsByCourse = async (id_course: number) => {
   const sessionResponse = await validateUserSession()
@@ -76,7 +123,9 @@ export const getStudentByIdDocument = async (id: string) => {
 
   return student
 }
-export const createStudent = async (data: Prisma.StudentCreateInput) => {
+export const createStudent = async (
+  data: Prisma.StudentUncheckedCreateInput
+) => {
   const sessionResponse = await validateUserSession()
 
   if (sessionResponse.error || !sessionResponse.session) {
@@ -93,20 +142,28 @@ export const createStudent = async (data: Prisma.StudentCreateInput) => {
     return permissionsResponse
   }
 
+  if (!data.id_current_course) {
+    return {
+      error: 'No has seleccionado un horario',
+      success: false,
+    }
+  }
+
   await prisma.student.create({
     data,
   })
 
-  await registerAuditAction('Se creó un nuevo estudiante: ' + data.names)
+  await registerAuditAction('Se registró un nuevo estudiante: ' + data.names)
   revalidatePath('/dashboard/cursos/estudiantes')
 
   return {
     error: false,
-    success: 'Estudiante creado exitosamente',
+    success: 'Estudiante registrado exitosamente',
   }
 }
+
 export const updateStudent = async (
-  data: Prisma.StudentUpdateInput,
+  data: Prisma.StudentUncheckedUpdateInput,
   id: number
 ) => {
   const sessionResponse = await validateUserSession()

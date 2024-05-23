@@ -1,5 +1,5 @@
 'use client'
-import { useTransition, useState, useEffect } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 
 import { useForm, SubmitHandler, useFormState } from 'react-hook-form'
 import { Button } from '@/modules/common/components/button'
@@ -14,7 +14,13 @@ import {
 import { DialogFooter } from '@/modules/common/components/dialog/dialog'
 import { useToast } from '@/modules/common/components/toast/use-toast'
 import { Input } from '@/modules/common/components/input/input'
-import { Student } from '@prisma/client'
+import {
+  Documentos_Identidad,
+  Genders,
+  Modalities,
+  Student,
+  Student_Status,
+} from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { CheckIcon, Loader2 } from 'lucide-react'
 import {
@@ -25,11 +31,26 @@ import {
   SelectValue,
 } from '@/modules/common/components/select/select'
 import { createStudent, updateStudent } from '../../lib/actions/students'
-import { cn } from '@/utils/utils'
-import { format } from 'date-fns'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
-import { getAllRepresentatives } from '../../lib/actions/representatives'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/modules/common/components/accordion'
+import { RepresentativeFields } from './representative-fields'
+import { getSchedulesByLevelAndModality } from '../../../cursos/lib/actions'
+import { RepresentativeFormType } from '@/types/types'
+import { StudentFields } from './student-fields'
+import { getDirtyValues } from '@/utils/helpers/get-dirty-values'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/modules/common/components/popover/popover'
+import { cn } from '@/utils/utils'
+import { CaretSortIcon } from '@radix-ui/react-icons'
 import {
   Command,
   CommandEmpty,
@@ -37,51 +58,76 @@ import {
   CommandInput,
   CommandItem,
 } from '@/modules/common/components/command/command'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/modules/common/components/popover/popover'
-import { CaretSortIcon } from '@radix-ui/react-icons'
-import { getDirtyValues } from '@/utils/helpers/get-dirty-values'
+import { ScrollArea } from '@/modules/common/components/scroll-area/scroll-area'
 
 interface Props {
   defaultValues?: Student
 }
 
-type FormValues = Student
+export type StudentFormType = {
+  names: string
+  lastNames: string
+  birthDate: Date
+  current_status: string
+  id_current_course?: number
+  modalidad: Modalities
+  gender: Genders
+
+  phone_number?: string
+  email?: string
+
+  address: string
+  country: string
+  city: string
+  state: string
+
+  extracurricular_activities?: string
+  status: Student_Status
+
+  id_document_type?: Documentos_Identidad
+  id_document_number?: string
+  id_document_image?: string
+
+  representative: RepresentativeFormType
+}
+type FormValues = StudentFormType
+
+type SelectOption = {
+  value: number
+  label: string
+}
 
 export default function StudentsForm({ defaultValues }: Props) {
   const { toast } = useToast()
   const router = useRouter()
 
-  const form = useForm<FormValues>({
-    defaultValues,
+  const { control, setValue, ...rest } = useForm<FormValues>({
+    // defaultValues,
   })
-  const { isDirty, dirtyFields } = useFormState({ control: form.control })
+  const { isDirty, dirtyFields } = useFormState({ control })
   const [isPending, startTransition] = useTransition()
-  const [representantives, setRepresentantives] = useState<
-    { label: string; value: string }[]
-  >([])
+  const [schedules, setSchedules] = useState<SelectOption[]>([])
+  const [level, setLevel] = useState<string>('')
+  const [modality, setModality] = useState<Modalities>('Presencial')
 
   useEffect(() => {
-    getAllRepresentatives().then((data) => {
-      const transformedData = data.map((item) => {
+    getSchedulesByLevelAndModality(level, modality).then((data) => {
+      const transformedSchedules = data.map((schedule) => {
         return {
-          label: `${item.names} ${item.id_document_number}`,
-          value: item.id_document_number,
+          value: schedule.course_id,
+          label: `${schedule.day} (${schedule.start} - ${schedule.end})`,
         }
       })
-
-      setRepresentantives(transformedData)
+      setSchedules(transformedSchedules)
     })
-  }, [])
+  }, [level, modality, setValue])
+
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
     const isEditing = !!defaultValues
 
     startTransition(() => {
       if (!isEditing) {
-        createStudent(values).then((data) => {
+        createStudent({ ...values, modalidad: modality }).then((data) => {
           if (data?.error) {
             toast({
               title: 'Parece que hubo un problema',
@@ -113,10 +159,19 @@ export default function StudentsForm({ defaultValues }: Props) {
 
         return
       }
-
+      //@ts-ignore
       const dirtyValues = getDirtyValues(dirtyFields, values) as FormValues
 
       updateStudent(dirtyValues, defaultValues.id).then((data) => {
+        if (data?.error) {
+          toast({
+            title: 'Parece que hubo un problema',
+            description: data.error,
+            variant: 'destructive',
+          })
+
+          return
+        }
         if (data?.success) {
           toast({
             title: 'Estudiante actualizado',
@@ -130,421 +185,211 @@ export default function StudentsForm({ defaultValues }: Props) {
   }
 
   return (
-    <Form {...form}>
+    <Form
+      {...{
+        control,
+        setValue,
+        ...rest,
+      }}
+    >
       <form
         style={{
           scrollbarGutter: 'stable both-edges',
         }}
         className="flex-1 overflow-y-auto p-6 gap-8 mb-36"
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={rest.handleSubmit(onSubmit)}
       >
         <div className="px-24">
           <div className="px-24">
-            <div className="flex flex-1 gap-4">
-              <FormField
-                control={form.control}
-                name="names"
-                rules={{
-                  required: 'Este campo es necesario',
-                  minLength: {
-                    value: 3,
-                    message: 'Debe tener al menos 3 caracteres',
-                  },
-                  maxLength: {
-                    value: 100,
-                    message: 'Debe tener un maximo de 100 caracteres',
-                  },
-                }}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Nombres del Estudiante</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="lastNames"
-                rules={{
-                  required: 'Este campo es necesario',
-                  minLength: {
-                    value: 3,
-                    message: 'Debe tener al menos 3 caracteres',
-                  },
-                  maxLength: {
-                    value: 100,
-                    message: 'Debe tener un maximo de 100 caracteres',
-                  },
-                }}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Apellidos del Estudiante</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
             <FormField
-              control={form.control}
-              name="id_document_number_representative"
-              rules={{ required: 'Este campo es obligatorio' }}
+              control={control}
+              name="current_status"
+              rules={{
+                required: 'Tipo de documento es requerido',
+              }}
               render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>Cédula del Representante:</FormLabel>
-
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            'w-full justify-between',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          {field.value
-                            ? representantives.find(
-                                (representative) =>
-                                  representative.value === field.value
-                              )?.label
-                            : 'Seleccionar representante'}
-                          <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="PopoverContent">
-                      <Command>
-                        <CommandInput
-                          placeholder="Buscar representante..."
-                          className="h-9"
-                        />
-                        <CommandEmpty>
-                          No se encontaron resultados.
-                        </CommandEmpty>
-                        <CommandGroup>
-                          {representantives.map((representative) => (
-                            <CommandItem
-                              value={representative.label}
-                              key={representative.value}
-                              onSelect={() => {
-                                form.setValue(
-                                  'id_document_number_representative',
-                                  representative.value
-                                )
-                              }}
-                            >
-                              {representative.label}
-                              <CheckIcon
-                                className={cn(
-                                  'ml-auto h-4 w-4',
-                                  representative.value === field.value
-                                    ? 'opacity-100'
-                                    : 'opacity-0'
-                                )}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                <FormItem>
+                  <FormLabel>Estado del Estudiante</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Cursando">Cursando</SelectItem>
+                      <SelectItem value="Rezagado">Rezagado</SelectItem>
+                      <SelectItem value="Pre-inscrito">Pre-inscrito</SelectItem>
+                      <SelectItem value="Inscrito">Inscrito</SelectItem>
+                      <SelectItem value="Reservado">Reservado</SelectItem>
+                      <SelectItem value="Culminado">Culminado</SelectItem>
+                    </SelectContent>
+                  </Select>
 
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div className="flex flex-1 gap-4">
-              <FormField
-                control={form.control}
-                name="id_document_type"
-                rules={{
-                  required: 'Campo requerido',
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Documento de Identidad</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value || ''}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="V">Venezolano</SelectItem>
-                        <SelectItem value="E">Extranjero</SelectItem>
-                        <SelectItem value="P">Pasaporte</SelectItem>
-                        <SelectItem value="Partida_Nacimiento">
-                          Partida de Nacimiento
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="id_document_number"
-                rules={{
-                  required: 'Este campo es necesario',
-                  minLength: {
-                    value: 3,
-                    message: 'Debe tener al menos 2 caracteres',
-                  },
-                  maxLength: {
-                    value: 25,
-                    message: 'Debe tener un maximo de 25 caracteres',
-                  },
-                }}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Número de Documento</FormLabel>
-                    <FormControl>
-                      <Input {...field} value={field.value || ''} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex gap-4">
-              <FormField
-                control={form.control}
-                name="birthDate"
-                rules={{
-                  required: 'Este campo es necesario',
-                }}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Fecha de Nacimiento</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        id="birthDate"
-                        {...field}
-                        value={
-                          field.value
-                            ? new Date(field.value).toISOString().split('T')[0]
-                            : ''
-                        }
-                        onChange={(e) => {
-                          field.onChange(new Date(e.target.value))
-                        }}
-                        className="w-full"
-                        max={new Date().toISOString().split('T')[0]}
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="gender"
-                rules={{
-                  required: 'Campo requerido',
-                }}
-                render={({ field }) => (
-                  <FormItem className="flex-1 gap-4 justify-between">
-                    <FormLabel className="">Sexo</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Masculino">Masculino</SelectItem>
-                        <SelectItem value="Femenino">Femenino</SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex flex-1 gap-4">
-              <FormField
-                control={form.control}
-                name="country"
-                rules={{
-                  required: 'Este campo es necesario',
-                  minLength: {
-                    value: 3,
-                    message: 'Debe tener al menos 3 caracteres',
-                  },
-                  maxLength: {
-                    value: 100,
-                    message: 'Debe tener un maximo de 100 caracteres',
-                  },
-                }}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Pais</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="state"
-                rules={{
-                  required: 'Este campo es necesario',
-                  minLength: {
-                    value: 3,
-                    message: 'Debe tener al menos 3 caracteres',
-                  },
-                  maxLength: {
-                    value: 100,
-                    message: 'Debe tener un maximo de 100 caracteres',
-                  },
-                }}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Estado</FormLabel>
-                    <FormControl>
-                      <Input {...field} value={field.value || ''} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="city"
-                rules={{
-                  required: 'Este campo es necesario',
-                  minLength: {
-                    value: 3,
-                    message: 'Debe tener al menos 3 caracteres',
-                  },
-                  maxLength: {
-                    value: 100,
-                    message: 'Debe tener un maximo de 100 caracteres',
-                  },
-                }}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Ciudad</FormLabel>
-                    <FormControl>
-                      <Input {...field} value={field.value || ''} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={form.control}
-              name="address"
-              rules={{
-                required: 'Este campo es necesario',
-                minLength: {
-                  value: 3,
-                  message: 'Debe tener al menos 3 caracteres',
-                },
-                maxLength: {
-                  value: 100,
-                  message: 'Debe tener un maximo de 100 caracteres',
-                },
-              }}
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>Dirección</FormLabel>
+            <div className="flex gap-5 ">
+              <FormItem className="flex-1">
+                <FormLabel>Nivel del curso</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    setLevel(value)
+                    setValue('id_current_course', undefined)
+                  }}
+                  defaultValue={level || ''}
+                >
                   <FormControl>
-                    <Input {...field} value={field.value || ''} />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar..." />
+                    </SelectTrigger>
                   </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Inteligencia Emocional - Nivel 1">
+                      Inteligencia Emocional - Nivel 1
+                    </SelectItem>
+                    <SelectItem value="El Dinero - Nivel 2">
+                      El Dinero - Nivel 2
+                    </SelectItem>
+                    <SelectItem value="Finanzas Personales - Nivel 3">
+                      Finanzas Personales - Nivel 3
+                    </SelectItem>
+                    <SelectItem value="El Ahorro - Nivel 4">
+                      El Ahorro - Nivel 4
+                    </SelectItem>
+                    <SelectItem value="El Banco - Nivel 5">
+                      El Banco - Nivel 5
+                    </SelectItem>
+                    <SelectItem value="Emprendimiento Personal - Nivel 6">
+                      Emprendimiento Personal - Nivel 6
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormMessage />
+              </FormItem>
+
+              <FormItem className="flex-1">
+                <FormLabel>Modalidad</FormLabel>
+                <Select
+                  onValueChange={(value: Modalities) => setModality(value)}
+                  defaultValue={modality || ''}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Presencial">Presencial</SelectItem>
+                    <SelectItem value="Online">Online</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <FormMessage />
+              </FormItem>
+            </div>
+
             <FormField
-              control={form.control}
-              name={`phone_number`}
-              rules={{
-                required: 'Este campo es requerido',
-              }}
-              render={({ field: { ref, ...field } }) => (
-                <FormItem className="flex-1 gap-2">
-                  <FormLabel className="flex-1">{`Numero telefónico:`}</FormLabel>
-                  <div className="">
-                    <FormControl>
-                      <PhoneInput
-                        country={'ve'}
-                        // placeholder="Ingresa tu numero telefónico"
-                        {...field}
-                        masks={{
-                          ve: '....-...-....',
-                        }}
-                        onChange={(value: string, data: any) => {
-                          const phoneNumber = value.split(data.dialCode)[1]
-                          const formattedPhoneNumber = `+${
-                            data.dialCode
-                          }-${phoneNumber.slice(0, 4)}-${phoneNumber.slice(
-                            4,
-                            7
-                          )}-${phoneNumber.slice(7)}`
-                          field.onChange(formattedPhoneNumber)
-                        }}
-                        countryCodeEditable={false}
-                      />
-                    </FormControl>
+              control={control}
+              name="id_current_course"
+              render={({ field }) => (
+                <FormItem className="flex flex-1 justify-between gap-4 items-center">
+                  <FormLabel>Horario del curso:</FormLabel>
+                  <div className="w-[70%]">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              'w-full justify-between',
+                              !field.value && 'text-muted-foreground'
+                            )}
+                          >
+                            {field.value
+                              ? schedules.find(
+                                  (schedule) => schedule.value === field.value
+                                )?.label
+                              : 'Seleccionar horario'}
+                            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="PopoverContent">
+                        <Command>
+                          <CommandInput
+                            placeholder="Buscar horario..."
+                            className="h-9"
+                          />
+                          <ScrollArea className="max-h-56">
+                            <CommandEmpty>
+                              No se encontaron resultados.
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {isPending ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                schedules.map((schedule) => (
+                                  <CommandItem
+                                    value={schedule.label}
+                                    key={schedule.value}
+                                    onSelect={() => {
+                                      setValue(
+                                        'id_current_course',
+                                        schedule.value,
+                                        {
+                                          shouldDirty: true,
+                                        }
+                                      )
+                                    }}
+                                  >
+                                    {schedule.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        'ml-auto h-4 w-4',
+                                        schedule.value === field.value
+                                          ? 'opacity-100'
+                                          : 'opacity-0'
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))
+                              )}
+                            </CommandGroup>
+                          </ScrollArea>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
                     <FormMessage />
                   </div>
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="">
-                  <FormLabel>Correo electrónico</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="john.doe@example.com"
-                      {...field}
-                      value={field.value || ''}
-                      disabled={isPending}
-                    />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>Datos del Estudiante</AccordionTrigger>
+                <AccordionContent>
+                  <StudentFields />
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger>Datos del Representante</AccordionTrigger>
+                <AccordionContent>
+                  <RepresentativeFields />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
         </div>
 
-        <DialogFooter className="fixed right-0 bottom-0 bg-white pt-4 border-t border-border gap-4 items-center w-full p-8">
+        <DialogFooter className="fixed right-0 bottom-0 bg-white pt-4 border-t border-border gap-4 items-center w-full p-4">
           <Button variant="default" type="submit" disabled={isPending}>
             {isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />

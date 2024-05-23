@@ -32,13 +32,13 @@ import {
 } from '@/modules/common/components/card/card'
 import ModalForm from '@/modules/common/components/modal-form'
 
-import { Prisma, Student } from '@prisma/client'
 import ChangeStudentStateForm from './forms/student-states-form'
+import { StudentByCourseType } from './forms/columns/students-by-course-columns'
 // import { DateTimePicker } from '@/modules/common/components/date-time-picker'
 // import { DateTimePicker } from '@/modules/common/components/date-time-picker'
 interface Props {
   id: number
-  students: Student[]
+  students: StudentByCourseType[]
 }
 export const ManualModalStudentsStates = ({ id, students }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false)

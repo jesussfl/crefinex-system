@@ -20,6 +20,7 @@ import { getAge } from '@/utils/helpers/get-age'
 import Link from 'next/link'
 
 export type StudentByCourseType = Student & {
+  code: string
   status: Student_Status
 }
 export const studentsByCourseColumns: ColumnDef<StudentByCourseType>[] = [
@@ -27,6 +28,11 @@ export const studentsByCourseColumns: ColumnDef<StudentByCourseType>[] = [
   {
     accessorKey: 'id',
     header: 'ID',
+  },
+  {
+    id: 'Codigo',
+    accessorKey: 'code',
+    header: 'Código',
   },
   {
     id: 'fullName',
@@ -45,7 +51,22 @@ export const studentsByCourseColumns: ColumnDef<StudentByCourseType>[] = [
       )
     },
   },
-
+  {
+    accessorKey: 'status',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Estado
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
   {
     id: 'age',
     accessorFn: (row) => getAge(new Date(row.birthDate)),
@@ -81,22 +102,7 @@ export const studentsByCourseColumns: ColumnDef<StudentByCourseType>[] = [
       )
     },
   },
-  {
-    accessorKey: 'status',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          className="text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Estado
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
-      )
-    },
-  },
+
   {
     accessorKey: 'phone_number',
     header: ({ column }) => {

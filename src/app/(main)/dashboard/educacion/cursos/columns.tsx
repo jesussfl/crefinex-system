@@ -27,6 +27,7 @@ import { cn } from '@/utils/utils'
 import { SelectedStudentsColumns } from './components/columns/selected-students-columns'
 type CoursesType = Prisma.CoursesGetPayload<{
   include: {
+    schedules: true
     students: {
       include: {
         student: true
@@ -141,6 +142,29 @@ export const columns: ColumnDef<CoursesType>[] = [
           className="text-xs"
         >
           Precio
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+  {
+    id: 'Horarios',
+    accessorFn: (row) => {
+      const labels = row.schedules.map((schedule) => {
+        return `${schedule.day} (${schedule.start} - ${schedule.end})`
+      })
+
+      return labels.join(', ')
+    },
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="text-xs"
+        >
+          Horarios
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )

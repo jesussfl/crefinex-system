@@ -24,6 +24,8 @@ import {
   Courses,
   Modalities,
   Prisma,
+  Schedule,
+  Spanish_Days,
   Student,
   Students_Courses,
 } from '@prisma/client'
@@ -53,13 +55,16 @@ type StudentsRelation = Omit<
   Students_Courses,
   'id_course' | 'id' | 'fecha_creacion' | 'ultima_actualizacion'
 >
-
-type FormValues = Omit<
+type SchedulesRelation = Omit<Schedule, 'id' | 'course_id'>
+export type FormValues = Omit<
   Courses,
   'id' | 'fecha_creacion' | 'ultima_actualizacion'
 > & {
-  students: StudentsRelation[]
+  schedules: SchedulesRelation[]
+
+  // students: StudentsRelation[]
 }
+
 interface Props {
   defaultValues?: FormValues
   students: Student[]
@@ -70,73 +75,82 @@ export default function CoursesForm({ defaultValues, students }: Props) {
   const router = useRouter()
   const isEditEnabled = !!defaultValues
   const form = useForm<FormValues>({
+    mode: 'onSubmit',
     defaultValues,
   })
-  const { append, remove } = useFieldArray<FormValues>({
+  // const { append, remove } = useFieldArray<FormValues>({
+  //   control: form.control,
+  //   name: `students`,
+  // })
+  const {
+    fields,
+    append: addSchedule,
+    remove: removeSchedule,
+  } = useFieldArray<FormValues>({
     control: form.control,
-    name: `students`,
+    name: `schedules`,
   })
   const [isPending, startTransition] = useTransition()
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedData, setSelectedData] = useState<Student[]>([])
-  const [selectedItems, setSelectedItems] = useState<{
-    [key: number]: boolean
-  }>({})
+  // const [isModalOpen, setIsModalOpen] = useState(false)
+  // const [selectedData, setSelectedData] = useState<Student[]>([])
+  // const [selectedItems, setSelectedItems] = useState<{
+  //   [key: number]: boolean
+  // }>({})
 
-  useEffect(() => {
-    if (isEditEnabled) {
-      const students = defaultValues.students
-      //@ts-ignore
-      const studentsData = students.map((student) => student.student) //TODO: revisar el tipado
-      const studentsSelected = students.reduce(
-        (acc, student) => {
-          acc[student.id_student] = true
-          return acc
-        },
-        {} as { [key: number]: boolean }
-      )
+  // useEffect(() => {
+  //   if (isEditEnabled) {
+  //     const students = defaultValues.students
+  //     //@ts-ignore
+  //     const studentsData = students.map((student) => student.student) //TODO: revisar el tipado
+  //     const studentsSelected = students.reduce(
+  //       (acc, student) => {
+  //         acc[student.id_student] = true
+  //         return acc
+  //       },
+  //       {} as { [key: number]: boolean }
+  //     )
 
-      setSelectedItems(studentsSelected)
-      setSelectedData(studentsData)
-    }
-  }, [isEditEnabled, defaultValues])
+  //     setSelectedItems(studentsSelected)
+  //     setSelectedData(studentsData)
+  //   }
+  // }, [isEditEnabled, defaultValues])
 
-  const handleTableSelect = useCallback(
-    (lastSelectedRow: any) => {
-      if (lastSelectedRow) {
-        append({
-          id_student: lastSelectedRow.id,
-          status: null,
-        })
-        setSelectedData((prev) => {
-          if (prev.find((item) => item.id === lastSelectedRow.id)) {
-            const index = prev.findIndex(
-              (item) => item.id === lastSelectedRow.id
-            )
-            remove(index)
-            return prev.filter((item) => item.id !== lastSelectedRow.id)
-          } else {
-            return [...prev, lastSelectedRow]
-          }
-        })
-      }
-    },
-    [append, remove]
-  )
+  // const handleTableSelect = useCallback(
+  //   (lastSelectedRow: any) => {
+  //     if (lastSelectedRow) {
+  //       append({
+  //         id_student: lastSelectedRow.id,
+  //         status: null,
+  //       })
+  //       setSelectedData((prev) => {
+  //         if (prev.find((item) => item.id === lastSelectedRow.id)) {
+  //           const index = prev.findIndex(
+  //             (item) => item.id === lastSelectedRow.id
+  //           )
+  //           remove(index)
+  //           return prev.filter((item) => item.id !== lastSelectedRow.id)
+  //         } else {
+  //           return [...prev, lastSelectedRow]
+  //         }
+  //       })
+  //     }
+  //   },
+  //   [append, remove]
+  // )
 
-  const deleteItem = (index: number) => {
-    setSelectedData((prev) => {
-      return prev.filter((item) => {
-        const nuevoObjeto = { ...selectedItems }
-        if (item.id === selectedData[index].id) {
-          delete nuevoObjeto[item.id]
-          setSelectedItems(nuevoObjeto)
-        }
-        return item.id !== selectedData[index].id
-      })
-    })
-    remove(index)
-  }
+  // const deleteItem = (index: number) => {
+  //   setSelectedData((prev) => {
+  //     return prev.filter((item) => {
+  //       const nuevoObjeto = { ...selectedItems }
+  //       if (item.id === selectedData[index].id) {
+  //         delete nuevoObjeto[item.id]
+  //         setSelectedItems(nuevoObjeto)
+  //       }
+  //       return item.id !== selectedData[index].id
+  //     })
+  //   })
+  //   remove(index)
+  // }
 
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
     const isEditing = !!defaultValues
@@ -157,7 +171,7 @@ export default function CoursesForm({ defaultValues, students }: Props) {
           if (data?.success) {
             toast({
               title: 'Curso creado',
-              description: 'El estudiante se ha creado correctamente',
+              description: 'El curso se ha creado correctamente',
               variant: 'success',
             })
 
@@ -331,7 +345,7 @@ export default function CoursesForm({ defaultValues, students }: Props) {
               )}
             />
           </div>
-
+          {/* <CourseSchedulesInput /> */}
           <div className="flex flex-row flex-1 items-center gap-5 ">
             <FormField
               control={form.control}
@@ -394,7 +408,7 @@ export default function CoursesForm({ defaultValues, students }: Props) {
               )}
             />
           </div>
-          <div className="flex flex-1 flex-row gap-8 items-center justify-between">
+          {/* <div className="flex flex-1 flex-row gap-8 items-center justify-between">
             <FormDescription className="w-[20rem]">
               Selecciona los estudiantes que pertenecen a este curso
             </FormDescription>
@@ -430,15 +444,97 @@ export default function CoursesForm({ defaultValues, students }: Props) {
                 />
               </div>
             </ModalForm>
-          </div>
-          <div className="flex flex-col my-5">
+          </div> */}
+          {fields.map((field, index) => (
+            <>
+              <div className="flex gap-4">
+                <FormField
+                  key={field.id}
+                  control={form.control}
+                  name={`schedules.${index}.day`}
+                  rules={{
+                    required: 'Este campo es requerido',
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dia</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value || ''}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Lunes">Lunes</SelectItem>
+                          <SelectItem value="Martes">Martes</SelectItem>
+                          <SelectItem value="Miercoles">Miercoles</SelectItem>
+                          <SelectItem value="Jueves">Jueves</SelectItem>
+                          <SelectItem value="Viernes">Viernes</SelectItem>
+                          <SelectItem value="Sabado">Sabado</SelectItem>
+                          <SelectItem value="Domingo">Domingo</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  key={field.id}
+                  control={form.control}
+                  name={`schedules.${index}.start`}
+                  rules={{
+                    required: 'Este campo es requerido',
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>¿A qué hora inicia?</FormLabel>
+                      <Input type="time" {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  key={field.id}
+                  control={form.control}
+                  name={`schedules.${index}.end`}
+                  rules={{
+                    required: 'Este campo es requerido',
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>¿A qué hora termina?</FormLabel>
+                      <Input type="time" {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </>
+          ))}
+          <Button
+            variant={'outline'}
+            onClick={() =>
+              addSchedule({
+                day: 'Lunes',
+                start: '',
+                end: '',
+              })
+            }
+          >
+            Agregar
+          </Button>
+          {/* <div className="flex flex-col my-5">
             <p className="text-md font-bold">Estudiantes Seleccionados</p>
             <DataTable
               columns={SelectedStudentsColumns}
               data={selectedData}
               isColumnFilterEnabled={false}
             />
-          </div>
+          </div> */}
         </div>
 
         <DialogFooter className="fixed right-0 bottom-0 bg-white pt-4 border-t border-border gap-4 items-center w-full p-8">

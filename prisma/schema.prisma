@@ -139,6 +139,7 @@ model Representative {
   lastNames String
   birthDate DateTime
 
+  profession   String?
   gender       Genders
   phone_number String?
   email        String?
@@ -163,24 +164,30 @@ enum Genders {
 }
 
 model Student {
-  id        Int    @id @default(autoincrement())
-  names     String
-  lastNames String
+  id   Int     @id @default(autoincrement())
+  uuid String? @unique
 
-  birthDate          DateTime
-  gender             Genders
-  phone_number       String?
-  email              String?
-  address            String?
-  country            String
-  city               String?
-  state              String?
-  id_document_type   Documentos_Identidad?
-  id_document_number String?               @unique
-  id_document_image  String?
+  names                      String
+  lastNames                  String
+  birthDate                  DateTime
+  gender                     Genders
+  modalidad                  String?
+  phone_number               String?
+  email                      String?
+  address                    String?
+  country                    String
+  city                       String?
+  state                      String?
+  extracurricular_activities String?
+  current_status             String?
+  id_document_type           Documentos_Identidad?
+  id_document_number         String?               @unique
+  id_document_image          String?
 
   courses Students_Courses[]
 
+  id_current_course                 Int?
+  current_course                    Courses?        @relation(fields: [id_current_course], references: [id])
   representative                    Representative? @relation(fields: [id_document_number_representative], references: [id_document_number])
   id_document_number_representative String?
 
@@ -193,17 +200,42 @@ enum Modalities {
   Online
 }
 
+enum Spanish_Days {
+  Lunes
+  Martes
+  Miercoles
+  Jueves
+  Viernes
+  Sabados
+  Domingos
+}
+
+model Schedule {
+  id        Int          @id @default(autoincrement())
+  day       Spanish_Days
+  start     String
+  end       String
+  course    Courses      @relation(fields: [course_id], references: [id])
+  course_id Int
+}
+
 model Courses {
-  id          Int                @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
   description String
   start_date  DateTime?
   end_date    DateTime?
-  price       Decimal?
-  modality    Modalities
-  image       String?
-  level       String?
-  students    Students_Courses[]
+
+  price Decimal?
+  image String?
+
+  modality Modalities
+  level    String?
+
+  schedules Schedule[]
+
+  students         Students_Courses[]
+  current_students Student[]
 }
 
 enum Student_Status {

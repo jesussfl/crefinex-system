@@ -1,7 +1,13 @@
 'use server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { Courses, Prisma, Students_Courses } from '@prisma/client'
+import {
+  Courses,
+  Modalities,
+  Prisma,
+  Schedule,
+  Students_Courses,
+} from '@prisma/client'
 import { validateUserSession } from '@/utils/helpers/validate-user-session'
 import { validateUserPermissions } from '@/utils/helpers/validate-user-permissions'
 import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
@@ -10,12 +16,13 @@ type StudentsRelation = Omit<
   Students_Courses,
   'id_course' | 'id' | 'fecha_creacion' | 'ultima_actualizacion'
 >
+type SchedulesRelation = Omit<Schedule, 'id' | 'course_id'>
 
 type FormValues = Omit<
   Courses,
   'id' | 'fecha_creacion' | 'ultima_actualizacion'
 > & {
-  students: StudentsRelation[]
+  schedules: SchedulesRelation[]
 }
 export const getAllCourses = async () => {
   const sessionResponse = await validateUserSession()
@@ -26,9 +33,79 @@ export const getAllCourses = async () => {
 
   const courses = await prisma.courses.findMany({
     include: {
+      schedules: true,
       students: {
         include: {
           student: true,
+        },
+      },
+    },
+  })
+
+  return courses
+}
+export const getAllOnlineCourses = async () => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    throw new Error('You must be signed in to perform this action')
+  }
+
+  const courses = await prisma.courses.findMany({
+    where: {
+      modality: 'Online',
+    },
+    include: {
+      schedules: true,
+      students: {
+        include: {
+          student: true,
+        },
+      },
+    },
+  })
+
+  return courses
+}
+export const getAllPresencialCourses = async () => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    throw new Error('You must be signed in to perform this action')
+  }
+
+  const courses = await prisma.courses.findMany({
+    where: {
+      modality: 'Presencial',
+    },
+    include: {
+      schedules: true,
+      students: {
+        include: {
+          student: true,
+        },
+      },
+    },
+  })
+
+  return courses
+}
+export const getSchedulesByLevelAndModality = async (
+  level: string,
+  modality: Modalities
+) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    throw new Error('You must be signed in to perform this action')
+  }
+
+  const courses = await prisma.schedule.findMany({
+    where: {
+      course: {
+        level,
+        AND: {
+          modality: modality,
         },
       },
     },
@@ -49,11 +126,12 @@ export const getCourseById = async (id: number) => {
       id,
     },
     include: {
-      students: {
-        include: {
-          student: true,
-        },
-      },
+      schedules: true,
+      // students: {
+      //   include: {
+      //     student: true,
+      //   },
+      // },
     },
   })
 
@@ -96,9 +174,12 @@ export const createCourse = async (data: FormValues) => {
   await prisma.courses.create({
     data: {
       ...data,
-      students: {
-        create: data.students,
+      schedules: {
+        create: data.schedules,
       },
+      // students: {
+      //   create: data.students,
+      // },
     },
   })
 
@@ -134,11 +215,13 @@ export const updateCourse = async (data: FormValues, id: number) => {
     },
     data: {
       ...data,
-      students: {
+      schedules: {
         deleteMany: {},
-        create: data.students.map((student) => {
+        create: data.schedules.map((schedule) => {
           return {
-            id_student: student.id_student,
+            day: schedule.day,
+            start: schedule.start,
+            end: schedule.end,
           }
         }),
       },
