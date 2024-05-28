@@ -7,6 +7,11 @@ import { validateUserPermissions } from '@/utils/helpers/validate-user-permissio
 import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
 import { registerAuditAction } from '@/lib/actions/audit'
 import { StudentFormType } from '../../../components/forms/students-form'
+import { auth } from '@/auth'
+import { getAge } from '@/utils/helpers/get-age'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+
 export const getAllStudents = async () => {
   const sessionResponse = await validateUserSession()
 
@@ -14,9 +19,18 @@ export const getAllStudents = async () => {
     throw new Error('You must be signed in to perform this action')
   }
 
-  const brands = await prisma.student.findMany()
+  const students = await prisma.student.findMany({
+    include: {
+      representative: true,
+      current_course: {
+        include: {
+          schedules: true,
+        },
+      },
+    },
+  })
 
-  return brands
+  return students
 }
 export const getAllOnlineStudents = async () => {
   const sessionResponse = await validateUserSession()
@@ -28,6 +42,14 @@ export const getAllOnlineStudents = async () => {
   const onlineStudents = await prisma.student.findMany({
     where: {
       modalidad: 'Online',
+    },
+    include: {
+      representative: true,
+      current_course: {
+        include: {
+          schedules: true,
+        },
+      },
     },
   })
 
@@ -43,6 +65,14 @@ export const getAllPresencialStudents = async () => {
   const presencialStudents = await prisma.student.findMany({
     where: {
       modalidad: 'Presencial',
+    },
+    include: {
+      representative: true,
+      current_course: {
+        include: {
+          schedules: true,
+        },
+      },
     },
   })
 
@@ -82,7 +112,7 @@ export const getStudentsByCourse = async (id_course: number) => {
 
   return students
 }
-export const getStudentById = async (id: number) => {
+export const getStudentById = async (id: number): Promise<StudentFormType> => {
   const sessionResponse = await validateUserSession()
 
   if (sessionResponse.error || !sessionResponse.session) {
@@ -93,13 +123,61 @@ export const getStudentById = async (id: number) => {
     where: {
       id,
     },
+    select: {
+      names: true,
+      lastNames: true,
+      id_document_type: true,
+      id_document_number: true,
+      current_status: true,
+      modalidad: true,
+      id_current_course: true,
+      state: true,
+      birthDate: true,
+      email: true,
+
+      phone_number: true,
+      gender: true,
+      address: true,
+      city: true,
+      country: true,
+      current_level: true,
+      extracurricular_activities: true,
+      current_course: {
+        select: {
+          level: true,
+        },
+      },
+      representative: {
+        select: {
+          names: true,
+          lastNames: true,
+          id_document_type: true,
+          id_document_number: true,
+          id_document_image: true,
+          state: true,
+          profession: true,
+          work_address: true,
+          birthDate: true,
+          email: true,
+          phone_number: true,
+          gender: true,
+          address: true,
+          city: true,
+          country: true,
+          relationship: true,
+        },
+      },
+    },
   })
 
   if (!student) {
     throw new Error('Estudiante no encontrado')
   }
 
-  return student
+  return {
+    ...student,
+    status: student.current_status,
+  }
 }
 export const getStudentByIdDocument = async (id: string) => {
   const sessionResponse = await validateUserSession()
@@ -123,9 +201,36 @@ export const getStudentByIdDocument = async (id: string) => {
 
   return student
 }
-export const createStudent = async (
-  data: Prisma.StudentUncheckedCreateInput
-) => {
+const generateCode = async (
+  courseLevel: number,
+  courseId: number,
+  courseEndMonth: number,
+  courseStartYear: number
+): Promise<string> => {
+  // Obtener el número total de estudiantes en la base de datos
+  const studentCount = await prisma.student.count()
+
+  // El siguiente ID del estudiante será studentCount + 1
+  const studentId = studentCount + 1
+
+  // Formatear mes y año
+  const formattedMonth = courseEndMonth.toString().padStart(2, '0')
+  const formattedYear = courseStartYear.toString().slice(-2)
+
+  // Generar el código
+  const code = `${courseId}-${courseLevel}-${studentId}-${formattedMonth}-${formattedYear}`
+  return code
+}
+const extractCourseLevel = (courseLevel: string): number => {
+  if (courseLevel.includes('Nivel 1')) return 1
+  if (courseLevel.includes('Nivel 2')) return 2
+  if (courseLevel.includes('Nivel 3')) return 3
+  if (courseLevel.includes('Nivel 4')) return 4
+  if (courseLevel.includes('Nivel 5')) return 5
+
+  return 0
+}
+export const createStudent = async (data: StudentFormType) => {
   const sessionResponse = await validateUserSession()
 
   if (sessionResponse.error || !sessionResponse.session) {
@@ -148,9 +253,50 @@ export const createStudent = async (
       success: false,
     }
   }
+  const course = await prisma.courses.findUnique({
+    where: {
+      id: data.id_current_course,
+    },
+  })
 
+  if (!course) {
+    return {
+      error: 'No se encontro el horario',
+      success: false,
+    }
+  }
+  const courseLevel = extractCourseLevel(
+    course.level ? course.level : 'Nivel 1'
+  )
+  const courseStartDate = course.start_date
+    ? new Date(course.start_date)
+    : new Date()
+  const courseStartMonth = courseStartDate.getMonth() + 1
+  const courseStartYear = courseStartDate.getFullYear()
+  const code = await generateCode(
+    courseLevel,
+    course.id,
+    courseStartMonth,
+    courseStartYear
+  )
+  const uuid = (await prisma.student.count()) + 1
   await prisma.student.create({
-    data,
+    data: {
+      ...data,
+      uuid,
+      codigo: code,
+      id_current_course: undefined,
+      current_course: {
+        connect: {
+          id: data.id_current_course,
+        },
+      },
+      representative: data.representative
+        ? {
+            create: data.representative,
+          }
+        : undefined,
+    },
   })
 
   await registerAuditAction('Se registró un nuevo estudiante: ' + data.names)
@@ -162,10 +308,7 @@ export const createStudent = async (
   }
 }
 
-export const updateStudent = async (
-  data: Prisma.StudentUncheckedUpdateInput,
-  id: number
-) => {
+export const updateStudent = async (data: StudentFormType, id: number) => {
   const sessionResponse = await validateUserSession()
 
   if (sessionResponse.error || !sessionResponse.session) {
@@ -186,7 +329,20 @@ export const updateStudent = async (
     where: {
       id,
     },
-    data,
+    data: {
+      ...data,
+      id_current_course: undefined,
+      current_course: {
+        connect: {
+          id: data.id_current_course,
+        },
+      },
+      representative: data.representative
+        ? {
+            update: data.representative,
+          }
+        : undefined,
+    },
   })
 
   if (!student) {
@@ -329,5 +485,106 @@ export const deleteManyStudents = async (ids: number[]) => {
   return {
     error: false,
     success: 'Estudiantes eliminados exitosamente',
+  }
+}
+export const deleteStudent = async (id: number) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    return sessionResponse
+  }
+
+  const permissionsResponse = validateUserPermissions({
+    sectionName: SECTION_NAMES.ESTUDIANTES,
+    actionName: 'ELIMINAR',
+    userPermissions: sessionResponse.session?.user.rol.permisos,
+  })
+
+  if (!permissionsResponse.success) {
+    return permissionsResponse
+  }
+
+  await prisma.student.delete({
+    where: {
+      id,
+    },
+  })
+
+  await registerAuditAction('Se elimino el estudiante: ' + id)
+  revalidatePath('/dashboard/cursos/estudiantes')
+
+  return {
+    error: false,
+    success: 'Estudiante eliminado exitosamente',
+  }
+}
+
+export const getDataToExportPreInscription = async (id: number) => {
+  const session = await auth()
+  if (!session?.user) {
+    throw new Error('You must be signed in to perform this action')
+  }
+  const student = await prisma.student.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      current_course: true,
+      representative: true,
+    },
+  })
+
+  if (!student) {
+    throw new Error('El estudiante no existe')
+  }
+
+  return {
+    nivel: student.current_course.level,
+    mes_inicio: format(
+      new Date(
+        student.current_course.start_date
+          ? student.current_course.start_date
+          : new Date()
+      ),
+      'MMMM',
+      { locale: es }
+    ),
+    mes_culminacion: format(
+      new Date(
+        student.current_course.end_date
+          ? student.current_course.end_date
+          : new Date()
+      ),
+      'MMMM',
+      { locale: es }
+    ),
+    edad: getAge(new Date(student.birthDate)),
+    //example: fecha_actual:  '2022-12-31' ,
+    fecha_actual: format(new Date(), 'dd-MM-yyyy'),
+    nombre_completo: student?.names + ' ' + student?.lastNames,
+    ci_estudiante: student?.id_document_number,
+    fecha_nacimiento: format(new Date(student.birthDate), 'dd-MM-yyyy'),
+    direccion: student.address,
+    hasExtraActivities: student?.extracurricular_activities ? 'Si' : 'No',
+    extra_activities: student?.extracurricular_activities,
+    nombre_completo_representante: student.representative
+      ? student.representative?.names + ' ' + student.representative.lastNames
+      : 'No aplica',
+    fecha_nacimiento_r: student.representative
+      ? format(new Date(student.representative.birthDate), 'dd-MM-yyyy')
+      : 'No aplica',
+    ci_representante: student.representative
+      ? `${student.representative?.id_document_type}-${student.representative?.id_document_number}`
+      : 'No aplica',
+    parentesco: student?.representative?.relationship,
+    direccion_representante: student.representative
+      ? student.representative.address
+      : 'No aplica',
+    profesion: student?.representative?.profession || 'No aplica',
+    // direccion_trabajo: student.representative ? student.representative?.work_address : 'No aplica',
+    telefono_representante: student.representative?.phone_number,
+    correo: student?.email,
+    direccion_trabajo: student?.representative?.work_address || '',
+    correo_representante: student?.representative?.email || '',
   }
 }

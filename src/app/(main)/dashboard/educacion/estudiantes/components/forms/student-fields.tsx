@@ -5,6 +5,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from '@/modules/common/components/form'
 import { Input } from '@/modules/common/components/input/input'
 
@@ -16,9 +17,15 @@ import {
   SelectValue,
 } from '@/modules/common/components/select/select'
 import PhoneInput from 'react-phone-input-2'
+import { Switch } from '@/modules/common/components/switch/switch'
+import { useEffect, useState } from 'react'
 export const StudentFields = () => {
   const form = useFormContext()
-
+  const [hasExtraActivity, setHasExtraActivity] = useState(false)
+  const extraActivities = form.watch('extracurricular_activities')
+  useEffect(() => {
+    setHasExtraActivity(!!extraActivities)
+  }, [extraActivities])
   return (
     <>
       <div className="flex flex-1 gap-4">
@@ -350,6 +357,65 @@ export const StudentFields = () => {
           </FormItem>
         )}
       />
+      <div className="flex gap-4 items-center">
+        <FormDescription>No</FormDescription>
+        <Switch
+          checked={hasExtraActivity}
+          onCheckedChange={(value) => {
+            if (value) {
+              setHasExtraActivity(true)
+            } else {
+              form.setValue('extracurricular_activities', null, {
+                shouldDirty: true,
+              })
+              setHasExtraActivity(false)
+            }
+          }}
+        />
+        <FormDescription>Si</FormDescription>
+      </div>
+      {hasExtraActivity && (
+        <>
+          <FormField
+            control={form.control}
+            name="extracurricular_activities"
+            rules={{
+              required: 'Este campo es necesario',
+              minLength: {
+                value: 10,
+                message: 'Debe tener al menos 10 carácteres',
+              },
+              maxLength: {
+                value: 200,
+                message: 'Debe tener un máximo de 200 carácteres',
+              },
+            }}
+            render={({ field }) => (
+              <FormItem className="">
+                <FormLabel>Actividad Extracurricular</FormLabel>
+                <FormControl>
+                  <textarea
+                    id="extracurricular_activities"
+                    rows={3}
+                    className=" w-full rounded-md border-0 p-1.5 text-foreground bg-background ring-1  placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    {...field}
+                    onChange={(e) => {
+                      if (form.formState.errors[field.name]) {
+                        form.clearErrors(field.name)
+                      }
+                      form.setValue(field.name, e.target.value, {
+                        shouldDirty: true,
+                      })
+                    }}
+                  />
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </>
+      )}
     </>
   )
 }

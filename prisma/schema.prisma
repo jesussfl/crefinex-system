@@ -139,14 +139,16 @@ model Representative {
   lastNames String
   birthDate DateTime
 
+  relationship String
   profession   String?
+  work_address String?
   gender       Genders
-  phone_number String?
+  phone_number String
   email        String?
   address      String?
   country      String
-  city         String?
-  state        String?
+  city         String
+  state        String
 
   id_document_type   Documentos_Identidad
   id_document_number String               @unique
@@ -164,31 +166,33 @@ enum Genders {
 }
 
 model Student {
-  id   Int     @id @default(autoincrement())
-  uuid String? @unique
+  id Int @id @default(autoincrement())
 
+  uuid                       Int                  @unique
+  codigo                     String               @unique
   names                      String
   lastNames                  String
   birthDate                  DateTime
   gender                     Genders
-  modalidad                  String?
+  modalidad                  Modalities
+  current_level              String
   phone_number               String?
   email                      String?
   address                    String?
   country                    String
-  city                       String?
-  state                      String?
+  city                       String
+  state                      String
   extracurricular_activities String?
-  current_status             String?
-  id_document_type           Documentos_Identidad?
-  id_document_number         String?               @unique
+  current_status             Student_Status
+  id_document_type           Documentos_Identidad
+  id_document_number         String?              @unique
   id_document_image          String?
 
   courses Students_Courses[]
 
-  id_current_course                 Int?
-  current_course                    Courses?        @relation(fields: [id_current_course], references: [id])
-  representative                    Representative? @relation(fields: [id_document_number_representative], references: [id_document_number])
+  id_current_course                 Int
+  current_course                    Courses         @relation(fields: [id_current_course], references: [id])
+  representative                    Representative? @relation(fields: [id_document_number_representative], references: [id_document_number], onDelete: Cascade, onUpdate: Cascade)
   id_document_number_representative String?
 
   createdAt DateTime @default(now())

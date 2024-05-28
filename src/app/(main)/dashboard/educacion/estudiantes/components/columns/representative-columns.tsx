@@ -18,6 +18,9 @@ import {
 import { format } from 'date-fns'
 import { getAge } from '@/utils/helpers/get-age'
 import Link from 'next/link'
+import ProtectedTableActions from '@/modules/common/components/table-actions'
+import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
+import { deleteRepresentative } from '../../lib/actions/representatives'
 
 export const representativeColumns: ColumnDef<Representative>[] = [
   SELECT_COLUMN,
@@ -217,27 +220,27 @@ export const representativeColumns: ColumnDef<Representative>[] = [
       const data = row.original
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir Menú</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(String(data.id))}
-            >
-              Copiar código
-            </DropdownMenuItem>
-            <Link
-              href={`/dashboard/educacion/estudiantes/representante/${data.id_document_number}`}
-            >
-              <DropdownMenuItem>Editar</DropdownMenuItem>
-            </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProtectedTableActions
+          sectionName={SECTION_NAMES.ESTUDIANTES}
+          editConfig={{
+            href: `/dashboard/educacion/estudiantes/representante/${data.id}`,
+          }}
+          deleteConfig={{
+            alertTitle: '¿Estás seguro de eliminar este representante?',
+            alertDescription: `Estas a punto de eliminar este representante y todas sus dependencias.`,
+            onConfirm: () => {
+              return deleteRepresentative(data.id)
+            },
+          }}
+        >
+          {/* <Link
+            href={`/dashboard/abastecimiento/recepciones/exportar/${String(
+              data.id
+            )}`}
+          >
+            <DropdownMenuItem>Exportar</DropdownMenuItem>
+          </Link> */}
+        </ProtectedTableActions>
       )
     },
   },

@@ -24,6 +24,41 @@ export const RepresentativeFields = () => {
 
   return (
     <>
+      <FormField
+        control={form.control}
+        name="representative.relationship"
+        rules={{
+          required: 'Campo requerido',
+        }}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Parentesco del Representante</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar..." />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="Padre">Padre</SelectItem>
+                <SelectItem value="Madre">Madre</SelectItem>
+                <SelectItem value="Tio">Tio</SelectItem>
+                <SelectItem value="Tia">Tia </SelectItem>
+                <SelectItem value="Abuelo">Abuelo</SelectItem>
+                <SelectItem value="Abuela">Abuela</SelectItem>
+                <SelectItem value="Hermano">Hermano</SelectItem>
+                <SelectItem value="Hermana">Hermana</SelectItem>
+                <SelectItem value="Primo">Primo</SelectItem>
+                <SelectItem value="Prima">Prima</SelectItem>
+
+                <SelectItem value="Tutor Legal">Tutor Legal</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       <div className="flex flex-1 gap-4">
         <FormField
           control={form.control}
@@ -327,6 +362,31 @@ export const RepresentativeFields = () => {
               </FormControl>
               <FormMessage />
             </div>
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="representative.work_address"
+        rules={{
+          required: 'Este campo es necesario',
+          minLength: {
+            value: 3,
+            message: 'Debe tener al menos 3 caracteres',
+          },
+          maxLength: {
+            value: 200,
+            message: 'Debe tener un maximo de 200 caracteres',
+          },
+        }}
+        render={({ field }) => (
+          <FormItem className="flex-1">
+            <FormLabel>Dirección de trabajo</FormLabel>
+            <FormControl>
+              <Input {...field} value={field.value || ''} />
+            </FormControl>
+
+            <FormMessage />
           </FormItem>
         )}
       />

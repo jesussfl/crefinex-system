@@ -1,25 +1,29 @@
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowUpDown, MoreHorizontal } from 'lucide-react'
+import { ArrowUpDown } from 'lucide-react'
 
 import { Button } from '@/modules/common/components/button'
 
 import { SELECT_COLUMN } from '@/utils/constants/columns'
-import { Representative, Student } from '@prisma/client'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/modules/common/components/dropdown-menu/dropdown-menu'
+import { Prisma, Student } from '@prisma/client'
+import { DropdownMenuItem } from '@/modules/common/components/dropdown-menu/dropdown-menu'
 import { format } from 'date-fns'
 import { getAge } from '@/utils/helpers/get-age'
 import Link from 'next/link'
-
-export const columns: ColumnDef<Student>[] = [
+import ProtectedTableActions from '@/modules/common/components/table-actions'
+import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
+import { deleteStudent } from './lib/actions/students'
+type StudentColumns = Prisma.StudentGetPayload<{
+  include: {
+    current_course: {
+      include: {
+        schedules: true
+      }
+    }
+  }
+}>
+export const columns: ColumnDef<StudentColumns>[] = [
   SELECT_COLUMN,
   {
     accessorKey: 'id',
@@ -42,7 +46,22 @@ export const columns: ColumnDef<Student>[] = [
       )
     },
   },
-
+  {
+    accessorKey: 'codigo',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Código
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
   {
     id: 'age',
     accessorFn: (row) => getAge(new Date(row.birthDate)),
@@ -73,6 +92,64 @@ export const columns: ColumnDef<Student>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
           Documento de identidad
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+  {
+    accessorKey: 'current_status',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Estado Actual
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+  {
+    accessorKey: 'current_level',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Nivel Actual
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+  {
+    id: 'horario_actual',
+    accessorFn: (row) => {
+      const schedules = row.current_course.schedules
+      const schedulesString = schedules
+        .map((schedule) => {
+          return `${schedule.day} (${schedule.start} - ${schedule.end})`
+        })
+        .join(', ')
+
+      return schedulesString
+    },
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Horario Actual
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
@@ -217,28 +294,34 @@ export const columns: ColumnDef<Student>[] = [
       const data = row.original
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir Menú</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(String(data.id))}
-            >
-              Copiar código
-            </DropdownMenuItem>
-            <Link
-              href={`/dashboard/educacion/estudiantes/estudiante/${data.id_document_number}`}
-            >
-              <DropdownMenuItem>Editar</DropdownMenuItem>
-            </Link>
-            <DropdownMenuSeparator />
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProtectedTableActions
+          sectionName={SECTION_NAMES.ESTUDIANTES}
+          editConfig={{
+            href: `/dashboard/educacion/estudiantes/estudiante/${data.id}`,
+          }}
+          deleteConfig={{
+            alertTitle: '¿Estás seguro de eliminar este estudiante?',
+            alertDescription: `Estas a punto de eliminar este estudiante y todas sus dependencias.`,
+            onConfirm: () => {
+              return deleteStudent(data.id)
+            },
+          }}
+        >
+          <Link
+            href={`/dashboard/educacion/estudiantes/exportar/${String(
+              data.id
+            )}`}
+          >
+            <DropdownMenuItem>Exportar</DropdownMenuItem>
+          </Link>
+          {/* <Link
+            href={`/dashboard/abastecimiento/recepciones/exportar/${String(
+              data.id
+            )}`}
+          >
+            <DropdownMenuItem>Exportar</DropdownMenuItem>
+          </Link> */}
+        </ProtectedTableActions>
       )
     },
   },

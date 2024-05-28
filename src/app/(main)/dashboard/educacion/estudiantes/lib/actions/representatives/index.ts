@@ -32,14 +32,10 @@ export const getRepresentativeById = async (id: number) => {
   })
 
   if (!representative) {
-    return { error: 'Representante no encontrado', success: false, data: null }
+    throw new Error('Representante no encontrado')
   }
 
-  return {
-    error: false,
-    success: true,
-    data: representative,
-  }
+  return representative
 }
 export const getRepresentativeByIdDocument = async (id: string) => {
   const sessionResponse = await validateUserSession()
@@ -100,7 +96,7 @@ export const deleteManyRepresentatives = async (ids: number[]) => {
 
   const permissionsResponse = validateUserPermissions({
     sectionName: SECTION_NAMES.ESTUDIANTES,
-    actionName: 'CREAR',
+    actionName: 'ELIMINAR',
     userPermissions: sessionResponse.session?.user.rol.permisos,
   })
 
@@ -125,6 +121,37 @@ export const deleteManyRepresentatives = async (ids: number[]) => {
   }
 }
 
+export const deleteRepresentative = async (id: number) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    return sessionResponse
+  }
+
+  const permissionsResponse = validateUserPermissions({
+    sectionName: SECTION_NAMES.ESTUDIANTES,
+    actionName: 'ELIMINAR',
+    userPermissions: sessionResponse.session?.user.rol.permisos,
+  })
+
+  if (!permissionsResponse.success) {
+    return permissionsResponse
+  }
+
+  await prisma.representative.delete({
+    where: {
+      id,
+    },
+  })
+
+  await registerAuditAction('Se eliminó el representante: ' + id)
+  revalidatePath('/dashboard/cursos/estudiantes')
+
+  return {
+    error: false,
+    success: 'Representante eliminado exitosamente',
+  }
+}
 export const updateRepresentative = async (
   data: Prisma.RepresentativeUpdateInput,
   id: number

@@ -5,13 +5,10 @@ import {
   PageHeader,
   PageHeaderTitle,
 } from '@/modules/layout/templates/page'
-import { PackagePlus } from 'lucide-react'
+import { PackagePlus, User2 } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
 import StudentsForm from '../../components/forms/students-form'
-import {
-  getStudentById,
-  getStudentByIdDocument,
-} from '../../lib/actions/students'
+import { getStudentById } from '../../lib/actions/students'
 
 export const metadata: Metadata = {
   title: 'Agregar Estudiante',
@@ -23,7 +20,7 @@ export default async function Page({
 }: {
   params: { studentId: string }
 }) {
-  const student = await getStudentByIdDocument(studentId)
+  const student = await getStudentById(Number(studentId))
   return (
     <>
       <PageHeader className="mb-0">
@@ -32,14 +29,14 @@ export default async function Page({
 
           <div>
             <PageHeaderTitle>
-              <PackagePlus size={24} />
+              <User2 size={24} />
               Editar estudiante
             </PageHeaderTitle>
           </div>
         </HeaderLeftSide>
       </PageHeader>
       <PageContent className="pt-5 space-y-4 md:px-[20px]">
-        <StudentsForm defaultValues={student} />
+        <StudentsForm defaultValues={student} studentId={Number(studentId)} />
       </PageContent>
     </>
   )

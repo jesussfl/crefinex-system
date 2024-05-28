@@ -1,15 +1,14 @@
 'use client'
 import { useSidebarContext } from '@/lib/context/sidebar-context'
 import { CustomFlowbiteTheme, Sidebar } from 'flowbite-react'
-import { useEffect, useState, type FC } from 'react'
+import { type FC } from 'react'
 
 import { twMerge } from 'tailwind-merge'
 import { SIDE_MENU_ITEMS } from '@/utils/constants/sidebar-constants'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { getUserPermissions } from '@/lib/auth'
-import { Permiso } from '@prisma/client'
+import { useSession } from 'next-auth/react'
 import { SideMenuItem } from '@/types/types'
 
 const customTheme: CustomFlowbiteTheme['sidebar'] = {
@@ -90,28 +89,14 @@ const customTheme: CustomFlowbiteTheme['sidebar'] = {
   },
 }
 
-type UserPermissions = {
-  id: number
-  permiso_key: string
-  rol_nombre: string
-  active: boolean | null
-}[]
 export const DashboardSidebar: FC = function () {
   const { isCollapsed } = useSidebarContext()
   const pathname = usePathname()
-  const [permissions, setPermissions] = useState<UserPermissions>([])
+  const { data: session } = useSession()
+  const { user } = session || {}
+  const { rol } = user || {}
+  const permissions = rol?.permisos
 
-  useEffect(() => {
-    const fetchedPermissions = async () => {
-      const permissions = await getUserPermissions()
-      if (!permissions) {
-        return
-      }
-      setPermissions(permissions)
-    }
-
-    fetchedPermissions()
-  }, [])
   const userSections = permissions?.map(
     (permission) => permission.permiso_key.split(':')[0]
   )
@@ -119,7 +104,6 @@ export const DashboardSidebar: FC = function () {
   const userPermissions = permissions?.map(
     (permission) => permission.permiso_key
   )
-  console.log(userSections, 'User Sections')
   const filterMenuItems = (items: SideMenuItem[]) => {
     return items.filter((item) => {
       if (item.requiredPermissions) {
@@ -137,7 +121,6 @@ export const DashboardSidebar: FC = function () {
   // Filtrar los elementos principales del menú lateral
   const filteredMenuItems = filterMenuItems(SIDE_MENU_ITEMS)
 
-  console.log(filteredMenuItems, 'sajfdk')
   const filteredSubmenuItems = filteredMenuItems.map((item) => {
     if (item.submenu && item.submenuItems) {
       return {

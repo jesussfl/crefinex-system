@@ -60,56 +60,61 @@ import {
 } from '@/modules/common/components/command/command'
 import { ScrollArea } from '@/modules/common/components/scroll-area/scroll-area'
 
-interface Props {
-  defaultValues?: Student
-}
-
 export type StudentFormType = {
   names: string
   lastNames: string
   birthDate: Date
-  current_status: string
-  id_current_course?: number
+  current_status: Student_Status
+  current_level: string
+  id_current_course: number
   modalidad: Modalities
   gender: Genders
 
-  phone_number?: string
-  email?: string
+  phone_number?: string | null
+  email?: string | null
 
-  address: string
+  address?: string | null
   country: string
   city: string
   state: string
 
-  extracurricular_activities?: string
+  extracurricular_activities?: string | null
   status: Student_Status
 
-  id_document_type?: Documentos_Identidad
-  id_document_number?: string
-  id_document_image?: string
+  id_document_type: Documentos_Identidad
+  id_document_number?: string | null
+  id_document_image?: string | null
 
-  representative: RepresentativeFormType
+  representative: RepresentativeFormType | null | undefined
+}
+type EditForm = {
+  defaultValues: StudentFormType
+  studentId: number
+}
+type CreateForm = {
+  defaultValues?: undefined
+  studentId?: undefined
 }
 type FormValues = StudentFormType
 
+type Props = EditForm | CreateForm
 type SelectOption = {
   value: number
   label: string
 }
 
-export default function StudentsForm({ defaultValues }: Props) {
+export default function StudentsForm({ defaultValues, studentId }: Props) {
   const { toast } = useToast()
   const router = useRouter()
 
   const { control, setValue, ...rest } = useForm<FormValues>({
-    // defaultValues,
+    defaultValues,
   })
   const { isDirty, dirtyFields } = useFormState({ control })
   const [isPending, startTransition] = useTransition()
   const [schedules, setSchedules] = useState<SelectOption[]>([])
-  const [level, setLevel] = useState<string>('')
-  const [modality, setModality] = useState<Modalities>('Presencial')
-
+  const level = rest.watch('current_level')
+  const modality = rest.watch('modalidad')
   useEffect(() => {
     getSchedulesByLevelAndModality(level, modality).then((data) => {
       const transformedSchedules = data.map((schedule) => {
@@ -159,10 +164,11 @@ export default function StudentsForm({ defaultValues }: Props) {
 
         return
       }
+
       //@ts-ignore
       const dirtyValues = getDirtyValues(dirtyFields, values) as FormValues
 
-      updateStudent(dirtyValues, defaultValues.id).then((data) => {
+      updateStudent(dirtyValues, studentId).then((data) => {
         if (data?.error) {
           toast({
             title: 'Parece que hubo un problema',
@@ -234,69 +240,95 @@ export default function StudentsForm({ defaultValues }: Props) {
               )}
             />
             <div className="flex gap-5 ">
-              <FormItem className="flex-1">
-                <FormLabel>Nivel del curso</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    setLevel(value)
-                    setValue('id_current_course', undefined)
-                  }}
-                  defaultValue={level || ''}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Inteligencia Emocional - Nivel 1">
-                      Inteligencia Emocional - Nivel 1
-                    </SelectItem>
-                    <SelectItem value="El Dinero - Nivel 2">
-                      El Dinero - Nivel 2
-                    </SelectItem>
-                    <SelectItem value="Finanzas Personales - Nivel 3">
-                      Finanzas Personales - Nivel 3
-                    </SelectItem>
-                    <SelectItem value="El Ahorro - Nivel 4">
-                      El Ahorro - Nivel 4
-                    </SelectItem>
-                    <SelectItem value="El Banco - Nivel 5">
-                      El Banco - Nivel 5
-                    </SelectItem>
-                    <SelectItem value="Emprendimiento Personal - Nivel 6">
-                      Emprendimiento Personal - Nivel 6
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+              <FormField
+                control={control}
+                name="current_level"
+                rules={{
+                  required: 'Este campo es requerido',
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nivel del curso</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                        //@ts-ignore
+                        setValue('id_current_course', undefined)
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Inteligencia Emocional - Nivel 1">
+                          Inteligencia Emocional - Nivel 1
+                        </SelectItem>
+                        <SelectItem value="El Dinero - Nivel 2">
+                          El Dinero - Nivel 2
+                        </SelectItem>
+                        <SelectItem value="Finanzas Personales - Nivel 3">
+                          Finanzas Personales - Nivel 3
+                        </SelectItem>
+                        <SelectItem value="El Ahorro - Nivel 4">
+                          El Ahorro - Nivel 4
+                        </SelectItem>
+                        <SelectItem value="El Banco - Nivel 5">
+                          El Banco - Nivel 5
+                        </SelectItem>
+                        <SelectItem value="Emprendimiento Personal - Nivel 6">
+                          Emprendimiento Personal - Nivel 6
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
 
-                <FormMessage />
-              </FormItem>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <FormItem className="flex-1">
-                <FormLabel>Modalidad</FormLabel>
-                <Select
-                  onValueChange={(value: Modalities) => setModality(value)}
-                  defaultValue={modality || ''}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Presencial">Presencial</SelectItem>
-                    <SelectItem value="Online">Online</SelectItem>
-                  </SelectContent>
-                </Select>
+              <FormField
+                control={control}
+                name="modalidad"
+                rules={{
+                  required: 'Este campo es requerido',
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Modalidad</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                        //@ts-ignore
+                        setValue('id_current_course', undefined)
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Presencial">Presencial</SelectItem>
+                        <SelectItem value="Online">Online</SelectItem>
+                      </SelectContent>
+                    </Select>
 
-                <FormMessage />
-              </FormItem>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <FormField
               control={control}
               name="id_current_course"
+              rules={{
+                required: 'Este campo es requerido',
+              }}
               render={({ field }) => (
                 <FormItem className="flex flex-1 justify-between gap-4 items-center">
                   <FormLabel>Horario del curso:</FormLabel>

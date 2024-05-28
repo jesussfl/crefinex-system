@@ -5,11 +5,14 @@ import {
   PageHeader,
   PageHeaderTitle,
 } from '@/modules/layout/templates/page'
-import { PackagePlus } from 'lucide-react'
+import { PackagePlus, UserCircle2 } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
 
 import RepresentativesForm from '../../components/forms/representatives-form'
-import { getRepresentativeByIdDocument } from '../../lib/actions/representatives'
+import {
+  getRepresentativeById,
+  getRepresentativeByIdDocument,
+} from '../../lib/actions/representatives'
 
 export const metadata: Metadata = {
   title: 'Editar Representante',
@@ -21,7 +24,7 @@ export default async function Page({
 }: {
   params: { representativeId: string }
 }) {
-  const representative = await getRepresentativeByIdDocument(representativeId)
+  const representative = await getRepresentativeById(Number(representativeId))
   return (
     <>
       <PageHeader className="mb-0">
@@ -30,7 +33,7 @@ export default async function Page({
 
           <div>
             <PageHeaderTitle>
-              <PackagePlus size={24} />
+              <UserCircle2 size={24} />
               Editar Representante
             </PageHeaderTitle>
           </div>

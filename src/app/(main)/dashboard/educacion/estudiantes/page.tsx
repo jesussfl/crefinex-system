@@ -29,6 +29,8 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/modules/common/components/tabs/tabs'
+import { representativeColumns } from './components/columns/representative-columns'
+import { getAllRepresentatives } from './lib/actions/representatives'
 
 export const metadata: Metadata = {
   title: 'Estudiantes',
@@ -38,6 +40,7 @@ export const metadata: Metadata = {
 export default async function Page() {
   const onlineStudents = await getAllOnlineStudents()
   const presencialStudents = await getAllPresencialStudents()
+  const representatives = await getAllRepresentatives()
   return (
     <>
       <PageHeader>
@@ -64,6 +67,7 @@ export default async function Page() {
         <TabsList className="mx-5">
           <TabsTrigger value="presencial">Estudiantes Presencial</TabsTrigger>
           <TabsTrigger value="online">Estudiantes Online </TabsTrigger>
+          <TabsTrigger value="representantes">Representantes</TabsTrigger>
         </TabsList>
         <TabsContent value="presencial">
           <PageContent>
@@ -87,6 +91,21 @@ export default async function Page() {
               </CardHeader>
               <CardContent>
                 <DataTable columns={columns} data={onlineStudents} />
+              </CardContent>
+            </Card>
+          </PageContent>
+        </TabsContent>
+        <TabsContent value="representantes">
+          <PageContent>
+            <Card>
+              <CardHeader className="flex flex-row justify-between">
+                <CardTitle className="text-md">Representantes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DataTable
+                  columns={representativeColumns}
+                  data={representatives}
+                />
               </CardContent>
             </Card>
           </PageContent>
