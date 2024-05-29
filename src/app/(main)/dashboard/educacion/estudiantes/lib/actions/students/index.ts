@@ -11,7 +11,10 @@ import { auth } from '@/auth'
 import { getAge } from '@/utils/helpers/get-age'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-
+import { getCldImageUrl } from 'next-cloudinary'
+import fetch from 'node-fetch'
+import axios from 'axios'
+const fs = require('fs').promises
 export const getAllStudents = async () => {
   const sessionResponse = await validateUserSession()
 
@@ -140,7 +143,6 @@ export const getStudentById = async (id: number): Promise<StudentFormType> => {
       address: true,
       city: true,
       country: true,
-      current_level: true,
       extracurricular_activities: true,
       current_course: {
         select: {
@@ -176,7 +178,8 @@ export const getStudentById = async (id: number): Promise<StudentFormType> => {
 
   return {
     ...student,
-    status: student.current_status,
+    level_id: student.current_course.level.id,
+    current_status: student.current_status,
   }
 }
 export const getStudentByIdDocument = async (id: string) => {
@@ -204,6 +207,7 @@ export const getStudentByIdDocument = async (id: string) => {
 const generateCode = async (
   courseLevel: number,
   courseId: number,
+  courseModality: number,
   courseEndMonth: number,
   courseStartYear: number
 ): Promise<string> => {
@@ -218,18 +222,10 @@ const generateCode = async (
   const formattedYear = courseStartYear.toString().slice(-2)
 
   // Generar el código
-  const code = `${courseId}-${courseLevel}-${studentId}-${formattedMonth}-${formattedYear}`
+  const code = `${courseId}-${courseLevel}-${courseModality}-${studentId}-${formattedMonth}-${formattedYear}`
   return code
 }
-const extractCourseLevel = (courseLevel: string): number => {
-  if (courseLevel.includes('Nivel 1')) return 1
-  if (courseLevel.includes('Nivel 2')) return 2
-  if (courseLevel.includes('Nivel 3')) return 3
-  if (courseLevel.includes('Nivel 4')) return 4
-  if (courseLevel.includes('Nivel 5')) return 5
 
-  return 0
-}
 export const createStudent = async (data: StudentFormType) => {
   const sessionResponse = await validateUserSession()
 
@@ -257,6 +253,9 @@ export const createStudent = async (data: StudentFormType) => {
     where: {
       id: data.id_current_course,
     },
+    include: {
+      level: true,
+    },
   })
 
   if (!course) {
@@ -265,9 +264,8 @@ export const createStudent = async (data: StudentFormType) => {
       success: false,
     }
   }
-  const courseLevel = extractCourseLevel(
-    course.level ? course.level : 'Nivel 1'
-  )
+  const courseLevel = course.level.order || 1
+  const courseModality = course.modality === 'Presencial' ? 1 : 2
   const courseStartDate = course.start_date
     ? new Date(course.start_date)
     : new Date()
@@ -275,25 +273,28 @@ export const createStudent = async (data: StudentFormType) => {
   const courseStartYear = courseStartDate.getFullYear()
   const code = await generateCode(
     courseLevel,
+    courseModality,
     course.id,
     courseStartMonth,
     courseStartYear
   )
   const uuid = (await prisma.student.count()) + 1
+  const { level_id, ...rest } = data
   await prisma.student.create({
     data: {
-      ...data,
+      ...rest,
+
       uuid,
       codigo: code,
       id_current_course: undefined,
       current_course: {
         connect: {
-          id: data.id_current_course,
+          id: rest.id_current_course,
         },
       },
-      representative: data.representative
+      representative: rest.representative
         ? {
-            create: data.representative,
+            create: rest.representative,
           }
         : undefined,
     },
@@ -331,6 +332,7 @@ export const updateStudent = async (data: StudentFormType, id: number) => {
     },
     data: {
       ...data,
+
       id_current_course: undefined,
       current_course: {
         connect: {
@@ -529,7 +531,11 @@ export const getDataToExportPreInscription = async (id: number) => {
       id,
     },
     include: {
-      current_course: true,
+      current_course: {
+        include: {
+          level: true,
+        },
+      },
       representative: true,
     },
   })
@@ -537,7 +543,24 @@ export const getDataToExportPreInscription = async (id: number) => {
   if (!student) {
     throw new Error('El estudiante no existe')
   }
+  const url = getCldImageUrl({
+    width: 960,
+    height: 600,
+    src: student.student_image || '',
+  })
 
+  const imageToShow = async () => {
+    const response = await axios(url, { responseType: 'arraybuffer' })
+    const buffer64 = Buffer.from(response.data, 'binary').toString('base64')
+    return buffer64
+  }
+
+  const exportedImage = {
+    width: 5,
+    height: 5,
+    data: await imageToShow(),
+    extension: '.jpg',
+  }
   return {
     nivel: student.current_course.level,
     mes_inicio: format(
@@ -564,6 +587,13 @@ export const getDataToExportPreInscription = async (id: number) => {
     nombre_completo: student?.names + ' ' + student?.lastNames,
     ci_estudiante: student?.id_document_number,
     fecha_nacimiento: format(new Date(student.birthDate), 'dd-MM-yyyy'),
+    sexo: student.gender,
+    estado: student.state,
+    plantel: 'Sin definir',
+    grado: 'Sin definir',
+    hasMedicamento: 'No',
+    medicamento: 'Sin definir',
+    student_image: exportedImage,
     direccion: student.address,
     hasExtraActivities: student?.extracurricular_activities ? 'Si' : 'No',
     extra_activities: student?.extracurricular_activities,

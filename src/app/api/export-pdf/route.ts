@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
-    console.log(req.data.nombre_completo, 'NOMBREEE')
+
     const pdfBuffer = await response.arrayBuffer()
     return new NextResponse(Buffer.from(pdfBuffer), {
       headers: {

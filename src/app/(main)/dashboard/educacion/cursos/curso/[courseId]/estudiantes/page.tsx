@@ -55,15 +55,7 @@ const generateCode = (
   const code = `${courseId}-${courseLevel}-${studentId}-${formattedMonth}-${formattedYear}`
   return code
 }
-const extractCourseLevel = (courseLevel: string): number => {
-  if (courseLevel.includes('Nivel 1')) return 1
-  if (courseLevel.includes('Nivel 2')) return 2
-  if (courseLevel.includes('Nivel 3')) return 3
-  if (courseLevel.includes('Nivel 4')) return 4
-  if (courseLevel.includes('Nivel 5')) return 5
 
-  return 0
-}
 export default async function Page({
   params: { courseId },
 }: {
@@ -71,8 +63,7 @@ export default async function Page({
 }) {
   const students = await getStudentsByCourse(Number(courseId))
   const course = await getCourseById(Number(courseId))
-  console.log(course)
-  const courseLevel = course.level ? extractCourseLevel(course.level) : 0 // Asumiendo que el nivel del curso está en el objeto `course`
+  const courseLevel = course.level.order || 0 // Asumiendo que el nivel del curso está en el objeto `course`
   const courseEndDate = course.end_date ? new Date(course.end_date) : new Date()
   const courseStartDate = course.start_date
     ? new Date(course.start_date)

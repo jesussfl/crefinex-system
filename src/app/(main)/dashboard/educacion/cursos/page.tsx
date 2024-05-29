@@ -26,6 +26,8 @@ import { DataTable } from '@/modules/common/components/table/data-table'
 import { getAllOnlineCourses, getAllPresencialCourses } from './lib/actions'
 import Link from 'next/link'
 import { buttonVariants } from '@/modules/common/components/button'
+import { getAllLevels } from './lib/actions/level-actions'
+import { levelColumns } from './components/columns/level-columns'
 
 export const metadata: Metadata = {
   title: 'Cursos',
@@ -34,6 +36,7 @@ export const metadata: Metadata = {
 export default async function Page() {
   const courses = await getAllPresencialCourses()
   const onlineCourses = await getAllOnlineCourses()
+  const levels = await getAllLevels()
   return (
     <>
       <PageHeader>
@@ -60,6 +63,7 @@ export default async function Page() {
         <TabsList className="mx-5">
           <TabsTrigger value="presenciales">Presenciales</TabsTrigger>
           <TabsTrigger value="online">Online</TabsTrigger>
+          <TabsTrigger value="niveles">Niveles</TabsTrigger>
         </TabsList>
         <TabsContent value="presenciales">
           <PageContent>
@@ -85,10 +89,29 @@ export default async function Page() {
             </Card>
           </PageContent>
         </TabsContent>
+        <TabsContent value="niveles">
+          <PageContent>
+            <Card>
+              <CardHeader className="flex flex-row justify-between">
+                <CardTitle className="text-md">Niveles de los cursos</CardTitle>
+                <Link
+                  href="/dashboard/educacion/cursos/nivel/nuevo"
+                  className={buttonVariants({ variant: 'default' })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Registrar Nuevo Nivel
+                </Link>
+              </CardHeader>
+              <CardContent>
+                <DataTable columns={levelColumns} data={levels} />
+              </CardContent>
+            </Card>
+          </PageContent>
+        </TabsContent>
       </Tabs>
-      <PageContent>
+      {/* <PageContent>
         <DataTable columns={columns} data={courses} />
-      </PageContent>
+      </PageContent> */}
     </>
   )
 }

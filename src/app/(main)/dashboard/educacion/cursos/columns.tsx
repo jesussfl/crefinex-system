@@ -6,27 +6,20 @@ import { ArrowUpDown, MoreHorizontal } from 'lucide-react'
 import { Button, buttonVariants } from '@/modules/common/components/button'
 
 import { SELECT_COLUMN } from '@/utils/constants/columns'
-import { Courses, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/modules/common/components/dropdown-menu/dropdown-menu'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import ModalForm from '@/modules/common/components/modal-form'
-import { DataTable } from '@/modules/common/components/table/data-table'
-import {
-  CardDescription,
-  CardTitle,
-} from '@/modules/common/components/card/card'
 import { cn } from '@/utils/utils'
-import { SelectedStudentsColumns } from './components/columns/selected-students-columns'
 type CoursesType = Prisma.CoursesGetPayload<{
   include: {
+    level: true
     schedules: true
     students: {
       include: {
@@ -74,7 +67,10 @@ export const columns: ColumnDef<CoursesType>[] = [
     },
   },
   {
-    accessorKey: 'level',
+    id: 'nivel',
+    accessorFn: (row) => {
+      return `Nivel ${row.level.order} - ${row.level.name}`
+    },
     header: ({ column }) => {
       return (
         <Button

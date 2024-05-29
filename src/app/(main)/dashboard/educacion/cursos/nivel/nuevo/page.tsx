@@ -5,13 +5,14 @@ import {
   PageHeader,
   PageHeaderTitle,
 } from '@/modules/layout/templates/page'
-import { UserCircle2 } from 'lucide-react'
+import { BookUp2 } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
-import StudentsForm from '../../components/forms/students-form'
+
+import LevelsForm from '../../components/forms/levels-form'
 
 export const metadata: Metadata = {
-  title: 'Agregar Estudiante',
-  description: 'Desde aquí puedes agregar estudiantes',
+  title: 'Agregar Nivel',
+  description: 'Desde aquí puedes agregar niveles',
 }
 
 export default async function Page() {
@@ -23,14 +24,14 @@ export default async function Page() {
 
           <div>
             <PageHeaderTitle>
-              <UserCircle2 size={24} />
-              Agregar estudiante
+              <BookUp2 size={24} />
+              Agregar Nivel
             </PageHeaderTitle>
           </div>
         </HeaderLeftSide>
       </PageHeader>
-      <PageContent className="pt-5 space-y-4 ">
-        <StudentsForm />
+      <PageContent className="pt-5 space-y-4 md:px-[20px]">
+        <LevelsForm />
       </PageContent>
     </>
   )

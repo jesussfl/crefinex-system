@@ -5,16 +5,22 @@ import {
   PageHeader,
   PageHeaderTitle,
 } from '@/modules/layout/templates/page'
-import { UserCircle2 } from 'lucide-react'
+import { PackagePlus } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
-import StudentsForm from '../../components/forms/students-form'
+import LevelsForm from '../../components/forms/levels-form'
+import { getLevelById } from '../../lib/actions/level-actions'
 
 export const metadata: Metadata = {
-  title: 'Agregar Estudiante',
-  description: 'Desde aquí puedes agregar estudiantes',
+  title: 'Editar Nivel',
+  description: 'Desde aquí puedes editar un nivel',
 }
 
-export default async function Page() {
+export default async function Page({
+  params: { levelId },
+}: {
+  params: { levelId: string }
+}) {
+  const level = await getLevelById(Number(levelId))
   return (
     <>
       <PageHeader className="mb-0">
@@ -23,14 +29,14 @@ export default async function Page() {
 
           <div>
             <PageHeaderTitle>
-              <UserCircle2 size={24} />
-              Agregar estudiante
+              <PackagePlus size={24} />
+              Editar nivel
             </PageHeaderTitle>
           </div>
         </HeaderLeftSide>
       </PageHeader>
-      <PageContent className="pt-5 space-y-4 ">
-        <StudentsForm />
+      <PageContent className="pt-5 space-y-4 md:px-[20px]">
+        <LevelsForm defaultValues={level} />
       </PageContent>
     </>
   )

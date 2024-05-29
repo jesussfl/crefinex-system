@@ -21,7 +21,7 @@ export default async function Page({
         <DialogHeader className="pb-5 mb-8 ">
           <DialogTitle>Exportar</DialogTitle>
         </DialogHeader>
-        <FormatSelector data={guideData} type="pre-inscripcion" />
+        <FormatSelector data={guideData} type="inscripcion" />
         <CloseButtonDialog />
       </DialogContent>
     </Dialog>

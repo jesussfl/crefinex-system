@@ -1,17 +1,11 @@
 'use client'
-import { useCallback, useEffect, useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 
-import {
-  useForm,
-  SubmitHandler,
-  useFormState,
-  useFieldArray,
-} from 'react-hook-form'
-import { Button, buttonVariants } from '@/modules/common/components/button'
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form'
+import { Button } from '@/modules/common/components/button'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,17 +14,9 @@ import {
 import { DialogFooter } from '@/modules/common/components/dialog/dialog'
 import { useToast } from '@/modules/common/components/toast/use-toast'
 import { Input } from '@/modules/common/components/input/input'
-import {
-  Courses,
-  Modalities,
-  Prisma,
-  Schedule,
-  Spanish_Days,
-  Student,
-  Students_Courses,
-} from '@prisma/client'
+import { Courses, Schedule, Student, Students_Courses } from '@prisma/client'
 import { useRouter } from 'next/navigation'
-import { Loader2, Plus } from 'lucide-react'
+import { CheckIcon, Loader2 } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -39,17 +25,22 @@ import {
   SelectValue,
 } from '@/modules/common/components/select/select'
 import { createCourse, updateCourse } from '../../lib/actions'
-import { format } from 'date-fns'
-import ModalForm from '@/modules/common/components/modal-form'
-import { DataTable } from '@/modules/common/components/table/data-table'
-import { columns } from '../../../estudiantes/columns'
-import {
-  CardDescription,
-  CardTitle,
-} from '@/modules/common/components/card/card'
-import Link from 'next/link'
 import { cn } from '@/utils/utils'
-import { SelectedStudentsColumns } from '../columns/selected-students-columns'
+import { ComboboxData } from '@/types/types'
+import { getLevelsByModality } from '../../lib/actions/level-actions'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from '@/modules/common/components/command/command'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/modules/common/components/popover/popover'
+import { CaretSortIcon } from '@radix-ui/react-icons'
 
 type StudentsRelation = Omit<
   Students_Courses,
@@ -78,10 +69,7 @@ export default function CoursesForm({ defaultValues, students }: Props) {
     mode: 'onSubmit',
     defaultValues,
   })
-  // const { append, remove } = useFieldArray<FormValues>({
-  //   control: form.control,
-  //   name: `students`,
-  // })
+
   const {
     fields,
     append: addSchedule,
@@ -91,66 +79,19 @@ export default function CoursesForm({ defaultValues, students }: Props) {
     name: `schedules`,
   })
   const [isPending, startTransition] = useTransition()
-  // const [isModalOpen, setIsModalOpen] = useState(false)
-  // const [selectedData, setSelectedData] = useState<Student[]>([])
-  // const [selectedItems, setSelectedItems] = useState<{
-  //   [key: number]: boolean
-  // }>({})
+  const [levels, setLevels] = useState<ComboboxData[]>()
+  const modality = form.watch('modality')
 
-  // useEffect(() => {
-  //   if (isEditEnabled) {
-  //     const students = defaultValues.students
-  //     //@ts-ignore
-  //     const studentsData = students.map((student) => student.student) //TODO: revisar el tipado
-  //     const studentsSelected = students.reduce(
-  //       (acc, student) => {
-  //         acc[student.id_student] = true
-  //         return acc
-  //       },
-  //       {} as { [key: number]: boolean }
-  //     )
+  useEffect(() => {
+    getLevelsByModality(modality).then((data) => {
+      const transformedData = data?.map((level) => ({
+        value: level.id,
+        label: `Nivel ${level.order} - ${level.name} `,
+      }))
 
-  //     setSelectedItems(studentsSelected)
-  //     setSelectedData(studentsData)
-  //   }
-  // }, [isEditEnabled, defaultValues])
-
-  // const handleTableSelect = useCallback(
-  //   (lastSelectedRow: any) => {
-  //     if (lastSelectedRow) {
-  //       append({
-  //         id_student: lastSelectedRow.id,
-  //         status: null,
-  //       })
-  //       setSelectedData((prev) => {
-  //         if (prev.find((item) => item.id === lastSelectedRow.id)) {
-  //           const index = prev.findIndex(
-  //             (item) => item.id === lastSelectedRow.id
-  //           )
-  //           remove(index)
-  //           return prev.filter((item) => item.id !== lastSelectedRow.id)
-  //         } else {
-  //           return [...prev, lastSelectedRow]
-  //         }
-  //       })
-  //     }
-  //   },
-  //   [append, remove]
-  // )
-
-  // const deleteItem = (index: number) => {
-  //   setSelectedData((prev) => {
-  //     return prev.filter((item) => {
-  //       const nuevoObjeto = { ...selectedItems }
-  //       if (item.id === selectedData[index].id) {
-  //         delete nuevoObjeto[item.id]
-  //         setSelectedItems(nuevoObjeto)
-  //       }
-  //       return item.id !== selectedData[index].id
-  //     })
-  //   })
-  //   remove(index)
-  // }
+      setLevels(transformedData)
+    })
+  }, [modality])
 
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
     const isEditing = !!defaultValues
@@ -271,51 +212,7 @@ export default function CoursesForm({ defaultValues, students }: Props) {
               </FormItem>
             )}
           />
-          <div className="flex gap-5 ">
-            <FormField
-              control={form.control}
-              name="level"
-              rules={{
-                required: 'El nivel es requerida',
-              }}
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>Nivel del curso</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value || ''}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar..." />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Inteligencia Emocional - Nivel 1">
-                        Inteligencia Emocional - Nivel 1
-                      </SelectItem>
-                      <SelectItem value="El Dinero - Nivel 2">
-                        El Dinero - Nivel 2
-                      </SelectItem>
-                      <SelectItem value="Finanzas Personales - Nivel 3">
-                        Finanzas Personales - Nivel 3
-                      </SelectItem>
-                      <SelectItem value="El Ahorro - Nivel 4">
-                        El Ahorro - Nivel 4
-                      </SelectItem>
-                      <SelectItem value="El Banco - Nivel 5">
-                        El Banco - Nivel 5
-                      </SelectItem>
-                      <SelectItem value="Emprendimiento Personal - Nivel 6">
-                        Emprendimiento Personal - Nivel 6
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <div className="flex flex-col ">
             <FormField
               control={form.control}
               name="modality"
@@ -326,7 +223,11 @@ export default function CoursesForm({ defaultValues, students }: Props) {
                 <FormItem className="flex-1">
                   <FormLabel>Modalidad del curso</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      //@ts-ignore
+                      form.setValue('level_id', undefined)
+                    }}
                     defaultValue={field.value}
                   >
                     <FormControl>
@@ -344,8 +245,80 @@ export default function CoursesForm({ defaultValues, students }: Props) {
                 </FormItem>
               )}
             />
+            {modality ? (
+              <FormField
+                control={form.control}
+                name="level_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nivel:</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              'w-full justify-between',
+                              !field.value && 'text-muted-foreground'
+                            )}
+                          >
+                            {field.value
+                              ? levels?.find(
+                                  (level) => level.value === field.value
+                                )?.label
+                              : 'Seleccionar nivel...'}
+                            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="PopoverContent">
+                        <Command>
+                          <CommandInput
+                            placeholder="Buscar nivel..."
+                            className="h-9"
+                          />
+                          <CommandEmpty>
+                            No se encontaron resultados.
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {!levels ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              levels.map((level) => (
+                                <CommandItem
+                                  value={level.label}
+                                  key={level.value}
+                                  onSelect={() => {
+                                    form.setValue('level_id', level.value, {
+                                      shouldDirty: true,
+                                    })
+                                  }}
+                                >
+                                  {level.label}
+                                  <CheckIcon
+                                    className={cn(
+                                      'ml-auto h-4 w-4',
+                                      level.value === field.value
+                                        ? 'opacity-100'
+                                        : 'opacity-0'
+                                    )}
+                                  />
+                                </CommandItem>
+                              ))
+                            )}
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : null}
           </div>
-          {/* <CourseSchedulesInput /> */}
+
           <div className="flex flex-row flex-1 items-center gap-5 ">
             <FormField
               control={form.control}
@@ -408,133 +381,98 @@ export default function CoursesForm({ defaultValues, students }: Props) {
               )}
             />
           </div>
-          {/* <div className="flex flex-1 flex-row gap-8 items-center justify-between">
-            <FormDescription className="w-[20rem]">
-              Selecciona los estudiantes que pertenecen a este curso
-            </FormDescription>
-            <ModalForm
-              triggerName="Seleccionar Estudiantes"
-              closeWarning={false}
-              // customToogleModal={toogleModal}
-            >
-              <div className="flex flex-col gap-4 p-8">
-                <CardTitle>
-                  Selecciona los estudiantes que pertenecen a este curso
-                </CardTitle>
-                <CardDescription>
-                  Selecciona los estudiantes que pertenecen a este curso, luego
-                  puedes agregarlos a la lista Si no encuentras el estudiante
-                  que buscas, puedes registrarlo
-                  <Link
-                    href="/dashboard/educacion/estudiantes/estudiante/nuevo"
-                    className={cn(buttonVariants({ variant: 'link' }), 'mx-4')}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Crear Estudiante
-                  </Link>
-                </CardDescription>
 
-                <DataTable
-                  columns={columns}
-                  data={students}
-                  onSelectedRowsChange={handleTableSelect}
-                  isColumnFilterEnabled={false}
-                  selectedData={selectedItems}
-                  setSelectedData={setSelectedItems}
-                />
-              </div>
-            </ModalForm>
-          </div> */}
           {fields.map((field, index) => (
-            <>
-              <div className="flex gap-4">
-                <FormField
-                  key={field.id}
-                  control={form.control}
-                  name={`schedules.${index}.day`}
-                  rules={{
-                    required: 'Este campo es requerido',
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Dia</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value || ''}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Lunes">Lunes</SelectItem>
-                          <SelectItem value="Martes">Martes</SelectItem>
-                          <SelectItem value="Miercoles">Miercoles</SelectItem>
-                          <SelectItem value="Jueves">Jueves</SelectItem>
-                          <SelectItem value="Viernes">Viernes</SelectItem>
-                          <SelectItem value="Sabado">Sabado</SelectItem>
-                          <SelectItem value="Domingo">Domingo</SelectItem>
-                        </SelectContent>
-                      </Select>
+            <div key={field.id} className="flex gap-4 items-center">
+              <FormField
+                key={field.id}
+                control={form.control}
+                name={`schedules.${index}.day`}
+                rules={{
+                  required: 'Este campo es requerido',
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dia</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value || ''}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Lunes">Lunes</SelectItem>
+                        <SelectItem value="Martes">Martes</SelectItem>
+                        <SelectItem value="Miercoles">Miercoles</SelectItem>
+                        <SelectItem value="Jueves">Jueves</SelectItem>
+                        <SelectItem value="Viernes">Viernes</SelectItem>
+                        <SelectItem value="Sabado">Sabado</SelectItem>
+                        <SelectItem value="Domingo">Domingo</SelectItem>
+                      </SelectContent>
+                    </Select>
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  key={field.id}
-                  control={form.control}
-                  name={`schedules.${index}.start`}
-                  rules={{
-                    required: 'Este campo es requerido',
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>¿A qué hora inicia?</FormLabel>
-                      <Input type="time" {...field} />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  key={field.id}
-                  control={form.control}
-                  name={`schedules.${index}.end`}
-                  rules={{
-                    required: 'Este campo es requerido',
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>¿A qué hora termina?</FormLabel>
-                      <Input type="time" {...field} />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                key={field.id}
+                control={form.control}
+                name={`schedules.${index}.start`}
+                rules={{
+                  required: 'Este campo es requerido',
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>¿A qué hora inicia?</FormLabel>
+                    <Input type="time" {...field} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                key={field.id}
+                control={form.control}
+                name={`schedules.${index}.end`}
+                rules={{
+                  required: 'Este campo es requerido',
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>¿A qué hora termina?</FormLabel>
+                    <Input type="time" {...field} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                key={field.id}
+                variant={'destructive'}
+                onClick={(e) => {
+                  e.preventDefault()
+                  removeSchedule(index)
+                }}
+              >
+                Eliminar
+              </Button>
+            </div>
           ))}
           <Button
             variant={'outline'}
-            onClick={() =>
+            onClick={(e) => {
+              e.preventDefault()
               addSchedule({
                 day: 'Lunes',
                 start: '',
                 end: '',
               })
-            }
+            }}
           >
             Agregar
           </Button>
-          {/* <div className="flex flex-col my-5">
-            <p className="text-md font-bold">Estudiantes Seleccionados</p>
-            <DataTable
-              columns={SelectedStudentsColumns}
-              data={selectedData}
-              isColumnFilterEnabled={false}
-            />
-          </div> */}
         </div>
 
         <DialogFooter className="fixed right-0 bottom-0 bg-white pt-4 border-t border-border gap-4 items-center w-full p-8">

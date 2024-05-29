@@ -165,17 +165,26 @@ enum Genders {
   Femenino
 }
 
+model Level {
+  id          Int        @id @default(autoincrement())
+  modalidad   Modalities
+  name        String
+  description String?
+  order       Int?
+  courses     Courses[]
+}
+
 model Student {
   id Int @id @default(autoincrement())
 
-  uuid                       Int                  @unique
-  codigo                     String               @unique
-  names                      String
-  lastNames                  String
-  birthDate                  DateTime
-  gender                     Genders
-  modalidad                  Modalities
-  current_level              String
+  uuid      Int        @unique
+  codigo    String     @unique
+  names     String
+  lastNames String
+  birthDate DateTime
+  gender    Genders
+  modalidad Modalities
+
   phone_number               String?
   email                      String?
   address                    String?
@@ -187,6 +196,8 @@ model Student {
   id_document_type           Documentos_Identidad
   id_document_number         String?              @unique
   id_document_image          String?
+
+  student_image String?
 
   courses Students_Courses[]
 
@@ -234,7 +245,8 @@ model Courses {
   image String?
 
   modality Modalities
-  level    String?
+  level_id Int
+  level    Level      @relation(fields: [level_id], references: [id])
 
   schedules Schedule[]
 

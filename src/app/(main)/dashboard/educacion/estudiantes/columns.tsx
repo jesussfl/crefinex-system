@@ -14,6 +14,7 @@ import Link from 'next/link'
 import ProtectedTableActions from '@/modules/common/components/table-actions'
 import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
 import { deleteStudent } from './lib/actions/students'
+import { CldImage } from 'next-cloudinary'
 type StudentColumns = Prisma.StudentGetPayload<{
   include: {
     current_course: {
@@ -43,6 +44,33 @@ export const columns: ColumnDef<StudentColumns>[] = [
           Nombre Completo
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
+      )
+    },
+  },
+  {
+    accessorKey: 'student_image',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Imágen
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const data = row.original
+      return (
+        <CldImage
+          src={data.student_image || ''}
+          width={100}
+          height={100}
+          alt="Uploaded Image"
+        />
       )
     },
   },

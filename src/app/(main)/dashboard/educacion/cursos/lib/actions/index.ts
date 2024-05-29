@@ -33,6 +33,8 @@ export const getAllCourses = async () => {
 
   const courses = await prisma.courses.findMany({
     include: {
+      level: true,
+
       schedules: true,
       students: {
         include: {
@@ -56,6 +58,8 @@ export const getAllOnlineCourses = async () => {
       modality: 'Online',
     },
     include: {
+      level: true,
+
       schedules: true,
       students: {
         include: {
@@ -79,6 +83,7 @@ export const getAllPresencialCourses = async () => {
       modality: 'Presencial',
     },
     include: {
+      level: true,
       schedules: true,
       students: {
         include: {
@@ -91,7 +96,7 @@ export const getAllPresencialCourses = async () => {
   return courses
 }
 export const getSchedulesByLevelAndModality = async (
-  level: string,
+  level: number,
   modality: Modalities
 ) => {
   const sessionResponse = await validateUserSession()
@@ -103,7 +108,7 @@ export const getSchedulesByLevelAndModality = async (
   const courses = await prisma.schedule.findMany({
     where: {
       course: {
-        level,
+        level_id: level,
         AND: {
           modality: modality,
         },
@@ -126,6 +131,7 @@ export const getCourseById = async (id: number) => {
       id,
     },
     include: {
+      level: true,
       schedules: true,
       // students: {
       //   include: {

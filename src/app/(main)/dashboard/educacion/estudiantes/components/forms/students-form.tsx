@@ -41,7 +41,7 @@ import {
 } from '@/modules/common/components/accordion'
 import { RepresentativeFields } from './representative-fields'
 import { getSchedulesByLevelAndModality } from '../../../cursos/lib/actions'
-import { RepresentativeFormType } from '@/types/types'
+import { ComboboxData, RepresentativeFormType } from '@/types/types'
 import { StudentFields } from './student-fields'
 import { getDirtyValues } from '@/utils/helpers/get-dirty-values'
 import {
@@ -59,13 +59,21 @@ import {
   CommandItem,
 } from '@/modules/common/components/command/command'
 import { ScrollArea } from '@/modules/common/components/scroll-area/scroll-area'
-
+import { CldImage, CldUploadButton, CldUploadWidget } from 'next-cloudinary'
+import Image from 'next/image'
+import { getLevelsByModality } from '../../../cursos/lib/actions/level-actions'
+interface UploadedAssetData {
+  public_id: string
+  width: number
+  height: number
+  id: string
+}
 export type StudentFormType = {
   names: string
   lastNames: string
   birthDate: Date
   current_status: Student_Status
-  current_level: string
+
   id_current_course: number
   modalidad: Modalities
   gender: Genders
@@ -77,13 +85,13 @@ export type StudentFormType = {
   country: string
   city: string
   state: string
-
+  level_id: number
   extracurricular_activities?: string | null
-  status: Student_Status
 
   id_document_type: Documentos_Identidad
   id_document_number?: string | null
   id_document_image?: string | null
+  student_image?: string | null
 
   representative: RepresentativeFormType | null | undefined
 }
@@ -109,12 +117,28 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
 
   const { control, setValue, ...rest } = useForm<FormValues>({
     defaultValues,
+    mode: 'onSubmit',
   })
-  const { isDirty, dirtyFields } = useFormState({ control })
+  const { dirtyFields } = useFormState({ control })
   const [isPending, startTransition] = useTransition()
   const [schedules, setSchedules] = useState<SelectOption[]>([])
-  const level = rest.watch('current_level')
+  const [result, setResult] = useState<UploadedAssetData | null>(null)
+  const [courses, setCourses] = useState<SelectOption[]>([])
+  const [levels, setLevels] = useState<SelectOption[]>([])
+  const [isImageDeleted, setIsImageDeleted] = useState<boolean>(false)
+  const level = rest.watch('level_id')
   const modality = rest.watch('modalidad')
+
+  useEffect(() => {
+    getLevelsByModality(modality).then((data) => {
+      const transformedData = data?.map((level) => ({
+        value: level.id,
+        label: `Nivel ${level.order} - ${level.name} `,
+      }))
+
+      setLevels(transformedData)
+    })
+  }, [modality])
   useEffect(() => {
     getSchedulesByLevelAndModality(level, modality).then((data) => {
       const transformedSchedules = data.map((schedule) => {
@@ -126,7 +150,16 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
       setSchedules(transformedSchedules)
     })
   }, [level, modality, setValue])
-
+  useEffect(() => {
+    if (result) {
+      setValue('student_image', result.public_id)
+    }
+  }, [result, setValue])
+  const handleDeleteImage = () => {
+    setResult(null)
+    setValue('student_image', null)
+    setIsImageDeleted(true)
+  }
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
     const isEditing = !!defaultValues
 
@@ -157,18 +190,17 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
         return
       }
 
-      if (!isDirty) {
-        toast({
-          title: 'No se han detectado cambios',
-        })
+      // if (!isDirty) {
+      //   toast({
+      //     title: 'No se han detectado cambios',
+      //   })
 
-        return
-      }
+      //   return
+      // }
 
       //@ts-ignore
-      const dirtyValues = getDirtyValues(dirtyFields, values) as FormValues
 
-      updateStudent(dirtyValues, studentId).then((data) => {
+      updateStudent(values, studentId).then((data) => {
         if (data?.error) {
           toast({
             title: 'Parece que hubo un problema',
@@ -206,7 +238,52 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
         onSubmit={rest.handleSubmit(onSubmit)}
       >
         <div className="px-24">
-          <div className="px-24">
+          <div>
+            <div className="flex flex-col gap-5 mb-5">
+              {/* SIGNED EXAMPLE */}
+              <CldUploadWidget
+                options={{
+                  sources: ['local'],
+                  multiple: false,
+                }}
+                signatureEndpoint="/api/sign-image"
+                onSuccess={(result) => {
+                  setResult(result?.info as UploadedAssetData)
+                }}
+              >
+                {({ open }) => (
+                  <Button
+                    variant={'default'}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      open()
+                    }}
+                  >
+                    Subir Foto del Estudiante
+                  </Button>
+                )}
+              </CldUploadWidget>
+
+              {result ? (
+                <div className="flex gap-4">
+                  <CldImage
+                    src={rest.watch('student_image') || ''}
+                    width={result.width}
+                    height={result.height}
+                    alt="Uploaded Image"
+                  />
+                  <Button
+                    variant={'destructive'}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleDeleteImage()
+                    }}
+                  >
+                    Eliminar Imagen
+                  </Button>
+                </div>
+              ) : null}
+            </div>
             <FormField
               control={control}
               name="current_status"
@@ -239,56 +316,7 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
                 </FormItem>
               )}
             />
-            <div className="flex gap-5 ">
-              <FormField
-                control={control}
-                name="current_level"
-                rules={{
-                  required: 'Este campo es requerido',
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nivel del curso</FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        field.onChange(value)
-                        //@ts-ignore
-                        setValue('id_current_course', undefined)
-                      }}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Inteligencia Emocional - Nivel 1">
-                          Inteligencia Emocional - Nivel 1
-                        </SelectItem>
-                        <SelectItem value="El Dinero - Nivel 2">
-                          El Dinero - Nivel 2
-                        </SelectItem>
-                        <SelectItem value="Finanzas Personales - Nivel 3">
-                          Finanzas Personales - Nivel 3
-                        </SelectItem>
-                        <SelectItem value="El Ahorro - Nivel 4">
-                          El Ahorro - Nivel 4
-                        </SelectItem>
-                        <SelectItem value="El Banco - Nivel 5">
-                          El Banco - Nivel 5
-                        </SelectItem>
-                        <SelectItem value="Emprendimiento Personal - Nivel 6">
-                          Emprendimiento Personal - Nivel 6
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
+            <div className="flex flex-col ">
               <FormField
                 control={control}
                 name="modalidad"
@@ -301,6 +329,8 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value)
+                        //@ts-ignore
+                        setValue('level_id', undefined)
                         //@ts-ignore
                         setValue('id_current_course', undefined)
                       }}
@@ -321,6 +351,78 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
                   </FormItem>
                 )}
               />
+              {modality ? (
+                <FormField
+                  control={control}
+                  name="level_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nivel:</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                'w-full justify-between',
+                                !field.value && 'text-muted-foreground'
+                              )}
+                            >
+                              {field.value
+                                ? levels?.find(
+                                    (level) => level.value === field.value
+                                  )?.label
+                                : 'Seleccionar nivel...'}
+                              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="PopoverContent">
+                          <Command>
+                            <CommandInput
+                              placeholder="Buscar nivel..."
+                              className="h-9"
+                            />
+                            <CommandEmpty>
+                              No se encontaron resultados.
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {!levels ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                levels.map((level) => (
+                                  <CommandItem
+                                    value={level.label}
+                                    key={level.value}
+                                    onSelect={() => {
+                                      setValue('level_id', level.value, {
+                                        shouldDirty: true,
+                                      })
+                                    }}
+                                  >
+                                    {level.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        'ml-auto h-4 w-4',
+                                        level.value === field.value
+                                          ? 'opacity-100'
+                                          : 'opacity-0'
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))
+                              )}
+                            </CommandGroup>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : null}
             </div>
 
             <FormField

@@ -1,5 +1,12 @@
 import { createReport } from 'docx-templates'
 
+type ImageType = {
+  width: number
+  heigth: number
+  data: any
+  extension: string
+  caption: string
+}
 export const getDocBlob = async (data: any, url: string) => {
   const res = await fetch(url)
   const buffer = await res.arrayBuffer()
@@ -15,6 +22,11 @@ export const getDocBlob = async (data: any, url: string) => {
       ...data,
     },
     cmdDelimiter: ['+++', '+++'],
+    additionalJsContext: {
+      getImage: (contents: ImageType) => {
+        return contents
+      },
+    },
   })
 
   return new Blob([report], {

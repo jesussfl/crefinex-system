@@ -19,19 +19,19 @@ export default function FormatSelector({
   type,
 }: {
   data: any
-  type: 'pre-inscripcion'
+  type: 'pre-inscripcion' | 'inscripcion'
 }) {
   const { toast } = useToast()
   const [format, setFormat] = useState<string>('PDF')
   const [loading, setLoading] = useState(false)
-  const handleExport = async () => {
+  const handleExport = async (planilla: 'pre-inscripcion' | 'inscripcion') => {
     setLoading(true)
     try {
       const apiUrl = format === 'PDF' ? '/api/export-pdf' : '/api/export-word'
 
       const body = {
         data,
-        url: `${process.env.NEXT_PUBLIC_BASE_URL}/Planilla-${type}-template.docx`,
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/Planilla-${planilla}-template.docx`,
         name: type,
       }
       const response = await fetch(apiUrl, {
@@ -98,9 +98,16 @@ export default function FormatSelector({
         <Button
           disabled={loading}
           variant="default"
-          onClick={() => handleExport()}
+          onClick={() => handleExport('inscripcion')}
         >
-          Exportar
+          Planilla de Inscripción
+        </Button>
+        <Button
+          disabled={loading}
+          variant="default"
+          onClick={() => handleExport('pre-inscripcion')}
+        >
+          Planilla de Preinscripción
         </Button>
       </CardContent>
     </Card>

@@ -11,9 +11,9 @@ export default async function Page({
   const guideData = await getDataToExportPreInscription(Number(id))
 
   return (
-    <PageForm title="Exportar" backLink="/dashboard/educaciones/estudiantes">
+    <PageForm title="Exportar" backLink="/dashboard/educacion/estudiantes">
       <div className="flex flex-col gap-4 justify-center items-center">
-        <FormatSelector data={guideData} type="pre-inscripcion" />
+        <FormatSelector data={guideData} type="inscripcion" />
       </div>
     </PageForm>
   )
