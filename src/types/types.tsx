@@ -52,4 +52,6 @@ export type RepresentativeFormType = {
   id_document_type: Documentos_Identidad
   id_document_number: string
   id_document_image?: string | null
+
+  representative_image?: string | null
 }

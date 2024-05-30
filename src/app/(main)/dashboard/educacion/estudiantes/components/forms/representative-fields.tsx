@@ -8,7 +8,7 @@ import {
 } from '@/modules/common/components/form'
 import { Input } from '@/modules/common/components/input/input'
 
-import { useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 
 import {
   Select,
@@ -18,15 +18,87 @@ import {
   SelectValue,
 } from '@/modules/common/components/select/select'
 import PhoneInput from 'react-phone-input-2'
-export const RepresentativeFields = () => {
-  const form = useFormContext()
+import { CldImage, CldUploadWidget } from 'next-cloudinary'
+import { Button } from '@/modules/common/components/button'
+interface UploadedAssetData {
+  public_id: string
+  width: number
+  height: number
+  id: string
+}
+export const RepresentativeFields = ({ index }: { index: number }) => {
+  const { setValue, watch, ...rest } = useFormContext()
   const [isPending, startTransition] = useTransition()
+  const [result, setResult] = useState<UploadedAssetData | null>(null)
+  useEffect(() => {
+    if (result) {
+      setValue(
+        `representatives.${index}.representative_image`,
+        result.public_id
+      )
+    }
+  }, [result, setValue, index])
 
+  const handleDeleteImage = () => {
+    setResult(null)
+    setValue(`representatives.${index}.representative_image`, null)
+  }
   return (
     <>
+      <div className="flex flex-col gap-5">
+        {/* SIGNED EXAMPLE */}
+        <div className="flex flex-col gap-3">
+          <FormLabel>Foto del representante</FormLabel>
+          <CldUploadWidget
+            options={{
+              sources: ['local'],
+              multiple: false,
+            }}
+            signatureEndpoint="/api/sign-image"
+            onSuccess={(result) => {
+              setResult(result?.info as UploadedAssetData)
+            }}
+          >
+            {({ open }) => (
+              <Button
+                variant={'default'}
+                onClick={(e) => {
+                  e.preventDefault()
+                  open()
+                }}
+              >
+                Subir Foto del Representante
+              </Button>
+            )}
+          </CldUploadWidget>
+        </div>
+
+        {result ? (
+          <div className="flex gap-4">
+            <CldImage
+              src={
+                watch('representatives.' + index + '.representative_image') ||
+                ''
+              }
+              width={result.width}
+              height={result.height}
+              alt="Uploaded Image"
+            />
+            <Button
+              variant={'destructive'}
+              onClick={(e) => {
+                e.preventDefault()
+                handleDeleteImage()
+              }}
+            >
+              Eliminar Imagen
+            </Button>
+          </div>
+        ) : null}
+      </div>
       <FormField
-        control={form.control}
-        name="representative.relationship"
+        control={rest.control}
+        name={`representatives.${index}.relationship`}
         rules={{
           required: 'Campo requerido',
         }}
@@ -61,8 +133,8 @@ export const RepresentativeFields = () => {
       />
       <div className="flex flex-1 gap-4">
         <FormField
-          control={form.control}
-          name="representative.names"
+          control={rest.control}
+          name={`representatives.${index}.names`}
           rules={{
             required: 'Este campo es necesario',
             minLength: {
@@ -86,8 +158,8 @@ export const RepresentativeFields = () => {
           )}
         />
         <FormField
-          control={form.control}
-          name="representative.lastNames"
+          control={rest.control}
+          name={`representatives.${index}.lastNames`}
           rules={{
             required: 'Este campo es necesario',
             minLength: {
@@ -114,8 +186,8 @@ export const RepresentativeFields = () => {
 
       <div className="flex flex-1 gap-4">
         <FormField
-          control={form.control}
-          name="representative.id_document_type"
+          control={rest.control}
+          name={`representatives.${index}.id_document_type`}
           rules={{
             required: 'Campo requerido',
           }}
@@ -143,8 +215,8 @@ export const RepresentativeFields = () => {
           )}
         />
         <FormField
-          control={form.control}
-          name="representative.id_document_number"
+          control={rest.control}
+          name={`representatives.${index}.id_document_number`}
           rules={{
             required: 'Este campo es necesario',
             minLength: {
@@ -170,8 +242,8 @@ export const RepresentativeFields = () => {
       </div>
       <div className="flex gap-4">
         <FormField
-          control={form.control}
-          name="representative.birthDate"
+          control={rest.control}
+          name={`representatives.${index}.birthDate`}
           rules={{
             required: 'Este campo es necesario',
           }}
@@ -202,8 +274,8 @@ export const RepresentativeFields = () => {
         />
 
         <FormField
-          control={form.control}
-          name="representative.gender"
+          control={rest.control}
+          name={`representatives.${index}.gender`}
           rules={{
             required: 'Campo requerido',
           }}
@@ -229,8 +301,8 @@ export const RepresentativeFields = () => {
       </div>
       <div className="flex flex-1 gap-4">
         <FormField
-          control={form.control}
-          name="representative.country"
+          control={rest.control}
+          name={`representatives.${index}.country`}
           rules={{
             required: 'Este campo es necesario',
             minLength: {
@@ -254,8 +326,8 @@ export const RepresentativeFields = () => {
           )}
         />
         <FormField
-          control={form.control}
-          name="representative.state"
+          control={rest.control}
+          name={`representatives.${index}.state`}
           rules={{
             required: 'Este campo es necesario',
             minLength: {
@@ -279,8 +351,8 @@ export const RepresentativeFields = () => {
           )}
         />
         <FormField
-          control={form.control}
-          name="representative.city"
+          control={rest.control}
+          name={`representatives.${index}.city`}
           rules={{
             required: 'Este campo es necesario',
             minLength: {
@@ -305,8 +377,8 @@ export const RepresentativeFields = () => {
         />
       </div>
       <FormField
-        control={form.control}
-        name="representative.address"
+        control={rest.control}
+        name={`representatives.${index}.address`}
         rules={{
           required: 'Este campo es necesario',
           minLength: {
@@ -330,8 +402,8 @@ export const RepresentativeFields = () => {
         )}
       />
       <FormField
-        control={form.control}
-        name={`representative.phone_number`}
+        control={rest.control}
+        name={`representatives.${index}.phone_number`}
         rules={{
           required: 'Este campo es requerido',
         }}
@@ -366,8 +438,8 @@ export const RepresentativeFields = () => {
         )}
       />
       <FormField
-        control={form.control}
-        name="representative.work_address"
+        control={rest.control}
+        name={`representatives.${index}.work_address`}
         rules={{
           required: 'Este campo es necesario',
           minLength: {
@@ -391,9 +463,8 @@ export const RepresentativeFields = () => {
         )}
       />
       <FormField
-        control={form.control}
-        name="representative.email"
-        //@ts-ignore
+        control={rest.control}
+        name={`representatives.${index}.email`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Correo electrónico</FormLabel>

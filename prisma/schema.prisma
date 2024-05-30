@@ -150,11 +150,12 @@ model Representative {
   city         String
   state        String
 
-  id_document_type   Documentos_Identidad
-  id_document_number String               @unique
-  id_document_image  String?
+  id_document_type     Documentos_Identidad
+  id_document_number   String               @unique
+  id_document_image    String?
+  representative_image String?
 
-  students Student[]
+  students Representatives_Students[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -201,18 +202,26 @@ model Student {
 
   courses Students_Courses[]
 
-  id_current_course                 Int
-  current_course                    Courses         @relation(fields: [id_current_course], references: [id])
-  representative                    Representative? @relation(fields: [id_document_number_representative], references: [id_document_number], onDelete: Cascade, onUpdate: Cascade)
-  id_document_number_representative String?
+  id_current_course Int
+  current_course    Courses @relation(fields: [id_current_course], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  representatives Representatives_Students[]
 }
 
 enum Modalities {
   Presencial
   Online
+}
+
+model Representatives_Students {
+  id                                Int            @id @default(autoincrement())
+  id_document_number_representative String
+  representative                    Representative @relation(fields: [id_document_number_representative], references: [id_document_number], onDelete: Cascade, onUpdate: Cascade)
+  student_id                        Int
+  student                           Student        @relation(fields: [student_id], references: [id])
 }
 
 enum Spanish_Days {

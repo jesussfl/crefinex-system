@@ -21,6 +21,7 @@ import Link from 'next/link'
 import ProtectedTableActions from '@/modules/common/components/table-actions'
 import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
 import { deleteRepresentative } from '../../lib/actions/representatives'
+import { CldImage } from 'next-cloudinary'
 
 export const representativeColumns: ColumnDef<Representative>[] = [
   SELECT_COLUMN,
@@ -45,7 +46,33 @@ export const representativeColumns: ColumnDef<Representative>[] = [
       )
     },
   },
-
+  {
+    accessorKey: 'representative_image',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Imágen
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const data = row.original
+      return (
+        <CldImage
+          src={data.representative_image || ''}
+          width={100}
+          height={100}
+          alt="Uploaded Image"
+        />
+      )
+    },
+  },
   {
     id: 'age',
     accessorFn: (row) => getAge(new Date(row.birthDate)),

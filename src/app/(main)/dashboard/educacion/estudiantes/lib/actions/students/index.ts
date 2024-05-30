@@ -24,7 +24,7 @@ export const getAllStudents = async () => {
 
   const students = await prisma.student.findMany({
     include: {
-      representative: true,
+      representatives: true,
       current_course: {
         include: {
           schedules: true,
@@ -47,7 +47,7 @@ export const getAllOnlineStudents = async () => {
       modalidad: 'Online',
     },
     include: {
-      representative: true,
+      representatives: true,
       current_course: {
         include: {
           schedules: true,
@@ -70,7 +70,7 @@ export const getAllPresencialStudents = async () => {
       modalidad: 'Presencial',
     },
     include: {
-      representative: true,
+      representatives: true,
       current_course: {
         include: {
           schedules: true,
@@ -149,24 +149,28 @@ export const getStudentById = async (id: number): Promise<StudentFormType> => {
           level: true,
         },
       },
-      representative: {
+      representatives: {
         select: {
-          names: true,
-          lastNames: true,
-          id_document_type: true,
-          id_document_number: true,
-          id_document_image: true,
-          state: true,
-          profession: true,
-          work_address: true,
-          birthDate: true,
-          email: true,
-          phone_number: true,
-          gender: true,
-          address: true,
-          city: true,
-          country: true,
-          relationship: true,
+          representative: {
+            select: {
+              names: true,
+              lastNames: true,
+              id_document_type: true,
+              id_document_number: true,
+              id_document_image: true,
+              state: true,
+              profession: true,
+              work_address: true,
+              birthDate: true,
+              email: true,
+              phone_number: true,
+              gender: true,
+              address: true,
+              city: true,
+              country: true,
+              relationship: true,
+            },
+          },
         },
       },
     },
@@ -178,32 +182,33 @@ export const getStudentById = async (id: number): Promise<StudentFormType> => {
 
   return {
     ...student,
+    representatives: student.representatives.map((rep) => rep.representative),
     level_id: student.current_course.level.id,
     current_status: student.current_status,
   }
 }
-export const getStudentByIdDocument = async (id: string) => {
-  const sessionResponse = await validateUserSession()
+// export const getStudentByIdDocument = async (id: string) => {
+//   const sessionResponse = await validateUserSession()
 
-  if (sessionResponse.error || !sessionResponse.session) {
-    throw new Error('You must be signed in to perform this action')
-  }
+//   if (sessionResponse.error || !sessionResponse.session) {
+//     throw new Error('You must be signed in to perform this action')
+//   }
 
-  const student = await prisma.student.findUnique({
-    where: {
-      id_document_number: id,
-    },
-    include: {
-      representative: true,
-    },
-  })
+//   const student = await prisma.student.findUnique({
+//     where: {
+//       id_document_number: id,
+//     },
+//     include: {
+//       representative: true,
+//     },
+//   })
 
-  if (!student) {
-    throw new Error('Estudiante no encontrado')
-  }
+//   if (!student) {
+//     throw new Error('Estudiante no encontrado')
+//   }
 
-  return student
-}
+//   return student
+// }
 const generateCode = async (
   courseLevel: number,
   courseId: number,
@@ -225,7 +230,26 @@ const generateCode = async (
   const code = `${courseId}-${courseLevel}-${courseModality}-${studentId}-${formattedMonth}-${formattedYear}`
   return code
 }
+const generateStudentCode = async (
+  course: Prisma.CoursesGetPayload<{ include: { level: true } }>
+) => {
+  const courseLevel = course.level.order || 1
+  const courseModality = course.modality === 'Presencial' ? 1 : 2
+  const courseStartDate = course.start_date
+    ? new Date(course.start_date)
+    : new Date()
+  const courseStartMonth = courseStartDate.getMonth() + 1
+  const courseStartYear = courseStartDate.getFullYear()
+  const code = await generateCode(
+    courseLevel,
+    courseModality,
+    course.id,
+    courseStartMonth,
+    courseStartYear
+  )
 
+  return code
+}
 export const createStudent = async (data: StudentFormType) => {
   const sessionResponse = await validateUserSession()
 
@@ -264,41 +288,41 @@ export const createStudent = async (data: StudentFormType) => {
       success: false,
     }
   }
-  const courseLevel = course.level.order || 1
-  const courseModality = course.modality === 'Presencial' ? 1 : 2
-  const courseStartDate = course.start_date
-    ? new Date(course.start_date)
-    : new Date()
-  const courseStartMonth = courseStartDate.getMonth() + 1
-  const courseStartYear = courseStartDate.getFullYear()
-  const code = await generateCode(
-    courseLevel,
-    courseModality,
-    course.id,
-    courseStartMonth,
-    courseStartYear
-  )
-  const uuid = (await prisma.student.count()) + 1
-  const { level_id, ...rest } = data
-  await prisma.student.create({
-    data: {
-      ...rest,
 
-      uuid,
-      codigo: code,
-      id_current_course: undefined,
-      current_course: {
-        connect: {
-          id: rest.id_current_course,
+  const uuid = (await prisma.student.count()) + 1
+  const codigo = await generateStudentCode(course)
+  const { level_id, ...rest } = data
+
+  await prisma.$transaction([
+    prisma.representative.createMany({
+      data: data.representatives.map((representative) => ({
+        ...representative,
+      })),
+    }),
+
+    prisma.student.create({
+      data: {
+        ...rest,
+
+        uuid,
+        codigo: codigo,
+        id_current_course: undefined,
+        current_course: {
+          connect: {
+            id: rest.id_current_course,
+          },
+        },
+        representatives: {
+          createMany: {
+            data: data.representatives.map((representative) => ({
+              id_document_number_representative:
+                representative.id_document_number,
+            })),
+          },
         },
       },
-      representative: rest.representative
-        ? {
-            create: rest.representative,
-          }
-        : undefined,
-    },
-  })
+    }),
+  ])
 
   await registerAuditAction('Se registró un nuevo estudiante: ' + data.names)
   revalidatePath('/dashboard/cursos/estudiantes')
@@ -309,7 +333,7 @@ export const createStudent = async (data: StudentFormType) => {
   }
 }
 
-export const updateStudent = async (data: StudentFormType, id: number) => {
+export const updateStudent = async (id: number, data: StudentFormType) => {
   const sessionResponse = await validateUserSession()
 
   if (sessionResponse.error || !sessionResponse.session) {
@@ -317,7 +341,7 @@ export const updateStudent = async (data: StudentFormType, id: number) => {
   }
 
   const permissionsResponse = validateUserPermissions({
-    sectionName: SECTION_NAMES.CURSOS,
+    sectionName: SECTION_NAMES.ESTUDIANTES,
     actionName: 'ACTUALIZAR',
     userPermissions: sessionResponse.session?.user.rol.permisos,
   })
@@ -326,39 +350,76 @@ export const updateStudent = async (data: StudentFormType, id: number) => {
     return permissionsResponse
   }
 
-  const student = await prisma.student.update({
-    where: {
-      id,
-    },
-    data: {
-      ...data,
-
-      id_current_course: undefined,
-      current_course: {
-        connect: {
-          id: data.id_current_course,
-        },
-      },
-      representative: data.representative
-        ? {
-            update: data.representative,
-          }
-        : undefined,
-    },
-  })
-
-  if (!student) {
+  if (!data.id_current_course) {
     return {
-      error: 'Parece que hubo un problema',
+      error: 'No has seleccionado un horario',
       success: false,
     }
   }
-  await registerAuditAction('Se editó el estudiante: ' + student.names)
+  const course = await prisma.courses.findUnique({
+    where: {
+      id: data.id_current_course,
+    },
+    include: {
+      level: true,
+    },
+  })
+
+  if (!course) {
+    return {
+      error: 'No se encontró el horario',
+      success: false,
+    }
+  }
+
+  const codigo = await generateStudentCode(course)
+  const { level_id, ...rest } = data
+
+  await prisma.$transaction([
+    prisma.representative.deleteMany({
+      where: {
+        students: {
+          some: {
+            student_id: id,
+          },
+        },
+      },
+    }),
+    prisma.representative.createMany({
+      data: data.representatives.map((representative) => ({
+        ...representative,
+      })),
+    }),
+
+    prisma.student.update({
+      where: { id },
+      data: {
+        ...rest,
+        codigo: codigo,
+        id_current_course: undefined,
+        current_course: {
+          connect: {
+            id: rest.id_current_course,
+          },
+        },
+        representatives: {
+          createMany: {
+            data: data.representatives.map((representative) => ({
+              id_document_number_representative:
+                representative.id_document_number,
+            })),
+          },
+        },
+      },
+    }),
+  ])
+
+  await registerAuditAction('Se actualizó el estudiante: ' + data.names)
   revalidatePath('/dashboard/cursos/estudiantes')
 
   return {
     error: false,
-    success: true,
+    success: 'Estudiante actualizado exitosamente',
   }
 }
 export const updateManyStudents = async (
@@ -536,7 +597,11 @@ export const getDataToExportPreInscription = async (id: number) => {
           level: true,
         },
       },
-      representative: true,
+      representatives: {
+        include: {
+          representative: true,
+        },
+      },
     },
   })
 
@@ -549,7 +614,7 @@ export const getDataToExportPreInscription = async (id: number) => {
     src: student.student_image || '',
   })
 
-  const imageToShow = async () => {
+  const imageToShow = async (url: string) => {
     const response = await axios(url, { responseType: 'arraybuffer' })
     const buffer64 = Buffer.from(response.data, 'binary').toString('base64')
     return buffer64
@@ -558,11 +623,48 @@ export const getDataToExportPreInscription = async (id: number) => {
   const exportedImage = {
     width: 5,
     height: 5,
-    data: await imageToShow(),
+    data: await imageToShow(url),
     extension: '.jpg',
   }
+
+  const convertRepresentativeImages = async (representatives: any) => {
+    const representativeImages = representatives.map(
+      async (representative: any) => {
+        const image = getCldImageUrl({
+          width: 960,
+          height: 600,
+          src: representative.representative.representative_image || '',
+        })
+
+        const buffer64 = await imageToShow(image)
+
+        return {
+          representative_image: buffer64,
+          id: representative.representative.id,
+        }
+      }
+    )
+
+    return Promise.all(representativeImages)
+  }
+  const representativeImagesConverted = await convertRepresentativeImages(
+    student.representatives
+  )
+  const representatives = student.representatives.map(
+    (representative, index) => {
+      return {
+        ...representative.representative,
+        representative_image: {
+          width: 5,
+          height: 5,
+          data: representativeImagesConverted[index].representative_image,
+          extension: '.jpg',
+        },
+      }
+    }
+  )
   return {
-    nivel: student.current_course.level,
+    nivel: student.current_course.level.name,
     mes_inicio: format(
       new Date(
         student.current_course.start_date
@@ -597,24 +699,42 @@ export const getDataToExportPreInscription = async (id: number) => {
     direccion: student.address,
     hasExtraActivities: student?.extracurricular_activities ? 'Si' : 'No',
     extra_activities: student?.extracurricular_activities,
-    nombre_completo_representante: student.representative
-      ? student.representative?.names + ' ' + student.representative.lastNames
-      : 'No aplica',
-    fecha_nacimiento_r: student.representative
-      ? format(new Date(student.representative.birthDate), 'dd-MM-yyyy')
-      : 'No aplica',
-    ci_representante: student.representative
-      ? `${student.representative?.id_document_type}-${student.representative?.id_document_number}`
-      : 'No aplica',
-    parentesco: student?.representative?.relationship,
-    direccion_representante: student.representative
-      ? student.representative.address
-      : 'No aplica',
-    profesion: student?.representative?.profession || 'No aplica',
-    // direccion_trabajo: student.representative ? student.representative?.work_address : 'No aplica',
-    telefono_representante: student.representative?.phone_number,
     correo: student?.email,
-    direccion_trabajo: student?.representative?.work_address || '',
-    correo_representante: student?.representative?.email || '',
+    representantes: representatives.map((representative) => {
+      return {
+        nombre_completo_representante:
+          representative?.names + ' ' + representative?.lastNames,
+        fecha_nacimiento_r: format(
+          new Date(representative?.birthDate),
+          'dd-MM-yyyy'
+        ),
+        ci_representante: `${representative?.id_document_type}-${representative?.id_document_number}`,
+        parentesco: representative?.relationship,
+        direccion_representante: representative?.address,
+        profesion: representative?.profession || 'No aplica',
+        telefono_representante: representative?.phone_number,
+        direccion_trabajo: representative?.work_address || '',
+        correo_representante: representative?.email || '',
+        representative_image: representative?.representative_image,
+      }
+    }),
+    // nombre_completo_representante: student.representative
+    //   ? student.representative?.names + ' ' + student.representative.lastNames
+    //   : 'No aplica',
+    // fecha_nacimiento_r: student.representative
+    //   ? format(new Date(student.representative.birthDate), 'dd-MM-yyyy')
+    //   : 'No aplica',
+    // ci_representante: student.representative
+    //   ? `${student.representative?.id_document_type}-${student.representative?.id_document_number}`
+    //   : 'No aplica',
+    // parentesco: student?.representative?.relationship,
+    // direccion_representante: student.representative
+    //   ? student.representative.address
+    //   : 'No aplica',
+    // profesion: student?.representative?.profession || 'No aplica',
+
+    // telefono_representante: student.representative?.phone_number,
+    // direccion_trabajo: student?.representative?.work_address || '',
+    // correo_representante: student?.representative?.email || '',
   }
 }
