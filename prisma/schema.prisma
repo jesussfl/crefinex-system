@@ -139,21 +139,29 @@ model Representative {
   lastNames String
   birthDate DateTime
 
-  relationship String
-  profession   String?
-  work_address String?
-  gender       Genders
-  phone_number String
-  email        String?
-  address      String?
-  country      String
-  city         String
-  state        String
+  relationship  String
+  profession    String?
+  work_address  String?
+  work_position String?
+  gender        Genders
+  phone_number  String
+  email         String?
+  address       String?
+  country       String
+  city          String
+  state         String
+  civil_status  String
+  is_working    Boolean
 
   id_document_type     Documentos_Identidad
   id_document_number   String               @unique
   id_document_image    String?
   representative_image String?
+
+  facebook  String?
+  instagram String?
+  tiktok    String?
+  youtube   String?
 
   students Representatives_Students[]
 
@@ -185,6 +193,11 @@ model Student {
   birthDate DateTime
   gender    Genders
   modalidad Modalities
+
+  school       String
+  birth_place  String
+  can_medicate Boolean
+  medicine     String?
 
   phone_number               String?
   email                      String?
@@ -221,7 +234,7 @@ model Representatives_Students {
   id_document_number_representative String
   representative                    Representative @relation(fields: [id_document_number_representative], references: [id_document_number], onDelete: Cascade, onUpdate: Cascade)
   student_id                        Int
-  student                           Student        @relation(fields: [student_id], references: [id])
+  student                           Student        @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 enum Spanish_Days {

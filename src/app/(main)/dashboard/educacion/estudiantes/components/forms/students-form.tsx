@@ -54,6 +54,11 @@ export type StudentFormType = {
   student_image?: string | null
 
   representatives: RepresentativeFormType[]
+
+  school: string
+  birth_place: string
+  can_medicate: boolean
+  medicine?: string | null
 }
 type EditForm = {
   defaultValues: StudentFormType
@@ -204,6 +209,13 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
                           id_document_number: '',
                           id_document_image: '',
                           relationship: '',
+                          facebook: '',
+                          instagram: '',
+                          tiktok: '',
+                          youtube: '',
+                          work_position: '',
+                          is_working: false,
+                          civil_status: '',
                         })
                       }}
                     >

@@ -143,6 +143,10 @@ export const getStudentById = async (id: number): Promise<StudentFormType> => {
       address: true,
       city: true,
       country: true,
+      can_medicate: true,
+      medicine: true,
+      birth_place: true,
+      school: true,
       extracurricular_activities: true,
       current_course: {
         select: {
@@ -169,6 +173,13 @@ export const getStudentById = async (id: number): Promise<StudentFormType> => {
               city: true,
               country: true,
               relationship: true,
+              civil_status: true,
+              work_position: true,
+              is_working: true,
+              facebook: true,
+              instagram: true,
+              youtube: true,
+              tiktok: true,
             },
           },
         },
@@ -615,14 +626,15 @@ export const getDataToExportPreInscription = async (id: number) => {
   })
 
   const imageToShow = async (url: string) => {
+    if (!url) return null
     const response = await axios(url, { responseType: 'arraybuffer' })
     const buffer64 = Buffer.from(response.data, 'binary').toString('base64')
     return buffer64
   }
 
   const exportedImage = {
-    width: 5,
-    height: 5,
+    width: 4,
+    height: 4,
     data: await imageToShow(url),
     extension: '.jpg',
   }
@@ -655,8 +667,8 @@ export const getDataToExportPreInscription = async (id: number) => {
       return {
         ...representative.representative,
         representative_image: {
-          width: 5,
-          height: 5,
+          width: 4,
+          height: 4,
           data: representativeImagesConverted[index].representative_image,
           extension: '.jpg',
         },
@@ -684,18 +696,19 @@ export const getDataToExportPreInscription = async (id: number) => {
       { locale: es }
     ),
     edad: getAge(new Date(student.birthDate)),
-    //example: fecha_actual:  '2022-12-31' ,
+
     fecha_actual: format(new Date(), 'dd-MM-yyyy'),
     nombre_completo: student?.names + ' ' + student?.lastNames,
     ci_estudiante: student?.id_document_number,
     fecha_nacimiento: format(new Date(student.birthDate), 'dd-MM-yyyy'),
     sexo: student.gender,
     estado: student.state,
-    plantel: 'Sin definir',
+    plantel: student.school,
     grado: 'Sin definir',
-    hasMedicamento: 'No',
-    medicamento: 'Sin definir',
-    student_image: exportedImage,
+    hasMedicamento: student?.can_medicate ? 'Si' : 'No',
+    lugar_nacimiento: student.birth_place,
+    medicamento: student?.medicine,
+    student_image: exportedImage.data != null ? exportedImage : null,
     direccion: student.address,
     hasExtraActivities: student?.extracurricular_activities ? 'Si' : 'No',
     extra_activities: student?.extracurricular_activities,
@@ -708,6 +721,7 @@ export const getDataToExportPreInscription = async (id: number) => {
           new Date(representative?.birthDate),
           'dd-MM-yyyy'
         ),
+        edad: getAge(new Date(representative?.birthDate)),
         ci_representante: `${representative?.id_document_type}-${representative?.id_document_number}`,
         parentesco: representative?.relationship,
         direccion_representante: representative?.address,
@@ -715,26 +729,19 @@ export const getDataToExportPreInscription = async (id: number) => {
         telefono_representante: representative?.phone_number,
         direccion_trabajo: representative?.work_address || '',
         correo_representante: representative?.email || '',
-        representative_image: representative?.representative_image,
+        sexo: representative?.gender,
+        representative_image:
+          representative?.representative_image.data != null
+            ? representative?.representative_image
+            : null,
+        is_working: representative?.is_working ? 'Si' : 'No',
+        facebook: representative?.facebook,
+        instagram: representative?.instagram,
+        youtube: representative?.youtube,
+        tiktok: representative?.tiktok,
+        cargo_laboral: representative?.work_position,
+        estado_civil: representative.civil_status,
       }
     }),
-    // nombre_completo_representante: student.representative
-    //   ? student.representative?.names + ' ' + student.representative.lastNames
-    //   : 'No aplica',
-    // fecha_nacimiento_r: student.representative
-    //   ? format(new Date(student.representative.birthDate), 'dd-MM-yyyy')
-    //   : 'No aplica',
-    // ci_representante: student.representative
-    //   ? `${student.representative?.id_document_type}-${student.representative?.id_document_number}`
-    //   : 'No aplica',
-    // parentesco: student?.representative?.relationship,
-    // direccion_representante: student.representative
-    //   ? student.representative.address
-    //   : 'No aplica',
-    // profesion: student?.representative?.profession || 'No aplica',
-
-    // telefono_representante: student.representative?.phone_number,
-    // direccion_trabajo: student?.representative?.work_address || '',
-    // correo_representante: student?.representative?.email || '',
   }
 }

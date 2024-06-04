@@ -56,7 +56,7 @@ export default function FormatSelector({
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `Planilla-de-${type}-${data.nombre_completo}.${
+      a.download = `Planilla-de-${planilla}-${data.nombre_completo}.${
         format === 'PDF' ? 'pdf' : 'docx'
       }`
       document.body.appendChild(a)

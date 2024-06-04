@@ -48,6 +48,14 @@ export type RepresentativeFormType = {
   city: string
   state: string
   relationship: string
+  civil_status: string
+  work_position?: string | null
+  is_working: boolean
+
+  facebook?: string | null
+  instagram?: string | null
+  tiktok?: string | null
+  youtube?: string | null
 
   id_document_type: Documentos_Identidad
   id_document_number: string

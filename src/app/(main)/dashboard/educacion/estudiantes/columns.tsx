@@ -64,6 +64,8 @@ export const columns: ColumnDef<StudentColumns>[] = [
     },
     cell: ({ row }) => {
       const data = row.original
+
+      if (!data.student_image) return 'Sin imagen'
       return (
         <CldImage
           src={data.student_image || ''}

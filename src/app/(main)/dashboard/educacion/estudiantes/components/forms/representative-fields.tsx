@@ -20,6 +20,7 @@ import {
 import PhoneInput from 'react-phone-input-2'
 import { CldImage, CldUploadWidget } from 'next-cloudinary'
 import { Button } from '@/modules/common/components/button'
+import { Switch } from '@/modules/common/components/switch/switch'
 interface UploadedAssetData {
   public_id: string
   width: number
@@ -437,11 +438,57 @@ export const RepresentativeFields = ({ index }: { index: number }) => {
           </FormItem>
         )}
       />
+      <div className="flex gap-4">
+        <FormField
+          control={rest.control}
+          name={`representatives.${index}.is_working`}
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between gap-4 rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-sm">¿Trabaja actualmente?</FormLabel>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={rest.control}
+          name={`representatives.${index}.work_position`}
+          disabled={!watch('is_working')}
+          rules={{
+            required: !watch('is_working') && 'Este campo es requerido',
+            minLength: {
+              value: 3,
+              message: 'Debe tener al menos 3 caracteres',
+            },
+            maxLength: {
+              value: 150,
+              message: 'Debe tener un maximo de 150 caracteres',
+            },
+          }}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Posición laboral</FormLabel>
+              <FormControl>
+                <Input type="text" {...field} />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
       <FormField
         control={rest.control}
+        disabled={!watch('is_working')}
         name={`representatives.${index}.work_address`}
         rules={{
-          required: 'Este campo es necesario',
+          required: !watch('is_working') && 'Este campo es requerido',
           minLength: {
             value: 3,
             message: 'Debe tener al menos 3 caracteres',
@@ -453,7 +500,7 @@ export const RepresentativeFields = ({ index }: { index: number }) => {
         }}
         render={({ field }) => (
           <FormItem className="flex-1">
-            <FormLabel>Dirección de trabajo</FormLabel>
+            <FormLabel>Dirección de trabajo (opcional):</FormLabel>
             <FormControl>
               <Input {...field} value={field.value || ''} />
             </FormControl>
@@ -462,26 +509,115 @@ export const RepresentativeFields = ({ index }: { index: number }) => {
           </FormItem>
         )}
       />
-      <FormField
-        control={rest.control}
-        name={`representatives.${index}.email`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Correo electrónico</FormLabel>
-            <FormControl>
-              <Input
-                type="email"
-                placeholder="john.doe@example.com"
-                {...field}
-                value={field.value || ''}
-                disabled={isPending}
-              />
-            </FormControl>
+      <div className="flex flex-1 gap-4">
+        <FormField
+          control={rest.control}
+          name={`representatives.${index}.civil_status`}
+          rules={{
+            required: 'Campo requerido',
+          }}
+          render={({ field }) => (
+            <FormItem className="flex-1 gap-4 justify-between">
+              <FormLabel className="">Estado Civil del Representante</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Casado">Casado</SelectItem>
+                  <SelectItem value="Soltero">Soltero</SelectItem>
+                  <SelectItem value="Divorciado">Divorciado</SelectItem>
+                  <SelectItem value="Viudo">Viudo</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={rest.control}
+          name={`representatives.${index}.email`}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Correo electrónico (opcional):</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="john.doe@example.com"
+                  {...field}
+                  value={field.value || ''}
+                  disabled={isPending}
+                />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="flex flex-1 gap-4">
+        <FormField
+          control={rest.control}
+          name={`representatives.${index}.facebook`}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Usuario de Facebook (opcional):</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={rest.control}
+          name={`representatives.${index}.instagram`}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Usuario de Instagram (opcional):</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="flex flex-1 gap-4">
+        <FormField
+          control={rest.control}
+          name={`representatives.${index}.tiktok`}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Usuario de Tiktok (opcional):</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={rest.control}
+          name={`representatives.${index}.youtube`}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Usuario de Youtube (opcional):</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </>
   )
 }

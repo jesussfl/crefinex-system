@@ -63,6 +63,8 @@ export const representativeColumns: ColumnDef<Representative>[] = [
     },
     cell: ({ row }) => {
       const data = row.original
+      if (!data.representative_image) return 'Sin imagen'
+
       return (
         <CldImage
           src={data.representative_image || ''}

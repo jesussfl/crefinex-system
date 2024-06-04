@@ -59,7 +59,7 @@ export const StudentFields = () => {
   const extraActivities = watch('extracurricular_activities')
   const level = watch('level_id')
   const modality = watch('modalidad')
-
+  const can_medicate = watch('can_medicate')
   useEffect(() => {
     setHasExtraActivity(!!extraActivities)
   }, [extraActivities])
@@ -456,7 +456,6 @@ export const StudentFields = () => {
             !watch('id_document_type')
           }
           rules={{
-            required: 'Este campo es necesario',
             validate: (value) => {
               const documentType = watch('id_document_type')
               if (documentType === 'V' || documentType === 'E') {
@@ -476,7 +475,7 @@ export const StudentFields = () => {
           }}
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Número de Documento</FormLabel>
+              <FormLabel>Número de Documento (Opcional):</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -547,6 +546,59 @@ export const StudentFields = () => {
 
         <FormField
           control={control}
+          name="birth_place"
+          rules={{
+            required: 'Este campo es necesario',
+            minLength: {
+              value: 3,
+              message: 'Debe tener al menos 3 caracteres',
+            },
+            maxLength: {
+              value: 100,
+              message: 'Debe tener un maximo de 100 caracteres',
+            },
+          }}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Lugar de nacimiento</FormLabel>
+              <FormControl>
+                <Input type="text" {...field} />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="flex gap-4">
+        <FormField
+          control={control}
+          name="school"
+          rules={{
+            required: 'Este campo es necesario',
+            minLength: {
+              value: 3,
+              message: 'Debe tener al menos 3 caracteres',
+            },
+            maxLength: {
+              value: 150,
+              message: 'Debe tener un maximo de 150 caracteres',
+            },
+          }}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Escuela donde estudia</FormLabel>
+              <FormControl>
+                <Input type="text" {...field} />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
           name="gender"
           rules={{
             required: 'Campo requerido',
@@ -565,6 +617,52 @@ export const StudentFields = () => {
                   <SelectItem value="Femenino">Femenino</SelectItem>
                 </SelectContent>
               </Select>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="flex gap-4">
+        <FormField
+          control={control}
+          name={'can_medicate'}
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between gap-4 rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-sm">
+                  ¿Puede tomar medicamentos?
+                </FormLabel>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="medicine"
+          disabled={!can_medicate}
+          rules={{
+            minLength: {
+              value: 3,
+              message: 'Debe tener al menos 3 caracteres',
+            },
+            maxLength: {
+              value: 150,
+              message: 'Debe tener un maximo de 150 caracteres',
+            },
+          }}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Medicamentos que puede tomar</FormLabel>
+              <FormControl>
+                <Input type="text" {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -677,12 +775,9 @@ export const StudentFields = () => {
         <FormField
           control={control}
           name={`phone_number`}
-          rules={{
-            required: 'Este campo es requerido',
-          }}
           render={({ field: { ref, ...field } }) => (
             <FormItem className="flex-1 gap-2">
-              <FormLabel className="flex-1">{`Numero telefónico:`}</FormLabel>
+              <FormLabel className="flex-1">{`Numero telefónico (Opcional):`}</FormLabel>
               <div className="">
                 <FormControl>
                   <PhoneInput
@@ -715,7 +810,7 @@ export const StudentFields = () => {
           name="email"
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Correo electrónico</FormLabel>
+              <FormLabel>Correo electrónico (Opcional):</FormLabel>
               <FormControl>
                 <Input
                   type="email"
@@ -755,8 +850,8 @@ export const StudentFields = () => {
             rules={{
               required: 'Este campo es necesario',
               minLength: {
-                value: 10,
-                message: 'Debe tener al menos 10 carácteres',
+                value: 3,
+                message: 'Debe tener al menos 3 carácteres',
               },
               maxLength: {
                 value: 200,
