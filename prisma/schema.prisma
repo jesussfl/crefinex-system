@@ -222,6 +222,7 @@ model Student {
   updatedAt DateTime @updatedAt
 
   representatives Representatives_Students[]
+  grades          Student_Grades[]
 }
 
 enum Modalities {
@@ -274,6 +275,7 @@ model Courses {
 
   students         Students_Courses[]
   current_students Student[]
+  evaluations      Evaluation[]
 }
 
 enum Student_Status {
@@ -292,4 +294,62 @@ model Students_Courses {
   student    Student         @relation(fields: [id_student], references: [id])
   id_student Int
   status     Student_Status?
+}
+
+model Evaluation {
+  id Int @id @default(autoincrement())
+
+  id_course Int
+  course    Courses @relation(fields: [id_course], references: [id])
+
+  name        String
+  description String
+  type        String
+  phase       String
+  date        DateTime
+  status      Evaluation_Status
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  grades Student_Grades[]
+}
+
+enum Evaluation_Status {
+  ACTIVA
+  PENDIENTE
+  CALIFICANDO
+  COMPLETADA
+}
+
+model Student_Grades {
+  id Int @id @default(autoincrement())
+
+  id_evaluation Int
+  evaluation    Evaluation @relation(fields: [id_evaluation], references: [id])
+
+  id_student Int
+  student    Student @relation(fields: [id_student], references: [id])
+
+  date_done   DateTime
+  weighing    Weighings
+  grade       Float
+  observation String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Weighings {
+  EXCELENTE
+  MUY_BIEN
+  BIEN
+  REGULAR
+  REPROBADO
+}
+
+model Book {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+  pages       Int
 }

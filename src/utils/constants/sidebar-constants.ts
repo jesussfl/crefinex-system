@@ -7,6 +7,8 @@ import {
   UserCircle,
   Book,
   BookUser,
+  PencilRuler,
+  BookOpen,
 } from 'lucide-react'
 import { SideMenuItem } from '@/types/types'
 
@@ -38,9 +40,9 @@ export enum SECTION_NAMES {
   USUARIOS = 'USUARIOS',
   ESTUDIANTES = 'ESTUDIANTES',
   AUDITORIA = 'AUDITORIA',
-
+  ADMINISTRACION_ACADEMICA = 'ADMINISTRACION_ACADEMICA',
   CONFIGURACION = 'CONFIGURACION',
-
+  LIBROS = 'LIBROS',
   AYUDA = 'AYUDA',
   TODAS = 'TODAS',
 }
@@ -59,6 +61,16 @@ export const SIDE_MENU_ITEMS: SideMenuItem[] = [
     icon: Book,
     submenu: true,
     submenuItems: [
+      {
+        title: 'Administración',
+        path: '/dashboard/educacion/administracion',
+        identifier: SECTION_NAMES.ADMINISTRACION_ACADEMICA,
+        icon: PencilRuler,
+        requiredPermissions: [
+          SECTION_NAMES.ADMINISTRACION_ACADEMICA,
+          SECTION_NAMES.TODAS,
+        ],
+      },
       {
         title: 'Cursos',
         path: '/dashboard/educacion/cursos',
@@ -83,7 +95,13 @@ export const SIDE_MENU_ITEMS: SideMenuItem[] = [
     icon: UserCircle,
     // requiredPermissions: [SECTION_NAMES.USUARIOS, SECTION_NAMES.TODAS],
   },
-
+  {
+    title: 'Libros',
+    path: '/dashboard/libros',
+    identifier: SECTION_NAMES.LIBROS,
+    icon: BookOpen,
+    requiredPermissions: [SECTION_NAMES.LIBROS, SECTION_NAMES.TODAS],
+  },
   {
     title: 'Auditoria',
     path: '/dashboard/auditoria',

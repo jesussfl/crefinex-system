@@ -5,24 +5,17 @@ import {
   PageHeader,
   PageHeaderTitle,
 } from '@/modules/layout/templates/page'
-import { BookUser, PackagePlus } from 'lucide-react'
+import { BookUp2 } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
-import CoursesForm from '../../components/forms/courses-form'
-import { getCourseById } from '../../lib/actions'
-import { getAllStudents } from '../../../estudiantes/lib/actions/students'
+
+import LevelsForm from '../../components/forms/levels-form'
 
 export const metadata: Metadata = {
-  title: 'Editar Curso',
-  description: 'Desde aquí puedes editar un curso',
+  title: 'Agregar Nivel',
+  description: 'Desde aquí puedes agregar niveles',
 }
 
-export default async function Page({
-  params: { courseId },
-}: {
-  params: { courseId: string }
-}) {
-  const course = await getCourseById(Number(courseId))
-  const students = await getAllStudents()
+export default async function Page() {
   return (
     <>
       <PageHeader className="mb-0">
@@ -31,15 +24,14 @@ export default async function Page({
 
           <div>
             <PageHeaderTitle>
-              <BookUser size={24} />
-              Editar curso
+              <BookUp2 size={24} />
+              Agregar Nivel
             </PageHeaderTitle>
           </div>
         </HeaderLeftSide>
       </PageHeader>
       <PageContent className="pt-5 space-y-4 md:px-[20px]">
-        {/*@ts-ignore */}
-        <CoursesForm defaultValues={course} students={students} />
+        <LevelsForm />
       </PageContent>
     </>
   )

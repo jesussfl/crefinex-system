@@ -314,7 +314,7 @@ export const createStudent = async (data: StudentFormType) => {
     prisma.student.create({
       data: {
         ...rest,
-
+        can_medicate: rest.can_medicate ? true : false,
         uuid,
         codigo: codigo,
         id_current_course: undefined,

@@ -63,3 +63,13 @@ export type RepresentativeFormType = {
 
   representative_image?: string | null
 }
+
+export type StudentWithGrades = Prisma.StudentGetPayload<{
+  include: {
+    grades: {
+      include: {
+        evaluation: true
+      }
+    }
+  }
+}>

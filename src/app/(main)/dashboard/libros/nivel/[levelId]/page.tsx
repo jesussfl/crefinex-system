@@ -5,24 +5,22 @@ import {
   PageHeader,
   PageHeaderTitle,
 } from '@/modules/layout/templates/page'
-import { BookUser, PackagePlus } from 'lucide-react'
+import { PackagePlus } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
-import CoursesForm from '../../components/forms/courses-form'
-import { getCourseById } from '../../lib/actions'
-import { getAllStudents } from '../../../estudiantes/lib/actions/students'
+import LevelsForm from '../../components/forms/levels-form'
+import { getLevelById } from '../../lib/actions/level-actions'
 
 export const metadata: Metadata = {
-  title: 'Editar Curso',
-  description: 'Desde aquí puedes editar un curso',
+  title: 'Editar Nivel',
+  description: 'Desde aquí puedes editar un nivel',
 }
 
 export default async function Page({
-  params: { courseId },
+  params: { levelId },
 }: {
-  params: { courseId: string }
+  params: { levelId: string }
 }) {
-  const course = await getCourseById(Number(courseId))
-  const students = await getAllStudents()
+  const level = await getLevelById(Number(levelId))
   return (
     <>
       <PageHeader className="mb-0">
@@ -31,15 +29,14 @@ export default async function Page({
 
           <div>
             <PageHeaderTitle>
-              <BookUser size={24} />
-              Editar curso
+              <PackagePlus size={24} />
+              Editar nivel
             </PageHeaderTitle>
           </div>
         </HeaderLeftSide>
       </PageHeader>
       <PageContent className="pt-5 space-y-4 md:px-[20px]">
-        {/*@ts-ignore */}
-        <CoursesForm defaultValues={course} students={students} />
+        <LevelsForm defaultValues={level} />
       </PageContent>
     </>
   )
