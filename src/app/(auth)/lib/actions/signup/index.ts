@@ -32,26 +32,71 @@ export const signup = async (values: z.infer<typeof RegisterSchema>) => {
     return { error: 'Este correo ya está registrado', field: 'email' }
   }
 
-  await prisma.usuario.create({
-    data: {
-      nombre: name,
-      email,
-      contrasena: hashedPassword,
-      rol: {
-        connectOrCreate: {
-          where: {
-            rol: 'Administrador',
-          },
+  try {
+    await prisma.$transaction(async (prisma) => {
+      // Parte 1: Contar Usuarios
+      const users_count = await prisma.usuario.count()
+
+      // Determinar el rol y su descripción basados en el conteo de usuarios
+      const rolData = {
+        rol: users_count === 0 ? 'Administrador' : 'Básico',
+        descripcion:
+          users_count === 0
+            ? 'Permitir acceso a todas las funcionalidades'
+            : 'Acceso limitado a algunas funcionalidades',
+      }
+
+      // Parte 2: Crear o Conectar Rol
+      const rol = await prisma.rol.upsert({
+        where: { rol: rolData.rol },
+        update: {},
+        create: rolData,
+      })
+
+      // Si es el primer usuario, crear o conectar permiso
+      let permiso
+      if (users_count === 0) {
+        permiso = await prisma.permiso.upsert({
+          where: { key: 'TODAS:FULL' },
+          update: {},
           create: {
-            rol: 'Administrador',
+            permiso: 'Acceso de superusuario',
+            key: 'TODAS:FULL',
             descripcion: 'Allows access to all features',
           },
-        },
-      },
-    },
-  })
+        })
 
-  return { success: 'Registrado correctamente' }
+        await prisma.roles_Permisos.create({
+          data: {
+            rol_nombre: rol.rol,
+            permiso_key: permiso.key,
+            active: true,
+          },
+        })
+      }
+
+      // Parte 4: Asignar Rol y Permiso al Usuario
+      await prisma.usuario.create({
+        data: {
+          nombre: name,
+          email,
+          contrasena: hashedPassword,
+          rol: {
+            connect: {
+              id: rol.id,
+            },
+          },
+        },
+      })
+    })
+
+    console.log('Usuario creado exitosamente')
+    return { success: 'Registrado correctamente' }
+  } catch (error) {
+    console.error('Error al crear el usuario:', error)
+  } finally {
+    await prisma.$disconnect()
+  }
 }
 
 type SignupByFacialID = {
@@ -79,30 +124,70 @@ export const signupByFacialID = async ({
       field: 'email',
     }
   }
-  console.log({ email, facialID, adminPassword, name })
+
   try {
-    await prisma.usuario.create({
-      data: {
-        nombre: name,
-        email,
-        facialID,
-        rol: {
-          connectOrCreate: {
-            where: {
-              rol: 'Administrador',
-            },
-            create: {
-              rol: 'Administrador',
-              descripcion: 'Allows access to all features',
+    await prisma.$transaction(async (prisma) => {
+      // Parte 1: Contar Usuarios
+      const users_count = await prisma.usuario.count()
+
+      // Determinar el rol y su descripción basados en el conteo de usuarios
+      const rolData = {
+        rol: users_count === 0 ? 'Administrador' : 'Básico',
+        descripcion:
+          users_count === 0
+            ? 'Permitir acceso a todas las funcionalidades'
+            : 'Acceso limitado a algunas funcionalidades',
+      }
+
+      // Parte 2: Crear o Conectar Rol
+      const rol = await prisma.rol.upsert({
+        where: { rol: rolData.rol },
+        update: {},
+        create: rolData,
+      })
+
+      // Si es el primer usuario, crear o conectar permiso
+      let permiso
+      if (users_count === 0) {
+        permiso = await prisma.permiso.upsert({
+          where: { key: 'FULL-TODAS' },
+          update: {},
+          create: {
+            permiso: 'Acceso de superusuario',
+            key: 'FULL-TODAS',
+            descripcion: 'Allows access to all features',
+          },
+        })
+
+        await prisma.roles_Permisos.create({
+          data: {
+            rol_nombre: rol.rol,
+            permiso_key: permiso.key,
+            active: true,
+          },
+        })
+      }
+
+      // Parte 4: Asignar Rol y Permiso al Usuario
+      await prisma.usuario.create({
+        data: {
+          nombre: name,
+          email,
+          facialID,
+          rol: {
+            connect: {
+              id: rol.id,
             },
           },
         },
-      },
+      })
     })
-    return { success: 'Registrado correctamente' }
+
+    console.log('Usuario creado exitosamente')
   } catch (error) {
-    console.log(error)
-    return { error: 'Error al registrar la persona', field: 'facialID' }
+    console.error('Error al crear el usuario:', error)
+  } finally {
+    await prisma.$disconnect()
   }
 }
 

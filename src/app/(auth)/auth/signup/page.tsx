@@ -35,7 +35,7 @@ export default function Page({
         <TabsList className="mx-5">
           <TabsTrigger value="Correo y Contraseña">Registro Básico</TabsTrigger>
         </TabsList>
-        <TabsContent value="Reconocimiento Facial"></TabsContent>
+
         <TabsContent value="Correo y Contraseña">
           <CredentialsSignupForm />
         </TabsContent>

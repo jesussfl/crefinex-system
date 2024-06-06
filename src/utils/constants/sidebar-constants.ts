@@ -93,7 +93,7 @@ export const SIDE_MENU_ITEMS: SideMenuItem[] = [
     path: '/dashboard/usuarios',
     identifier: SECTION_NAMES.USUARIOS,
     icon: UserCircle,
-    // requiredPermissions: [SECTION_NAMES.USUARIOS, SECTION_NAMES.TODAS],
+    requiredPermissions: [SECTION_NAMES.USUARIOS, SECTION_NAMES.TODAS],
   },
   {
     title: 'Libros',
@@ -115,6 +115,7 @@ export const SIDE_MENU_ITEMS: SideMenuItem[] = [
     identifier: SECTION_NAMES.CONFIGURACION,
     path: '/dashboard/configuracion',
     icon: Settings,
+    requiredPermissions: [SECTION_NAMES.CONFIGURACION, SECTION_NAMES.TODAS],
   },
   {
     title: 'Ayuda',

@@ -12,9 +12,8 @@ import { getAge } from '@/utils/helpers/get-age'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { getCldImageUrl } from 'next-cloudinary'
-import fetch from 'node-fetch'
 import axios from 'axios'
-const fs = require('fs').promises
+
 export const getAllStudents = async () => {
   const sessionResponse = await validateUserSession()
 
