@@ -40,7 +40,7 @@ export const createRol = async (data: CreateRolesWithPermissions) => {
       },
     },
   })
-  revalidatePath('/dashboard/abastecimiento/usuarios')
+  revalidatePath('/dashboard/usuarios')
   return {
     success: 'Rol creado exitosamente',
   }
@@ -80,7 +80,7 @@ export const updateRol = async (
   //   console.log('updated session', data.permisos)
   // }
 
-  revalidatePath('/dashboard/abastecimiento/usuarios')
+  revalidatePath('/dashboard/usuarios')
   return {
     success: 'Rol actualizado exitosamente',
   }
@@ -99,7 +99,7 @@ export const deleteRol = async (id: number) => {
     },
   })
 
-  revalidatePath('/dashboard/abastecimiento/usuarios')
+  revalidatePath('/dashboard/usuarios')
 }
 
 export const getAllRoles = async () => {

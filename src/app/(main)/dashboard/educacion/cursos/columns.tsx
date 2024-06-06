@@ -222,13 +222,6 @@ export const columns: ColumnDef<CoursesType>[] = [
           >
             <DropdownMenuItem>Exportar</DropdownMenuItem>
           </Link>
-          {/* <Link
-            href={`/dashboard/abastecimiento/recepciones/exportar/${String(
-              data.id
-            )}`}
-          >
-            <DropdownMenuItem>Exportar</DropdownMenuItem>
-          </Link> */}
         </ProtectedTableActions>
       )
     },

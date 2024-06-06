@@ -87,7 +87,7 @@ export default async function Page() {
                     </CardTitle>
                   </div>
                   <Link
-                    href="/dashboard/abastecimiento/inventario"
+                    href="/dashboard/educacion/estudiantes"
                     className={buttonVariants({ variant: 'outline' })}
                   >
                     Ir a Estudiantes
@@ -125,7 +125,7 @@ export default async function Page() {
                     </CardTitle>
                   </div>
                   <Link
-                    href="/dashboard/abastecimiento/despachos"
+                    href="/dashboard/auditoria"
                     className={buttonVariants({ variant: 'outline' })}
                   >
                     Ir a Auditoria

@@ -344,13 +344,6 @@ export const columns: ColumnDef<StudentColumns>[] = [
           >
             <DropdownMenuItem>Exportar</DropdownMenuItem>
           </Link>
-          {/* <Link
-            href={`/dashboard/abastecimiento/recepciones/exportar/${String(
-              data.id
-            )}`}
-          >
-            <DropdownMenuItem>Exportar</DropdownMenuItem>
-          </Link> */}
         </ProtectedTableActions>
       )
     },

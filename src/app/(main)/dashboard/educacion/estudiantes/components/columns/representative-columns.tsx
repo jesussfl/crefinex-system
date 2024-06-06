@@ -261,15 +261,7 @@ export const representativeColumns: ColumnDef<Representative>[] = [
               return deleteRepresentative(data.id)
             },
           }}
-        >
-          {/* <Link
-            href={`/dashboard/abastecimiento/recepciones/exportar/${String(
-              data.id
-            )}`}
-          >
-            <DropdownMenuItem>Exportar</DropdownMenuItem>
-          </Link> */}
-        </ProtectedTableActions>
+        ></ProtectedTableActions>
       )
     },
   },
