@@ -17,6 +17,9 @@ import {
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { cn } from '@/utils/utils'
+import ProtectedTableActions from '@/modules/common/components/table-actions'
+import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
+import { deleteCourse } from './lib/actions'
 type CoursesType = Prisma.CoursesGetPayload<{
   include: {
     level: true
@@ -199,25 +202,34 @@ export const columns: ColumnDef<CoursesType>[] = [
       const data = row.original
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir Menú</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(String(data.id))}
-            >
-              Copiar código
-            </DropdownMenuItem>
-            <Link href={`/dashboard/educacion/cursos/curso/${data.id}`}>
-              <DropdownMenuItem>Editar</DropdownMenuItem>
-            </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProtectedTableActions
+          sectionName={SECTION_NAMES.CURSOS}
+          editConfig={{
+            href: `/dashboard/educacion/cursos/curso/${data.id}`,
+          }}
+          deleteConfig={{
+            alertTitle: '¿Estás seguro de eliminar este curso?',
+            alertDescription: `Estas a punto de eliminar este curso y todas sus dependencias.`,
+            onConfirm: () => {
+              return deleteCourse(data.id)
+            },
+          }}
+        >
+          <Link
+            href={`/dashboard/educacion/estudiantes/exportar/${String(
+              data.id
+            )}`}
+          >
+            <DropdownMenuItem>Exportar</DropdownMenuItem>
+          </Link>
+          {/* <Link
+            href={`/dashboard/abastecimiento/recepciones/exportar/${String(
+              data.id
+            )}`}
+          >
+            <DropdownMenuItem>Exportar</DropdownMenuItem>
+          </Link> */}
+        </ProtectedTableActions>
       )
     },
   },

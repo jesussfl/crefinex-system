@@ -27,6 +27,7 @@ import { RepresentativeFields } from './representative-fields'
 import { RepresentativeFormType } from '@/types/types'
 import { StudentFields } from './student-fields'
 import { Step, Stepper, useStepper } from '@/modules/common/components/stepper'
+import { Option } from '@/modules/common/components/multiple-selector'
 
 export type StudentFormType = {
   names: string
@@ -35,6 +36,7 @@ export type StudentFormType = {
   current_status: Student_Status
 
   id_current_course: number
+  current_schedules: Option[]
   modalidad: Modalities
   gender: Genders
 

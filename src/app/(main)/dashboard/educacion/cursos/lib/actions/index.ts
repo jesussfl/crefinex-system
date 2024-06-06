@@ -122,7 +122,46 @@ export const getSchedulesByLevelAndModality = async (
 
   return courses
 }
+export const getCoursesByLevelAndModality = async (
+  level: number,
+  modality: Modalities
+) => {
+  const sessionResponse = await validateUserSession()
 
+  if (sessionResponse.error || !sessionResponse.session) {
+    throw new Error('You must be signed in to perform this action')
+  }
+
+  const courses = await prisma.courses.findMany({
+    where: {
+      level_id: level,
+      AND: {
+        modality: modality,
+      },
+    },
+
+    include: {
+      schedules: true,
+    },
+  })
+
+  return courses
+}
+export const getSchedulesByCourse = async (id: number) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    throw new Error('You must be signed in to perform this action')
+  }
+
+  const schedules = await prisma.schedule.findMany({
+    where: {
+      course_id: id,
+    },
+  })
+
+  return schedules
+}
 export const getCourseById = async (id: number) => {
   const sessionResponse = await validateUserSession()
 
@@ -206,7 +245,7 @@ export const createCourse = async (data: FormValues) => {
   }
 }
 
-export const updateCourse = async (data: FormValues, id: number) => {
+export const updateCourse = async (data: FormValues, courseId: number) => {
   const sessionResponse = await validateUserSession()
 
   if (sessionResponse.error || !sessionResponse.session) {
@@ -223,12 +262,22 @@ export const updateCourse = async (data: FormValues, id: number) => {
     return permissionsResponse
   }
 
+  //@ts-ignore
+  const { id, ...rest } = data
   await prisma.courses.update({
     where: {
-      id,
+      id: courseId,
     },
+
     data: {
-      ...data,
+      ...rest,
+
+      level_id: undefined,
+      level: {
+        connect: {
+          id: data.level_id,
+        },
+      },
       evaluations: {
         deleteMany: {},
         create: data.evaluations.map((evaluation) => {
@@ -289,5 +338,37 @@ export const deleteManyCourses = async (ids: number[]) => {
   return {
     error: false,
     success: 'Cursos eliminados exitosamente',
+  }
+}
+
+export const deleteCourse = async (id: number) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    return sessionResponse
+  }
+
+  const permissionsResponse = validateUserPermissions({
+    sectionName: SECTION_NAMES.CURSOS,
+    actionName: 'ELIMINAR',
+    userPermissions: sessionResponse.session?.user.rol.permisos,
+  })
+
+  if (!permissionsResponse.success) {
+    return permissionsResponse
+  }
+
+  await prisma.courses.delete({
+    where: {
+      id,
+    },
+  })
+
+  await registerAuditAction('Se eliminó el curso: ' + id)
+  revalidatePath('/dashboard/educacion/cursos')
+
+  return {
+    error: false,
+    success: 'Curso eliminado exitosamente',
   }
 }

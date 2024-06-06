@@ -23,7 +23,7 @@ import ModalForm from '@/modules/common/components/modal-form'
 import EvaluationForm from '../../forms/evaluation-form'
 
 type Props = {
-  selectedCourse: number
+  selectedCourse?: number
   setSelectedCourse: (value: number) => void
   courses: ComboboxData[]
 }
@@ -60,8 +60,8 @@ export default function TableFilters({
                   !courses && 'text-muted-foreground'
                 )}
               >
-                {courses
-                  ? courses?.find((course) => course.value === course.value)
+                {selectedCourse
+                  ? courses?.find((course) => course.value === selectedCourse)
                       ?.label
                   : 'Seleccionar nivel...'}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -110,6 +110,7 @@ export default function TableFilters({
           className="w-[400px]"
           closeWarning={false}
         >
+          {/*@ts-ignore */}
           <EvaluationForm id_course={selectedCourse} />
         </ModalForm>
       </div>

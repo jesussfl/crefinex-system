@@ -10,7 +10,7 @@ export default function useGradesTableFilters({
   studentsWithGrades,
   evaluations,
 }: Props) {
-  const [selectedCourse, setSelectedCourse] = useState<number>(3)
+  const [selectedCourse, setSelectedCourse] = useState<number>()
   const [studentsByCourse, setStudentsByCourse] = useState<StudentWithGrades[]>(
     []
   )

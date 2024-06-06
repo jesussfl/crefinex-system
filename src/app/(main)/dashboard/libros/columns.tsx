@@ -6,29 +6,16 @@ import { ArrowUpDown, MoreHorizontal } from 'lucide-react'
 import { Button, buttonVariants } from '@/modules/common/components/button'
 
 import { SELECT_COLUMN } from '@/utils/constants/columns'
-import { Prisma } from '@prisma/client'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from '@/modules/common/components/dropdown-menu/dropdown-menu'
+import { Book } from '@prisma/client'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import { Progress } from '@/modules/common/components/progress-bar'
+import ProtectedTableActions from '@/modules/common/components/table-actions'
+import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
+import { deleteBook } from './lib/actions/book-actions'
 import { cn } from '@/utils/utils'
-type CoursesType = Prisma.CoursesGetPayload<{
-  include: {
-    level: true
-    schedules: true
-    students: {
-      include: {
-        student: true
-      }
-    }
-  }
-}>
-export const columns: ColumnDef<CoursesType>[] = [
+
+export const columns: ColumnDef<Book>[] = [
   SELECT_COLUMN,
   {
     accessorKey: 'id',
@@ -36,189 +23,161 @@ export const columns: ColumnDef<CoursesType>[] = [
   },
   {
     accessorKey: 'title',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          className="text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Título
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <HeaderCell column={column} title="Título" />,
   },
   {
-    accessorKey: 'description',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          className="text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Descripción
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
-      )
-    },
+    accessorKey: 'synopsis',
+    header: ({ column }) => <HeaderCell column={column} title="Sinopsis" />,
   },
   {
-    id: 'nivel',
-    accessorFn: (row) => {
-      return `Nivel ${row.level.order} - ${row.level.name}`
-    },
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          className="text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Nivel
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
-      )
-    },
-  },
-  {
-    accessorKey: 'start_date',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="text-xs"
-        >
-          Fecha de inicio
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
-      )
-    },
+    id: 'estado',
+    accesorKey: 'completion_percentage',
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        size={'sm'}
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        className="text-xs"
+      >
+        Porcentaje de completación
+        <ArrowUpDown className="ml-2 h-3 w-3" />
+      </Button>
+    ),
     cell: ({ row }) => {
-      return row.original.start_date
-        ? format(new Date(row.original.start_date), 'dd/MM/yyyy')
-        : 'Sin fecha de inicio'
-    },
-  },
-  {
-    accessorKey: 'end_date',
-    header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="text-xs"
-        >
-          Fecha de culminación
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      return row.original.end_date
-        ? format(new Date(row.original.end_date), 'dd/MM/yyyy')
-        : 'Sin fecha de culminación'
-    },
-  },
-  {
-    accessorKey: 'price',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="text-xs"
-        >
-          Precio
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
+        <div className="flex gap-3 w-full items-center">
+          <p>{row.original.completion_percentage}%</p>
+          <Progress
+            className="flex-1"
+            value={row.original.completion_percentage}
+          />
+          <p>100%</p>
+        </div>
       )
     },
   },
   {
-    id: 'Horarios',
-    accessorFn: (row) => {
-      const labels = row.schedules.map((schedule) => {
-        return `${schedule.day} (${schedule.start} - ${schedule.end})`
-      })
+    id: 'paginas',
+    accessorFn: (row) => row.page_count,
 
-      return labels.join(', ')
+    header: ({ column }) => (
+      <HeaderCell column={column} title="Número de Páginas" />
+    ),
+    cell: ({ row }) => {
+      return <div>{row.original.page_count}</div>
     },
-    header: ({ column }) => {
+  },
+  {
+    accessorKey: 'publication_date',
+    header: ({ column }) => (
+      <HeaderCell column={column} title="Fecha de Publicación" />
+    ),
+    cell: ({ row }) => {
+      return row.original.publication_date
+        ? format(new Date(row.original.publication_date), 'dd/MM/yyyy')
+        : 'Sin fecha de publicación'
+    },
+  },
+  {
+    id: 'precio',
+    accessorFn: (row) => row.price,
+    header: ({ column }) => (
+      <HeaderCell column={column} title="Precio de venta" />
+    ),
+  },
+  {
+    id: 'editables',
+    accessorFn: (row) => row.photoshop_files_url,
+    header: ({ column }) => (
+      <HeaderCell column={column} title="URL de editables" />
+    ),
+    cell: ({ row }) => {
+      if (!row.original.photoshop_files_url)
+        return <div>No hay una URL asociado</div>
+
       return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="text-xs"
+        <a
+          className={cn(buttonVariants({ variant: 'outline' }))}
+          href={row.original.photoshop_files_url}
         >
-          Horarios
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
+          Ir al sitio
+        </a>
       )
     },
   },
   {
-    accessorKey: 'students',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="text-xs"
-        >
-          Estudiantes
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
-      )
-    },
+    id: 'pdf',
+    accessorFn: (row) => row.PDF_file_url,
+    header: ({ column }) => <HeaderCell column={column} title="URL del PDF" />,
     cell: ({ row }) => {
-      const data = row.original
+      if (!row.original.PDF_file_url) return <div>No hay una URL asociado</div>
+
       return (
-        <Link
-          href={`/dashboard/educacion/cursos/curso/${data.id}/estudiantes`}
-          className={cn(buttonVariants({ variant: 'default', size: 'sm' }))}
+        <a
+          className={cn(buttonVariants({ variant: 'outline' }))}
+          href={row.original.PDF_file_url}
         >
-          Ver estudiantes
-        </Link>
+          Ir al sitio
+        </a>
       )
     },
   },
+  {
+    id: 'ilustraciones',
+    accessorFn: (row) => row.illustrations_url,
+    header: ({ column }) => (
+      <HeaderCell column={column} title="URL de ilustraciones" />
+    ),
+    cell: ({ row }) => {
+      if (!row.original.illustrations_url)
+        return <div>No hay una URL asociado</div>
+
+      return (
+        <a
+          className={cn(buttonVariants({ variant: 'outline' }))}
+          href={row.original.illustrations_url}
+        >
+          Ir al sitio
+        </a>
+      )
+    },
+  },
+
   {
     id: 'acciones',
+
     cell: ({ row }) => {
       const data = row.original
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir Menú</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(String(data.id))}
-            >
-              Copiar código
-            </DropdownMenuItem>
-            <Link href={`/dashboard/educacion/cursos/curso/${data.id}`}>
-              <DropdownMenuItem>Editar</DropdownMenuItem>
-            </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProtectedTableActions
+          sectionName={SECTION_NAMES.LIBROS}
+          editConfig={{
+            href: `/dashboard/libros/libro/${data.id}`,
+          }}
+          deleteConfig={{
+            alertTitle: '¿Estás seguro de eliminar este libro?',
+            alertDescription: `Estas a punto de eliminar este libro y todas sus dependencias.`,
+            onConfirm: () => {
+              return deleteBook(data.id)
+            },
+          }}
+        ></ProtectedTableActions>
       )
     },
   },
 ]
+
+export const HeaderCell = ({ column, title }: { column: any; title: any }) => {
+  return (
+    <Button
+      variant="ghost"
+      size={'sm'}
+      onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      className="text-xs"
+    >
+      {title}
+      <ArrowUpDown className="ml-2 h-3 w-3" />
+    </Button>
+  )
+}

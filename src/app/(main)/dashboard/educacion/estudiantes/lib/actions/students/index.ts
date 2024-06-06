@@ -153,6 +153,11 @@ export const getStudentById = async (id: number): Promise<StudentFormType> => {
           level: true,
         },
       },
+      schedules: {
+        select: {
+          schedule: true,
+        },
+      },
       representatives: {
         select: {
           representative: {
@@ -196,6 +201,12 @@ export const getStudentById = async (id: number): Promise<StudentFormType> => {
     representatives: student.representatives.map((rep) => rep.representative),
     level_id: student.current_course.level.id,
     current_status: student.current_status,
+    current_schedules: student.schedules.map((schedule) => {
+      return {
+        value: String(schedule.schedule.id),
+        label: `${schedule.schedule.day} (${schedule.schedule.start} - ${schedule.schedule.end})`,
+      }
+    }),
   }
 }
 // export const getStudentByIdDocument = async (id: string) => {
@@ -253,8 +264,8 @@ const generateStudentCode = async (
   const courseStartYear = courseStartDate.getFullYear()
   const code = await generateCode(
     courseLevel,
-    courseModality,
     course.id,
+    courseModality,
     courseStartMonth,
     courseStartYear
   )
@@ -302,7 +313,7 @@ export const createStudent = async (data: StudentFormType) => {
 
   const uuid = (await prisma.student.count()) + 1
   const codigo = await generateStudentCode(course)
-  const { level_id, ...rest } = data
+  const { current_schedules, level_id, ...rest } = data
 
   await prisma.$transaction([
     prisma.representative.createMany({
@@ -321,6 +332,13 @@ export const createStudent = async (data: StudentFormType) => {
         current_course: {
           connect: {
             id: rest.id_current_course,
+          },
+        },
+        schedules: {
+          createMany: {
+            data: data.current_schedules.map((schedule) => ({
+              id_schedule: Number(schedule.value),
+            })),
           },
         },
         representatives: {
@@ -412,6 +430,12 @@ export const updateStudent = async (id: number, data: StudentFormType) => {
           connect: {
             id: rest.id_current_course,
           },
+        },
+        schedules: {
+          deleteMany: {},
+          connect: data.current_schedules.map((schedule) => ({
+            id: Number(schedule.value),
+          })),
         },
         representatives: {
           createMany: {

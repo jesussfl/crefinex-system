@@ -39,8 +39,16 @@ import { Button } from '@/modules/common/components/button'
 import { CheckIcon, Loader2 } from 'lucide-react'
 import { ComboboxData } from '@/types/types'
 import { getLevelsByModality } from '../../../cursos/lib/actions/level-actions'
-import { getSchedulesByLevelAndModality } from '../../../cursos/lib/actions'
+import {
+  getCoursesByLevelAndModality,
+  getSchedulesByCourse,
+  getSchedulesByLevelAndModality,
+} from '../../../cursos/lib/actions'
 import { Documentos_Identidad } from '@prisma/client'
+import { format } from 'date-fns'
+import MultipleSelector, {
+  Option,
+} from '@/modules/common/components/multiple-selector'
 interface UploadedAssetData {
   public_id: string
   width: number
@@ -50,7 +58,7 @@ interface UploadedAssetData {
 
 export const StudentFields = () => {
   const { control, setValue, watch, ...rest } = useFormContext()
-  const [schedules, setSchedules] = useState<ComboboxData[]>([])
+  const [schedules, setSchedules] = useState<Option[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<UploadedAssetData | null>(null)
   const [courses, setCourses] = useState<ComboboxData[]>([])
@@ -60,6 +68,7 @@ export const StudentFields = () => {
   const level = watch('level_id')
   const modality = watch('modalidad')
   const can_medicate = watch('can_medicate')
+  const course = watch('id_current_course')
   useEffect(() => {
     setHasExtraActivity(!!extraActivities)
   }, [extraActivities])
@@ -79,18 +88,27 @@ export const StudentFields = () => {
 
   useEffect(() => {
     setIsLoading(true)
-
-    getSchedulesByLevelAndModality(level, modality).then((data) => {
-      const transformedSchedules = data.map((schedule) => {
-        return {
-          value: schedule.course_id,
-          label: `${schedule.day} (${schedule.start} - ${schedule.end})`,
-        }
-      })
-      setSchedules(transformedSchedules)
+    getCoursesByLevelAndModality(level, modality).then((data) => {
+      const transformedData = data?.map((course) => ({
+        value: course.id,
+        label: `${course.title} (${format(
+          new Date(course.start_date || new Date()),
+          'dd/MM/yyyy'
+        )})`,
+      }))
+      setCourses(transformedData)
     })
+    if (course) {
+      getSchedulesByCourse(course).then((data) => {
+        const transformedData = data?.map((schedule) => ({
+          value: String(schedule.id),
+          label: `${schedule.day} (${schedule.start} - ${schedule.end})`,
+        }))
+        setSchedules(transformedData)
+      })
+    }
     setIsLoading(false)
-  }, [level, modality, setValue])
+  }, [level, modality, setValue, course])
 
   useEffect(() => {
     if (result) {
@@ -287,7 +305,6 @@ export const StudentFields = () => {
           )}
         />
       </div>
-
       <FormField
         control={control}
         name="id_current_course"
@@ -296,7 +313,7 @@ export const StudentFields = () => {
         }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Horario del curso:</FormLabel>
+            <FormLabel>Cursos:</FormLabel>
 
             <Popover>
               <PopoverTrigger asChild>
@@ -310,41 +327,37 @@ export const StudentFields = () => {
                     )}
                   >
                     {field.value
-                      ? schedules.find(
-                          (schedule) => schedule.value === field.value
-                        )?.label
-                      : 'Seleccionar horario'}
+                      ? courses.find((course) => course.value === field.value)
+                          ?.label
+                      : 'Seleccionar curso'}
                     <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </FormControl>
               </PopoverTrigger>
               <PopoverContent className="PopoverContent">
                 <Command>
-                  <CommandInput
-                    placeholder="Buscar horario..."
-                    className="h-9"
-                  />
+                  <CommandInput placeholder="Buscar curso..." className="h-9" />
                   <ScrollArea className="max-h-56">
                     <CommandEmpty>No se encontaron resultados.</CommandEmpty>
                     <CommandGroup>
                       {isLoading ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        schedules.map((schedule) => (
+                        courses.map((course) => (
                           <CommandItem
-                            value={schedule.label}
-                            key={schedule.value}
+                            value={course.label}
+                            key={course.value}
                             onSelect={() => {
-                              setValue('id_current_course', schedule.value, {
+                              setValue('id_current_course', course.value, {
                                 shouldDirty: true,
                               })
                             }}
                           >
-                            {schedule.label}
+                            {course.label}
                             <CheckIcon
                               className={cn(
                                 'ml-auto h-4 w-4',
-                                schedule.value === field.value
+                                course.value === field.value
                                   ? 'opacity-100'
                                   : 'opacity-0'
                               )}
@@ -362,6 +375,35 @@ export const StudentFields = () => {
           </FormItem>
         )}
       />
+      <FormField
+        control={control}
+        name="current_schedules"
+        rules={{
+          required: 'Este campo es requerido',
+        }}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Horarios:</FormLabel>
+
+            <FormControl>
+              <MultipleSelector
+                value={field.value}
+                onChange={field.onChange}
+                options={schedules}
+                placeholder="Selecciona los horarios del curso"
+                emptyIndicator={
+                  <p className="text-center leading-10 text-gray-600 dark:text-gray-400">
+                    No hay más horarios
+                  </p>
+                }
+              />
+            </FormControl>
+
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <div className="flex flex-1 gap-4">
         <FormField
           control={control}

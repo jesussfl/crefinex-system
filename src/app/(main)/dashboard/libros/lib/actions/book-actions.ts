@@ -1,60 +1,44 @@
 'use server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { Modalities, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { validateUserSession } from '@/utils/helpers/validate-user-session'
 import { validateUserPermissions } from '@/utils/helpers/validate-user-permissions'
 import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
 import { registerAuditAction } from '@/lib/actions/audit'
 
-export const getAllLevels = async () => {
+export const getAllBooks = async () => {
   const sessionResponse = await validateUserSession()
 
   if (sessionResponse.error || !sessionResponse.session) {
     throw new Error('You must be signed in to perform this action')
   }
 
-  const levels = await prisma.level.findMany()
+  const books = await prisma.book.findMany()
 
-  return levels
+  return books
 }
 
-export const getLevelById = async (id: number) => {
+export const getBookById = async (id: number) => {
   const sessionResponse = await validateUserSession()
 
   if (sessionResponse.error || !sessionResponse.session) {
     throw new Error('You must be signed in to perform this action')
   }
 
-  const level = await prisma.level.findUnique({
+  const book = await prisma.book.findUnique({
     where: {
       id,
     },
   })
 
-  if (!level) {
-    throw new Error('Level not found')
+  if (!book) {
+    throw new Error('Book not found')
   }
-  return level
+  return book
 }
 
-export const getLevelsByModality = async (modality: Modalities) => {
-  const sessionResponse = await validateUserSession()
-
-  if (sessionResponse.error || !sessionResponse.session) {
-    throw new Error('You must be signed in to perform this action')
-  }
-
-  const levels = await prisma.level.findMany({
-    where: {
-      modalidad: modality,
-    },
-  })
-
-  return levels
-}
-
-export const createLevel = async (data: Prisma.LevelCreateInput) => {
+export const createBook = async (data: Prisma.BookCreateInput) => {
   const sessionResponse = await validateUserSession()
 
   if (sessionResponse.error || !sessionResponse.session) {
@@ -71,19 +55,16 @@ export const createLevel = async (data: Prisma.LevelCreateInput) => {
     return permissionsResponse
   }
 
-  await prisma.level.create({
-    data: {
-      ...data,
-      order: Number(data.order),
-    },
+  await prisma.book.create({
+    data,
   })
 
-  await registerAuditAction('Se creó un nuevo libro: ' + data.name)
+  await registerAuditAction('Se creó un nuevo libro: ' + data.title)
   revalidatePath('/dashboard/libros')
 
   return {
     error: false,
-    success: 'Nivel creado exitosamente',
+    success: 'Libro creado exitosamente',
   }
 }
 
@@ -117,5 +98,36 @@ export const updateBook = async (data: Prisma.BookUpdateInput, id: number) => {
   return {
     error: false,
     success: 'Libro actualizado exitosamente',
+  }
+}
+export const deleteBook = async (id: number) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    return sessionResponse
+  }
+
+  const permissionsResponse = validateUserPermissions({
+    sectionName: SECTION_NAMES.LIBROS,
+    actionName: 'ELIMINAR',
+    userPermissions: sessionResponse.session?.user.rol.permisos,
+  })
+
+  if (!permissionsResponse.success) {
+    return permissionsResponse
+  }
+
+  await prisma.book.delete({
+    where: {
+      id,
+    },
+  })
+
+  await registerAuditAction('Se elimino el libro: ' + id)
+  revalidatePath('/dashboard/libros')
+
+  return {
+    error: false,
+    success: 'Libro eliminado exitosamente',
   }
 }

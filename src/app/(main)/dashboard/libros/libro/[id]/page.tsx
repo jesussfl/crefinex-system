@@ -7,20 +7,21 @@ import {
 } from '@/modules/layout/templates/page'
 import { PackagePlus } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
-import LevelsForm from '../../components/forms/levels-form'
-import { getLevelById } from '../../lib/actions/level-actions'
+
+import BooksForm from '../../components/forms/books-form'
+import { getBookById } from '../../lib/actions/book-actions'
 
 export const metadata: Metadata = {
-  title: 'Editar Nivel',
-  description: 'Desde aquí puedes editar un nivel',
+  title: 'Editar Libro',
+  description: 'Desde aquí puedes editar un libro',
 }
 
 export default async function Page({
-  params: { levelId },
+  params: { id },
 }: {
-  params: { levelId: string }
+  params: { id: string }
 }) {
-  const level = await getLevelById(Number(levelId))
+  const book = await getBookById(Number(id))
   return (
     <>
       <PageHeader className="mb-0">
@@ -30,13 +31,13 @@ export default async function Page({
           <div>
             <PageHeaderTitle>
               <PackagePlus size={24} />
-              Editar nivel
+              Editar libro
             </PageHeaderTitle>
           </div>
         </HeaderLeftSide>
       </PageHeader>
       <PageContent className="pt-5 space-y-4 md:px-[20px]">
-        <LevelsForm defaultValues={level} />
+        <BooksForm defaultValues={book} />
       </PageContent>
     </>
   )

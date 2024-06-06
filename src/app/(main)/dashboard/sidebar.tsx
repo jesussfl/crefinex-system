@@ -8,8 +8,8 @@ import { SIDE_MENU_ITEMS } from '@/utils/constants/sidebar-constants'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { SideMenuItem } from '@/types/types'
+import { useSession } from 'next-auth/react'
 
 const customTheme: CustomFlowbiteTheme['sidebar'] = {
   root: {
@@ -19,7 +19,7 @@ const customTheme: CustomFlowbiteTheme['sidebar'] = {
       off: 'w-64',
     },
     inner:
-      'h-full overflow-y-auto rounded bg-dark py-4 px-3 dark:bg-gray-800 hideScrollbar',
+      'h-full overflow-y-auto overflow-x-visible rounded bg-dark py-4 dark:bg-gray-800 hideScrollbar px-3 pb-20',
   },
   collapse: {
     button:
@@ -60,21 +60,19 @@ const customTheme: CustomFlowbiteTheme['sidebar'] = {
     },
   },
   item: {
-    base: 'flex items-center justify-center rounded-lg p-2 text-base font-normal text-gray-500 hover:text-white hover:bg-dark-secondary dark:text-white dark:hover:bg-gray-700',
-    active: 'bg-primary dark:bg-gray-700',
+    base: 'flex items-center justify-center rounded-lg p-2 text-base font-normal text-gray-500 hover:text-white hover:bg-dark-secondary dark:text-white dark:hover:bg-gray-700 group',
+    active: 'text-white bg-primary dark:bg-gray-700',
 
     content: {
-      base: 'px-3 flex-1 whitespace-nowrap',
+      base: 'px-3 flex-1 whitespace-nowrap group-hover:text-white',
     },
     icon: {
       base: 'h-6 w-6 flex-shrink-0 text-gray-500 transition duration-75 group-hover:text-white',
       active: 'text-white dark:text-gray-100',
     },
-    label: '',
-    listItem: '',
   },
   items: {
-    base: '',
+    base: 'hover:text-white',
   },
   itemGroup: {
     base: 'mt-4 space-y-2 border-t border-gray-200 pt-4 first:mt-0 first:border-t-0 first:pt-0 dark:border-gray-700',
@@ -139,6 +137,10 @@ export const DashboardSidebar: FC = function () {
     return true
   })
 
+  const isActivePath = (path: string) => {
+    return pathname.startsWith(path)
+  }
+
   return (
     <Sidebar
       aria-label="Sidebar with multi-level dropdown example"
@@ -150,20 +152,22 @@ export const DashboardSidebar: FC = function () {
         isCollapsed && 'hidden w-16'
       )}
     >
+      {/* <ScrollArea className="h-full px-3 overflow-x-visible"> */}
       <Sidebar.Items>
-        <Sidebar.ItemGroup title="Main">
+        <Sidebar.ItemGroup>
           {menuItems.map((item, idx) => {
             if (item.submenu) {
               return (
                 <Sidebar.Collapse
                   className={`${
-                    pathname.split('/').slice(0, -1).join('/') === item.path
+                    isActivePath(item.path)
                       ? 'text-white bg-dark-secondary'
                       : ''
                   }`}
                   key={idx}
                   label={item.title}
                   icon={item.icon}
+                  open={isActivePath(item.path)}
                 >
                   {item.submenuItems?.map((subItem, subIdx) => {
                     return (
@@ -173,11 +177,11 @@ export const DashboardSidebar: FC = function () {
                         key={subIdx}
                         href={subItem.path}
                         icon={subItem.icon}
-                        active={subItem.path === pathname}
+                        active={isActivePath(subItem.path)}
                       >
                         <p
                           className={
-                            subItem.path === pathname ? 'text-white' : ''
+                            isActivePath(subItem.path) ? 'text-white' : ''
                           }
                         >
                           {subItem.title}
@@ -188,15 +192,32 @@ export const DashboardSidebar: FC = function () {
                 </Sidebar.Collapse>
               )
             }
+
+            if (item.path === '/dashboard') {
+              return (
+                <Sidebar.Item
+                  as={Link}
+                  key={idx}
+                  href={item.path}
+                  icon={item.icon}
+                  active={pathname === item.path}
+                >
+                  <p className={pathname === item.path ? 'text-white' : ''}>
+                    {item.title}
+                  </p>
+                </Sidebar.Item>
+              )
+            }
+
             return (
               <Sidebar.Item
                 as={Link}
                 key={idx}
                 href={item.path}
                 icon={item.icon}
-                active={item.path === pathname}
+                active={isActivePath(item.path)}
               >
-                <p className={item.path === pathname ? 'text-white' : ''}>
+                <p className={isActivePath(item.path) ? 'text-white' : ''}>
                   {item.title}
                 </p>
               </Sidebar.Item>
@@ -204,6 +225,7 @@ export const DashboardSidebar: FC = function () {
           })}
         </Sidebar.ItemGroup>
       </Sidebar.Items>
+      {/* </ScrollArea> */}
     </Sidebar>
   )
 }

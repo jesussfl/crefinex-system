@@ -1,4 +1,4 @@
-import { BookUp2, PackagePlus, Plus } from 'lucide-react'
+import { BookOpen, Plus } from 'lucide-react'
 import { Metadata } from 'next'
 import {
   HeaderLeftSide,
@@ -23,26 +23,23 @@ import {
 } from '@/modules/common/components/tabs/tabs'
 import { columns } from './columns'
 import { DataTable } from '@/modules/common/components/table/data-table'
-import { getAllOnlineCourses, getAllPresencialCourses } from './lib/actions'
 import Link from 'next/link'
 import { buttonVariants } from '@/modules/common/components/button'
-import { getAllLevels } from './lib/actions/level-actions'
-import { levelColumns } from './components/columns/level-columns'
+import { getAllBooks } from './lib/actions/book-actions'
 
 export const metadata: Metadata = {
-  title: 'Cursos',
-  description: 'Desde aquí puedes visualizar todos los cursos de Crefinex',
+  title: 'Libros',
+  description: 'Desde aquí puedes visualizar todos los libros de Crefinex',
 }
 export default async function Page() {
-  const courses = await getAllPresencialCourses()
-  const onlineCourses = await getAllOnlineCourses()
-  const levels = await getAllLevels()
+  const books = await getAllBooks()
+
   return (
     <>
       <PageHeader>
         <HeaderLeftSide>
           <PageHeaderTitle>
-            <BookUp2 size={24} />
+            <BookOpen size={24} />
             Libros de Crefinex
           </PageHeaderTitle>
           <PageHeaderDescription>
@@ -51,11 +48,11 @@ export default async function Page() {
         </HeaderLeftSide>
         <HeaderRightSide>
           <Link
-            href="/dashboard/educacion/libros/libro/nuevo"
+            href="/dashboard/libros/libro/nuevo"
             className={buttonVariants({ variant: 'default' })}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Registrar Libro Nuevo
+            Registrar Libro
           </Link>
         </HeaderRightSide>
       </PageHeader>
@@ -72,7 +69,7 @@ export default async function Page() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <DataTable columns={columns} data={courses} />
+                <DataTable columns={columns} data={books} />
               </CardContent>
             </Card>
           </PageContent>

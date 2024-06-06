@@ -5,14 +5,15 @@ import {
   PageHeader,
   PageHeaderTitle,
 } from '@/modules/layout/templates/page'
-import { BookUp2 } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 import { BackLinkButton } from '@/app/(auth)/components/back-button'
 
-import LevelsForm from '../../components/forms/levels-form'
+import LevelsForm from '../../components/forms/books-form'
+import BooksForm from '../../components/forms/books-form'
 
 export const metadata: Metadata = {
-  title: 'Agregar Nivel',
-  description: 'Desde aquí puedes agregar niveles',
+  title: 'Agregar Libro',
+  description: 'Desde aquí puedes agregar libros',
 }
 
 export default async function Page() {
@@ -22,16 +23,14 @@ export default async function Page() {
         <HeaderLeftSide className="flex-row items-center gap-8">
           <BackLinkButton label="Volver" variant="outline" />
 
-          <div>
-            <PageHeaderTitle>
-              <BookUp2 size={24} />
-              Agregar Nivel
-            </PageHeaderTitle>
-          </div>
+          <PageHeaderTitle>
+            <BookOpen size={24} />
+            Agregar Libro
+          </PageHeaderTitle>
         </HeaderLeftSide>
       </PageHeader>
       <PageContent className="pt-5 space-y-4 md:px-[20px]">
-        <LevelsForm />
+        <BooksForm />
       </PageContent>
     </>
   )

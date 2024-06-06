@@ -216,18 +216,28 @@ model Student {
   courses Students_Courses[]
 
   id_current_course Int
-  current_course    Courses @relation(fields: [id_current_course], references: [id])
+  current_course    Courses @relation(fields: [id_current_course], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   representatives Representatives_Students[]
   grades          Student_Grades[]
+  schedules       Students_Schedules[]
 }
 
 enum Modalities {
   Presencial
   Online
+}
+
+model Students_Schedules {
+  id          Int      @id @default(autoincrement())
+  id_schedule Int
+  schedule    Schedule @relation(fields: [id_schedule], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  id_student Int
+  student    Student @relation(fields: [id_student], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Representatives_Students {
@@ -249,12 +259,13 @@ enum Spanish_Days {
 }
 
 model Schedule {
-  id        Int          @id @default(autoincrement())
+  id        Int                  @id @default(autoincrement())
   day       Spanish_Days
   start     String
   end       String
-  course    Courses      @relation(fields: [course_id], references: [id])
+  course    Courses              @relation(fields: [course_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   course_id Int
+  students  Students_Schedules[]
 }
 
 model Courses {
@@ -289,9 +300,9 @@ enum Student_Status {
 model Students_Courses {
   id Int @id @default(autoincrement())
 
-  course     Courses         @relation(fields: [id_course], references: [id])
+  course     Courses         @relation(fields: [id_course], references: [id], onDelete: Cascade, onUpdate: Cascade)
   id_course  Int
-  student    Student         @relation(fields: [id_student], references: [id])
+  student    Student         @relation(fields: [id_student], references: [id], onDelete: Cascade, onUpdate: Cascade)
   id_student Int
   status     Student_Status?
 }
@@ -300,7 +311,7 @@ model Evaluation {
   id Int @id @default(autoincrement())
 
   id_course Int
-  course    Courses @relation(fields: [id_course], references: [id])
+  course    Courses @relation(fields: [id_course], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   name        String
   description String
@@ -325,10 +336,10 @@ model Student_Grades {
   id Int @id @default(autoincrement())
 
   id_evaluation Int
-  evaluation    Evaluation @relation(fields: [id_evaluation], references: [id])
+  evaluation    Evaluation @relation(fields: [id_evaluation], references: [id], onDelete: Cascade)
 
   id_student Int
-  student    Student @relation(fields: [id_student], references: [id])
+  student    Student @relation(fields: [id_student], references: [id], onDelete: Cascade)
 
   date_done   DateTime
   weighing    Weighings
@@ -348,8 +359,27 @@ enum Weighings {
 }
 
 model Book {
-  id          Int    @id @default(autoincrement())
-  title       String
-  description String
-  pages       Int
+  id               Int      @id @default(autoincrement())
+  title            String
+  synopsis         String?
+  page_count       Int
+  publication_date DateTime
+  price            Float?
+
+  photoshop_files_url String?
+  PDF_file_url        String?
+  illustrations_url   String?
+
+  illustrators      String?
+  content_reviewers String?
+  keywords          String?
+
+  cover_image    String?
+  creation_notes String?
+
+  status                String?
+  completion_percentage Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
