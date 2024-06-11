@@ -185,11 +185,11 @@ export const StudentFields = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
+                  <SelectItem value="Inscrito">Inscrito</SelectItem>
+                  <SelectItem value="Preinscrito">Pre-inscrito</SelectItem>
+                  <SelectItem value="Reservado">Reservado</SelectItem>
                   <SelectItem value="Cursando">Cursando</SelectItem>
                   <SelectItem value="Rezagado">Rezagado</SelectItem>
-                  <SelectItem value="Pre-inscrito">Pre-inscrito</SelectItem>
-                  <SelectItem value="Inscrito">Inscrito</SelectItem>
-                  <SelectItem value="Reservado">Reservado</SelectItem>
                   <SelectItem value="Culminado">Culminado</SelectItem>
                 </SelectContent>
               </Select>

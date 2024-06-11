@@ -20,6 +20,11 @@ import { cn } from '@/utils/utils'
 import ProtectedTableActions from '@/modules/common/components/table-actions'
 import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
 import { deleteCourse } from './lib/actions'
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/modules/common/components/hover-card'
 type CoursesType = Prisma.CoursesGetPayload<{
   include: {
     level: true
@@ -66,6 +71,52 @@ export const columns: ColumnDef<CoursesType>[] = [
           Descripción
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
+      )
+    },
+  },
+  {
+    accessorKey: 'objective',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Objetivo
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+  {
+    id: 'Temario',
+    accessorFn: (row) => row.syllabus,
+
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          className="text-xs"
+          size={'sm'}
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          ¿Qué Aprenderás?
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      return (
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <Button variant="link">¿Qué aprenderás?</Button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-80 bg-background p-5 border border-border rounded-sm">
+            <div className="space-y-1">{row.original.syllabus}</div>
+          </HoverCardContent>
+        </HoverCard>
       )
     },
   },
@@ -140,7 +191,7 @@ export const columns: ColumnDef<CoursesType>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           className="text-xs"
         >
-          Precio
+          Precio en Dolares
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )

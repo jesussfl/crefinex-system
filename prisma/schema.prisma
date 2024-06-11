@@ -276,12 +276,14 @@ model Courses {
   start_date  DateTime?
   end_date    DateTime?
 
-  price Decimal?
+  price Float?
   image String?
 
-  modality Modalities
-  level_id Int
-  level    Level      @relation(fields: [level_id], references: [id])
+  objective String?
+  syllabus  String?
+  modality  Modalities
+  level_id  Int
+  level     Level      @relation(fields: [level_id], references: [id])
 
   schedules Schedule[]
 
@@ -291,11 +293,12 @@ model Courses {
 }
 
 enum Student_Status {
-  Culminado
-  Desertor
-  Cursando
+  Inscrito
   Preinscrito
-  No_Admitido
+  Reservado
+  Cursando
+  Rezagado
+  Culminado
 }
 
 model Students_Courses {

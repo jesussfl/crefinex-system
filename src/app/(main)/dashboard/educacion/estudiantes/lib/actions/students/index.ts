@@ -26,6 +26,7 @@ export const getAllStudents = async () => {
       representatives: true,
       current_course: {
         include: {
+          level: true,
           schedules: true,
         },
       },
@@ -49,6 +50,7 @@ export const getAllOnlineStudents = async () => {
       representatives: true,
       current_course: {
         include: {
+          level: true,
           schedules: true,
         },
       },
@@ -72,6 +74,7 @@ export const getAllPresencialStudents = async () => {
       representatives: true,
       current_course: {
         include: {
+          level: true,
           schedules: true,
         },
       },

@@ -19,6 +19,7 @@ type StudentColumns = Prisma.StudentGetPayload<{
   include: {
     current_course: {
       include: {
+        level: true
         schedules: true
       }
     }
@@ -147,7 +148,8 @@ export const columns: ColumnDef<StudentColumns>[] = [
     },
   },
   {
-    accessorKey: 'current_level',
+    id: 'Nivel Actual',
+    accessorFn: (row) => row.current_course.level.name,
     header: ({ column }) => {
       return (
         <Button

@@ -6,6 +6,7 @@ import { Button } from '@/modules/common/components/button'
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -165,10 +166,10 @@ export default function CoursesForm({ defaultValues, students }: Props) {
         style={{
           scrollbarGutter: 'stable both-edges',
         }}
-        className="flex-1 overflow-y-auto p-6 gap-8 mb-36"
+        className="flex-1 overflow-y-auto p-6 gap-12 mb-36"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <div className="px-24">
+        <div className="flex flex-col px-24 gap-3">
           <FormField
             control={form.control}
             name="title"
@@ -199,8 +200,8 @@ export default function CoursesForm({ defaultValues, students }: Props) {
             name="description"
             rules={{
               maxLength: {
-                value: 200,
-                message: 'Debe tener un máximo de 200 carácteres',
+                value: 2000,
+                message: 'Debe tener un máximo de 2000 carácteres',
               },
             }}
             render={({ field }) => (
@@ -217,7 +218,60 @@ export default function CoursesForm({ defaultValues, students }: Props) {
                     value={field.value || ''}
                   />
                 </FormControl>
+                <FormDescription>
+                  Tiene un maximo de 2000 carácteres
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="objective"
+            rules={{
+              maxLength: {
+                value: 350,
+                message: 'Debe tener un maximo de 350 carácteres',
+              },
+            }}
+            render={({ field }) => (
+              <FormItem className="mb-8">
+                <FormLabel>Objetivo del Curso</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value || ''} />
+                </FormControl>
 
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="syllabus"
+            rules={{
+              maxLength: {
+                value: 2000,
+                message: 'Debe tener un máximo de 2000 carácteres',
+              },
+            }}
+            render={({ field }) => (
+              <FormItem className="">
+                <div className="flex flex-col gap-1">
+                  <FormLabel>¿Qué aprenderás en el curso?</FormLabel>
+                </div>
+                <FormControl>
+                  <textarea
+                    id="what-you-will-learn"
+                    rows={3}
+                    className=" w-full rounded-md border-0 p-1.5 text-foreground bg-background ring-1  placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    {...field}
+                    value={field.value || ''}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Tiene un maximo de 2000 carácteres
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -329,7 +383,7 @@ export default function CoursesForm({ defaultValues, students }: Props) {
             ) : null}
           </div>
 
-          <div className="flex flex-row flex-1 items-center gap-5 ">
+          <div className="flex flex-row flex-1 gap-5 ">
             <FormField
               control={form.control}
               name="start_date"
@@ -390,10 +444,30 @@ export default function CoursesForm({ defaultValues, students }: Props) {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel>Precio del curso en Dolares</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(value) => field.onChange(Number(value))}
+                      value={field.value || undefined}
+                    />
+                  </FormControl>
+                  <FormMessage />
+
+                  <FormDescription>Este campo es opcional</FormDescription>
+                </FormItem>
+              )}
+            />
           </div>
           <div className="flex flex-col gap-8 mt-4">
             <div className="flex flex-col gap-2">
-              <FormLabel>Agrega horarios a este curso</FormLabel>
+              <FormLabel>Agrega horarios a este curso (Opcional):</FormLabel>
               <Button
                 variant={'outline'}
                 onClick={(e) => {

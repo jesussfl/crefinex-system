@@ -36,25 +36,28 @@ export const EvaluationFields = () => {
   })
   return (
     <div className="space-y-8">
-      <Button
-        variant="outline"
-        className="w-full"
-        onClick={(e) => {
-          e.preventDefault()
-          append({
-            name: '',
-            description: '',
-            date: new Date(),
-            phase: '',
-            type: '',
+      <div className="flex flex-col gap-2">
+        <FormLabel>Agrega evaluaciones a este curso (Opcional):</FormLabel>
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={(e) => {
+            e.preventDefault()
+            append({
+              name: '',
+              description: '',
+              date: new Date(),
+              phase: '',
+              type: '',
 
-            status: 'ACTIVA',
-          })
-        }}
-      >
-        <PlusIcon className="h-4 w-4" />
-        Agregar Evaluación
-      </Button>
+              status: 'ACTIVA',
+            })
+          }}
+        >
+          <PlusIcon className="h-4 w-4" />
+          Agregar Evaluación
+        </Button>
+      </div>
       <Accordion type="single" collapsible className="w-full">
         {fields.map((field, index) => (
           <div key={field.id} className="flex flex-row gap-6 items-start">
