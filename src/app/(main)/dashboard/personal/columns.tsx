@@ -6,25 +6,40 @@ import { ArrowUpDown } from 'lucide-react'
 import { Button } from '@/modules/common/components/button'
 
 import { SELECT_COLUMN } from '@/utils/constants/columns'
-import { Prisma, Student } from '@prisma/client'
-import { DropdownMenuItem } from '@/modules/common/components/dropdown-menu/dropdown-menu'
-import { format } from 'date-fns'
+import { Employee } from '@prisma/client'
 import { getAge } from '@/utils/helpers/get-age'
-import Link from 'next/link'
 import ProtectedTableActions from '@/modules/common/components/table-actions'
 import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
-import { deleteStudent } from './lib/actions/students'
+// import { deleteStudent } from './lib/actions/students'
 import { CldImage } from 'next-cloudinary'
-type StudentColumns = Prisma.StudentGetPayload<{
-  include: {
-    current_course: {
-      include: {
-        schedules: true
-      }
-    }
+import { addMonths, addYears, format } from 'date-fns'
+import { deleteEmployee } from './lib/actions/employee-actions'
+
+const calculateEndDate = (
+  admissionDate: Date,
+  contractPeriod: string | null
+) => {
+  switch (contractPeriod) {
+    case 'Mensual':
+      return addMonths(new Date(admissionDate), 1)
+    case 'Trimestral':
+      return addMonths(new Date(admissionDate), 3)
+    case 'Semestral':
+      return addMonths(new Date(admissionDate), 6)
+    case 'Anual':
+      return addYears(new Date(admissionDate), 1)
+    case 'Bienal':
+      return addYears(new Date(admissionDate), 2)
+    case 'Trienal':
+      return addYears(new Date(admissionDate), 3)
+    case 'Indefinido':
+      return null // Puede usar null para indicar que no hay fecha de culminación
+    default:
+      return null // O manejar otros casos específicos
   }
-}>
-export const columns: ColumnDef<StudentColumns>[] = [
+}
+
+export const columns: ColumnDef<Employee>[] = [
   SELECT_COLUMN,
   {
     accessorKey: 'id',
@@ -48,7 +63,7 @@ export const columns: ColumnDef<StudentColumns>[] = [
     },
   },
   {
-    accessorKey: 'student_image',
+    accessorKey: 'employee_image',
     header: ({ column }) => {
       return (
         <Button
@@ -65,10 +80,10 @@ export const columns: ColumnDef<StudentColumns>[] = [
     cell: ({ row }) => {
       const data = row.original
 
-      if (!data.student_image) return 'Sin imagen'
+      if (!data.employee_image) return 'Sin imagen'
       return (
         <CldImage
-          src={data.student_image || ''}
+          src={data.employee_image || ''}
           width={100}
           height={100}
           alt="Uploaded Image"
@@ -77,26 +92,11 @@ export const columns: ColumnDef<StudentColumns>[] = [
     },
   },
   {
-    accessorKey: 'codigo',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          className="text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Código
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
-      )
-    },
-  },
-  {
     id: 'age',
     accessorFn: (row) => {
-      if (!row.birthDate) return 'Sin fecha de nacimiento'
-      return getAge(new Date(row.birthDate))
+      if (!row.birth_date) return
+
+      return getAge(new Date(row.birth_date))
     },
     header: ({ column }) => {
       return (
@@ -131,7 +131,7 @@ export const columns: ColumnDef<StudentColumns>[] = [
     },
   },
   {
-    accessorKey: 'current_status',
+    accessorKey: 'status',
     header: ({ column }) => {
       return (
         <Button
@@ -140,14 +140,14 @@ export const columns: ColumnDef<StudentColumns>[] = [
           className="text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Estado Actual
+          Estado
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
     },
   },
   {
-    accessorKey: 'current_level',
+    accessorKey: 'profession',
     header: ({ column }) => {
       return (
         <Button
@@ -156,38 +156,29 @@ export const columns: ColumnDef<StudentColumns>[] = [
           className="text-xs"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Nivel Actual
+          Profesión
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
     },
   },
   {
-    id: 'horario_actual',
-    accessorFn: (row) => {
-      const schedules = row.current_course.schedules
-      const schedulesString = schedules
-        .map((schedule) => {
-          return `${schedule.day} (${schedule.start} - ${schedule.end})`
-        })
-        .join(', ')
+    accessorKey: 'department',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Departamento
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
 
-      return schedulesString
-    },
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size={'sm'}
-          className="text-xs"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Horario Actual
-          <ArrowUpDown className="ml-2 h-3 w-3" />
-        </Button>
-      )
-    },
-  },
   {
     accessorKey: 'gender',
     header: ({ column }) => {
@@ -199,6 +190,38 @@ export const columns: ColumnDef<StudentColumns>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
           Sexo
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+  {
+    accessorKey: 'work_position',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Cargo
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
+  {
+    accessorKey: 'civil_status',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Estado Civil
           <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       )
@@ -300,6 +323,68 @@ export const columns: ColumnDef<StudentColumns>[] = [
       )
     },
   },
+  {
+    accessorKey: 'admission_date',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Fecha de Admisión
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+
+    cell: ({ row }) => {
+      return format(new Date(row.original.admission_date), 'dd/MM/yyyy')
+    },
+  },
+  {
+    accessorKey: 'start_date_contract',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Inicio del Contrato
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+
+    cell: ({ row }) => {
+      if (!row.original.start_date_contract) return
+
+      return format(new Date(row.original.start_date_contract), 'dd/MM/yyyy')
+    },
+  },
+  {
+    id: 'renovación_contrato',
+    accessorFn: (row) => {
+      const endDate = calculateEndDate(row.admission_date, row.contract_period)
+      return endDate ? format(endDate, 'dd/MM/yyyy') : 'Indefinido'
+    },
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Renovación de Contrato
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+  },
 
   {
     accessorKey: 'createdAt',
@@ -322,6 +407,26 @@ export const columns: ColumnDef<StudentColumns>[] = [
     },
   },
   {
+    accessorKey: 'updatedAt',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          size={'sm'}
+          className="text-xs"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Actualizado
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
+
+    cell: ({ row }) => {
+      return format(new Date(row.original.createdAt), 'dd/MM/yyyy HH:mm:ss')
+    },
+  },
+  {
     id: 'acciones',
     cell: ({ row }) => {
       const data = row.original
@@ -330,23 +435,23 @@ export const columns: ColumnDef<StudentColumns>[] = [
         <ProtectedTableActions
           sectionName={SECTION_NAMES.ESTUDIANTES}
           editConfig={{
-            href: `/dashboard/educacion/estudiantes/estudiante/${data.id}`,
+            href: `/dashboard/personal/personal/${data.id}`,
           }}
           deleteConfig={{
-            alertTitle: '¿Estás seguro de eliminar este estudiante?',
-            alertDescription: `Estas a punto de eliminar este estudiante y todas sus dependencias.`,
+            alertTitle: '¿Estás seguro de eliminar este empleado?',
+            alertDescription: `Estas a punto de eliminar este empleado y todas sus dependencias.`,
             onConfirm: () => {
-              return deleteStudent(data.id)
+              return deleteEmployee(data.id)
             },
           }}
         >
-          <Link
+          {/* <Link
             href={`/dashboard/educacion/estudiantes/exportar/${String(
               data.id
             )}`}
           >
             <DropdownMenuItem>Exportar</DropdownMenuItem>
-          </Link>
+          </Link> */}
         </ProtectedTableActions>
       )
     },

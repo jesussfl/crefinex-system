@@ -214,15 +214,7 @@ export const columns: ColumnDef<CoursesType>[] = [
               return deleteCourse(data.id)
             },
           }}
-        >
-          <Link
-            href={`/dashboard/educacion/estudiantes/exportar/${String(
-              data.id
-            )}`}
-          >
-            <DropdownMenuItem>Exportar</DropdownMenuItem>
-          </Link>
-        </ProtectedTableActions>
+        ></ProtectedTableActions>
       )
     },
   },

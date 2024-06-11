@@ -35,7 +35,10 @@ export const SelectedStudentsColumns: ColumnDef<Student>[] = [
 
   {
     id: 'age',
-    accessorFn: (row) => getAge(new Date(row.birthDate)),
+    accessorFn: (row) => {
+      if (!row.birthDate) return 'Sin fecha de nacimiento'
+      return getAge(new Date(row.birthDate))
+    },
     header: ({ column }) => {
       return (
         <Button

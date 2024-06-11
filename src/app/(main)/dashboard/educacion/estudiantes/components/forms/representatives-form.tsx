@@ -6,7 +6,6 @@ import { Button } from '@/modules/common/components/button'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,9 +14,9 @@ import {
 import { DialogFooter } from '@/modules/common/components/dialog/dialog'
 import { useToast } from '@/modules/common/components/toast/use-toast'
 import { Input } from '@/modules/common/components/input/input'
-import { Documentos_Identidad, Representative, Student } from '@prisma/client'
+import { Representative } from '@prisma/client'
 import { useRouter } from 'next/navigation'
-import { CalendarIcon, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -25,18 +24,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/modules/common/components/select/select'
-import { createStudent } from '../../lib/actions/students'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/modules/common/components/popover/popover'
-import { Calendar } from '@/modules/common/components/calendar'
-import { cn } from '@/utils/utils'
 import { format } from 'date-fns'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
-import { handleEmailValidation } from '@/utils/helpers/validate-email'
 import {
   createRepresentative,
   updateRepresentative,
@@ -132,8 +122,8 @@ export default function RepresentativesForm({ defaultValues }: Props) {
                   message: 'Debe tener al menos 3 caracteres',
                 },
                 maxLength: {
-                  value: 100,
-                  message: 'Debe tener un maximo de 100 caracteres',
+                  value: 150,
+                  message: 'Debe tener un maximo de 150 caracteres',
                 },
               }}
               render={({ field }) => (
@@ -157,8 +147,8 @@ export default function RepresentativesForm({ defaultValues }: Props) {
                   message: 'Debe tener al menos 3 caracteres',
                 },
                 maxLength: {
-                  value: 100,
-                  message: 'Debe tener un maximo de 100 caracteres',
+                  value: 150,
+                  message: 'Debe tener un maximo de 150 caracteres',
                 },
               }}
               render={({ field }) => (
@@ -239,7 +229,7 @@ export default function RepresentativesForm({ defaultValues }: Props) {
               }}
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel>Fecha de Nacimiento</FormLabel>
+                  <FormLabel>Fecha de Nacimiento (Opcional): </FormLabel>
                   <FormControl>
                     <Input
                       type="date"

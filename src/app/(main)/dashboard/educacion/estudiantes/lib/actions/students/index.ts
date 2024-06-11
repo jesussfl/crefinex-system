@@ -718,12 +718,16 @@ export const getDataToExportPreInscription = async (id: number) => {
       'MMMM',
       { locale: es }
     ),
-    edad: getAge(new Date(student.birthDate)),
+    edad:
+      (student?.birthDate && getAge(new Date(student.birthDate))) ||
+      'sin definir',
 
     fecha_actual: format(new Date(), 'dd-MM-yyyy'),
     nombre_completo: student?.names + ' ' + student?.lastNames,
     ci_estudiante: student?.id_document_number,
-    fecha_nacimiento: format(new Date(student.birthDate), 'dd-MM-yyyy'),
+    fecha_nacimiento: student?.birthDate
+      ? format(new Date(student.birthDate), 'dd-MM-yyyy')
+      : 'sin definir',
     sexo: student.gender,
     estado: student.state,
     plantel: student.school,
@@ -740,11 +744,14 @@ export const getDataToExportPreInscription = async (id: number) => {
       return {
         nombre_completo_representante:
           representative?.names + ' ' + representative?.lastNames,
-        fecha_nacimiento_r: format(
-          new Date(representative?.birthDate),
-          'dd-MM-yyyy'
-        ),
-        edad: getAge(new Date(representative?.birthDate)),
+        fecha_nacimiento_r:
+          (representative?.birthDate &&
+            format(new Date(representative?.birthDate), 'dd-MM-yyyy')) ||
+          'sin definir',
+        edad:
+          (representative?.birthDate &&
+            getAge(new Date(representative?.birthDate))) ||
+          'sin definir',
         ci_representante: `${representative?.id_document_type}-${representative?.id_document_number}`,
         parentesco: representative?.relationship,
         direccion_representante: representative?.address,

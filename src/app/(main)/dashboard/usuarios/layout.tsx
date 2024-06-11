@@ -8,13 +8,13 @@ export default async function Layout({
   modal: React.ReactNode
   children: React.ReactNode
 }) {
-  // const isAuthorized = await validateSectionsAndPermissions({
-  //   sections: [SECTION_NAMES.USUARIOS],
-  // })
+  const isAuthorized = await validateSectionsAndPermissions({
+    sections: [SECTION_NAMES.USUARIOS],
+  })
 
-  // if (!isAuthorized) {
-  //   redirect('/dashboard')
-  // }
+  if (!isAuthorized) {
+    redirect('/dashboard')
+  }
   return (
     <>
       {children}

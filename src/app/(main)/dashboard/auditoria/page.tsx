@@ -1,4 +1,4 @@
-import { PackagePlus } from 'lucide-react'
+import { FolderSearch, PackagePlus } from 'lucide-react'
 import { Metadata } from 'next'
 import {
   HeaderLeftSide,
@@ -26,7 +26,7 @@ export default async function Page() {
       <PageHeader>
         <HeaderLeftSide>
           <PageHeaderTitle>
-            <PackagePlus size={24} />
+            <FolderSearch size={24} />
             Auditoría
           </PageHeaderTitle>
           <PageHeaderDescription>

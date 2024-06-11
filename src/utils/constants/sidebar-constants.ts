@@ -9,6 +9,7 @@ import {
   BookUser,
   PencilRuler,
   BookOpen,
+  UserCog2,
 } from 'lucide-react'
 import { SideMenuItem } from '@/types/types'
 
@@ -89,6 +90,13 @@ export const SIDE_MENU_ITEMS: SideMenuItem[] = [
   },
 
   {
+    title: 'Personal',
+    path: '/dashboard/personal',
+    identifier: SECTION_NAMES.PERSONAL,
+    icon: UserCog2,
+    requiredPermissions: [SECTION_NAMES.PERSONAL, SECTION_NAMES.TODAS],
+  },
+  {
     title: 'Usuarios',
     path: '/dashboard/usuarios',
     identifier: SECTION_NAMES.USUARIOS,
@@ -111,7 +119,7 @@ export const SIDE_MENU_ITEMS: SideMenuItem[] = [
   },
 
   {
-    title: 'Configuraciones',
+    title: 'Respaldo',
     identifier: SECTION_NAMES.CONFIGURACION,
     path: '/dashboard/configuracion',
     icon: Settings,

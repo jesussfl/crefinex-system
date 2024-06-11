@@ -42,9 +42,7 @@ import { getLevelsByModality } from '../../../cursos/lib/actions/level-actions'
 import {
   getCoursesByLevelAndModality,
   getSchedulesByCourse,
-  getSchedulesByLevelAndModality,
 } from '../../../cursos/lib/actions'
-import { Documentos_Identidad } from '@prisma/client'
 import { format } from 'date-fns'
 import MultipleSelector, {
   Option,
@@ -126,7 +124,7 @@ export const StudentFields = () => {
         <div className="flex flex-col gap-5">
           {/* SIGNED EXAMPLE */}
           <div className="flex flex-col gap-3">
-            <FormLabel>Foto del estudiante</FormLabel>
+            <FormLabel>Foto del estudiante (Opcional):</FormLabel>
             <CldUploadWidget
               options={{
                 sources: ['local'],
@@ -154,7 +152,7 @@ export const StudentFields = () => {
           {result ? (
             <div className="flex gap-4">
               <CldImage
-                src={watch('student_image') || ''}
+                src={watch('employee_image') || ''}
                 width={result.width}
                 height={result.height}
                 alt="Uploaded Image"
@@ -313,7 +311,7 @@ export const StudentFields = () => {
         }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Cursos:</FormLabel>
+            <FormLabel>Curso:</FormLabel>
 
             <Popover>
               <PopoverTrigger asChild>
@@ -415,8 +413,8 @@ export const StudentFields = () => {
               message: 'Debe tener al menos 3 caracteres',
             },
             maxLength: {
-              value: 100,
-              message: 'Debe tener un maximo de 100 caracteres',
+              value: 150,
+              message: 'Debe tener un maximo de 150 caracteres',
             },
           }}
           render={({ field }) => (
@@ -440,8 +438,8 @@ export const StudentFields = () => {
               message: 'Debe tener al menos 3 caracteres',
             },
             maxLength: {
-              value: 100,
-              message: 'Debe tener un maximo de 100 caracteres',
+              value: 150,
+              message: 'Debe tener un maximo de 150 caracteres',
             },
           }}
           render={({ field }) => (
@@ -557,12 +555,9 @@ export const StudentFields = () => {
         <FormField
           control={control}
           name="birthDate"
-          rules={{
-            required: 'Este campo es necesario',
-          }}
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Fecha de Nacimiento</FormLabel>
+              <FormLabel>Fecha de Nacimiento (Opcional):</FormLabel>
               <FormControl>
                 <Input
                   type="date"
@@ -589,20 +584,9 @@ export const StudentFields = () => {
         <FormField
           control={control}
           name="birth_place"
-          rules={{
-            required: 'Este campo es necesario',
-            minLength: {
-              value: 3,
-              message: 'Debe tener al menos 3 caracteres',
-            },
-            maxLength: {
-              value: 100,
-              message: 'Debe tener un maximo de 100 caracteres',
-            },
-          }}
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Lugar de nacimiento</FormLabel>
+              <FormLabel>Lugar de nacimiento (Opcional):</FormLabel>
               <FormControl>
                 <Input type="text" {...field} />
               </FormControl>
@@ -629,7 +613,7 @@ export const StudentFields = () => {
           }}
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Escuela donde estudia</FormLabel>
+              <FormLabel>Escuela donde estudia (Opcional):</FormLabel>
               <FormControl>
                 <Input type="text" {...field} />
               </FormControl>
@@ -889,8 +873,9 @@ export const StudentFields = () => {
           <FormField
             control={control}
             name="extracurricular_activities"
+            disabled={!hasExtraActivity}
             rules={{
-              required: 'Este campo es necesario',
+              required: hasExtraActivity && 'Este campo es requerido',
               minLength: {
                 value: 3,
                 message: 'Debe tener al menos 3 carácteres',

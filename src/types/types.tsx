@@ -36,7 +36,7 @@ export type CourseColumns = {
 export type RepresentativeFormType = {
   names: string
   lastNames: string
-  birthDate: Date
+  birthDate: Date | null
 
   profession?: string | null
   work_address?: string | null

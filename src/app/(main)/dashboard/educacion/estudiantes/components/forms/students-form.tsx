@@ -32,7 +32,7 @@ import { Option } from '@/modules/common/components/multiple-selector'
 export type StudentFormType = {
   names: string
   lastNames: string
-  birthDate: Date
+  birthDate: Date | null
   current_status: Student_Status
 
   id_current_course: number
@@ -57,8 +57,8 @@ export type StudentFormType = {
 
   representatives: RepresentativeFormType[]
 
-  school: string
-  birth_place: string
+  school?: string | null
+  birth_place?: string | null
   can_medicate: boolean
   medicine?: string | null
 }

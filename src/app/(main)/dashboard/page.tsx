@@ -1,10 +1,7 @@
 import { Button, buttonVariants } from '@/modules/common/components/button'
 import {
-  Plus,
   FileDown,
   PackagePlus,
-  User2,
-  Package,
   ArrowRight,
   UserCircle,
   PackageMinus,
@@ -30,7 +27,6 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/modules/common/components/card/card'
@@ -63,12 +59,7 @@ export default async function Page() {
             {`Correo: ${session?.user?.email} | Rol: ${session?.user?.rol_nombre}`}
           </PageHeaderDescription>
         </HeaderLeftSide>
-        <HeaderRightSide>
-          <Button variant="outline" size={'sm'}>
-            <FileDown className="mr-2 h-4 w-4" />
-            Exportar
-          </Button>
-        </HeaderRightSide>
+        <HeaderRightSide></HeaderRightSide>
       </PageHeader>
 
       <PageContent>
@@ -83,7 +74,7 @@ export default async function Page() {
                   <div className="flex flex-row items-center space-x-2">
                     <Boxes className="text-muted-foreground" />
                     <CardTitle className="text-sm font-medium">
-                      Estudiantes Totales
+                      Estudiantes
                     </CardTitle>
                   </div>
                   <Link
@@ -101,7 +92,7 @@ export default async function Page() {
                   <div className="flex flex-row items-center space-x-2">
                     <UserCircle className="text-muted-foreground" />
                     <CardTitle className="text-sm font-medium">
-                      Usuarios Registrados
+                      Usuarios
                     </CardTitle>
                   </div>
                   <Link
@@ -137,12 +128,12 @@ export default async function Page() {
                 </CardContent>
               </Card>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+            {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
               <Card>
                 <CardHeader className="flex flex-row justify-between">
                   <CardTitle className="text-xl">Estadística</CardTitle>
                 </CardHeader>
-                <CardContent>{/* <Overview /> */}</CardContent>
+                <CardContent></CardContent>
               </Card>
               <Card>
                 <CardHeader className="flex flex-row justify-between">
@@ -150,7 +141,7 @@ export default async function Page() {
                 </CardHeader>
                 <CardContent></CardContent>
               </Card>
-            </div>
+            </div> */}
           </TabsContent>
         </Tabs>
       </PageContent>

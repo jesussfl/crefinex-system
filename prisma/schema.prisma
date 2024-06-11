@@ -58,6 +58,7 @@ model Usuario {
   sessions      Session[]
   rol           Rol         @relation(fields: [rol_nombre], references: [rol], onDelete: Cascade, onUpdate: Cascade)
   auditoria     Auditoria[]
+  estado        String?
 
   @@map("User")
 }
@@ -137,7 +138,7 @@ model Representative {
 
   names     String
   lastNames String
-  birthDate DateTime
+  birthDate DateTime?
 
   relationship  String
   profession    String?
@@ -190,12 +191,12 @@ model Student {
   codigo    String     @unique
   names     String
   lastNames String
-  birthDate DateTime
+  birthDate DateTime?
   gender    Genders
   modalidad Modalities
 
-  school       String
-  birth_place  String
+  school       String?
+  birth_place  String?
   can_medicate Boolean
   medicine     String?
 
@@ -382,4 +383,59 @@ model Book {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Employee {
+  id Int @id @default(autoincrement())
+
+  names      String
+  lastNames  String
+  birth_date DateTime?
+
+  profession    String?
+  work_position String?
+  department    String?
+  gender        Genders
+  phone_number  String
+  email         String
+  address       String
+  country       String
+  city          String
+  state         String
+  civil_status  String
+
+  id_document_type   Documentos_Identidad
+  id_document_number String               @unique
+  id_document_image  String?
+  employee_image     String?
+
+  base_salary         Float?
+  bonus               Float?
+  status              Employee_Status
+  admission_date      DateTime
+  start_date_contract DateTime?
+  contract_period     Contract_Periods?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+}
+
+enum Employee_Status {
+  Activo
+  Inactivo
+  Despedido
+  Renunciado
+  Vacaciones
+  Licencia_Por_Enfermedad
+  Pasante
+  Contratista
+}
+
+enum Contract_Periods {
+  Mensual
+  Trimestral
+  Semestral
+  Anual
+  Indefinido
+  Por_Proyecto
+  Temporal
 }

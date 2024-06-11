@@ -459,9 +459,11 @@ export const RepresentativeFields = ({ index }: { index: number }) => {
         <FormField
           control={rest.control}
           name={`representatives.${index}.work_position`}
-          disabled={!watch('is_working')}
+          disabled={!watch(`representatives.${index}.is_working`)}
           rules={{
-            required: !watch('is_working') && 'Este campo es requerido',
+            required:
+              watch(`representatives.${index}.is_working`) &&
+              'Este campo es requerido',
             minLength: {
               value: 3,
               message: 'Debe tener al menos 3 caracteres',
@@ -485,10 +487,12 @@ export const RepresentativeFields = ({ index }: { index: number }) => {
       </div>
       <FormField
         control={rest.control}
-        disabled={!watch('is_working')}
+        disabled={!watch(`representatives.${index}.is_working`)}
         name={`representatives.${index}.work_address`}
         rules={{
-          required: !watch('is_working') && 'Este campo es requerido',
+          required:
+            watch(`representatives.${index}.is_working`) &&
+            'Este campo es requerido',
           minLength: {
             value: 3,
             message: 'Debe tener al menos 3 caracteres',
