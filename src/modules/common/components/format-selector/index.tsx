@@ -24,7 +24,9 @@ export default function FormatSelector({
   const { toast } = useToast()
   const [format, setFormat] = useState<string>('PDF')
   const [loading, setLoading] = useState(false)
-  const handleExport = async (planilla: 'pre-inscripcion' | 'inscripcion') => {
+  const handleExport = async (
+    planilla: 'pre-inscripcion' | 'inscripcion' | 'certificado'
+  ) => {
     setLoading(true)
     try {
       const apiUrl = format === 'PDF' ? '/api/export-pdf' : '/api/export-word'
@@ -108,6 +110,13 @@ export default function FormatSelector({
           onClick={() => handleExport('pre-inscripcion')}
         >
           Planilla de Preinscripción
+        </Button>
+        <Button
+          disabled={loading}
+          variant="default"
+          onClick={() => handleExport('certificado')}
+        >
+          Certificado de Culminación
         </Button>
       </CardContent>
     </Card>

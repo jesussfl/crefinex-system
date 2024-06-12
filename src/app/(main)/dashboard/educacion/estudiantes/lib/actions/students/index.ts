@@ -139,7 +139,7 @@ export const getStudentById = async (id: number): Promise<StudentFormType> => {
       state: true,
       birthDate: true,
       email: true,
-
+      id_main_representative: true,
       phone_number: true,
       gender: true,
       address: true,
@@ -158,6 +158,26 @@ export const getStudentById = async (id: number): Promise<StudentFormType> => {
       schedules: {
         select: {
           schedule: true,
+        },
+      },
+      secondary_representative: {
+        select: {
+          names: true,
+          last_names: true,
+          id_document_type: true,
+          id_document_number: true,
+          phone_number: true,
+          relationship: true,
+        },
+      },
+      emergency_representative: {
+        select: {
+          names: true,
+          last_names: true,
+          id_document_type: true,
+          id_document_number: true,
+          phone_number: true,
+          relationship: true,
         },
       },
       representatives: {
@@ -200,6 +220,7 @@ export const getStudentById = async (id: number): Promise<StudentFormType> => {
 
   return {
     ...student,
+
     representatives: student.representatives.map((rep) => rep.representative),
     level_id: student.current_course.level.id,
     current_status: student.current_status,
@@ -315,7 +336,13 @@ export const createStudent = async (data: StudentFormType) => {
 
   const uuid = (await prisma.student.count()) + 1
   const codigo = await generateStudentCode(course)
-  const { current_schedules, level_id, ...rest } = data
+  const {
+    current_schedules,
+    secondary_representative,
+    emergency_representative,
+    level_id,
+    ...rest
+  } = data
 
   await prisma.$transaction([
     prisma.representative.createMany({
@@ -327,6 +354,22 @@ export const createStudent = async (data: StudentFormType) => {
     prisma.student.create({
       data: {
         ...rest,
+        emergency_representative: {
+          create: {
+            ...emergency_representative,
+          },
+        },
+        secondary_representative: {
+          create: {
+            ...secondary_representative,
+          },
+        },
+        id_main_representative: undefined,
+        main_representative: {
+          connect: {
+            id_document_number: rest.id_main_representative,
+          },
+        },
         can_medicate: rest.can_medicate ? true : false,
         uuid,
         codigo: codigo,
@@ -404,7 +447,12 @@ export const updateStudent = async (id: number, data: StudentFormType) => {
   }
 
   const codigo = await generateStudentCode(course)
-  const { level_id, ...rest } = data
+  const {
+    level_id,
+    emergency_representative,
+    secondary_representative,
+    ...rest
+  } = data
 
   await prisma.$transaction([
     prisma.representative.deleteMany({
@@ -427,6 +475,22 @@ export const updateStudent = async (id: number, data: StudentFormType) => {
       data: {
         ...rest,
         codigo: codigo,
+        emergency_representative: {
+          update: {
+            ...emergency_representative,
+          },
+        },
+        secondary_representative: {
+          update: {
+            ...secondary_representative,
+          },
+        },
+        id_main_representative: undefined,
+        main_representative: {
+          connect: {
+            id_document_number: rest.id_main_representative,
+          },
+        },
         id_current_course: undefined,
         current_course: {
           connect: {
@@ -629,6 +693,9 @@ export const getDataToExportPreInscription = async (id: number) => {
       id,
     },
     include: {
+      emergency_representative: true,
+      secondary_representative: true,
+      main_representative: true,
       current_course: {
         include: {
           level: true,
@@ -702,7 +769,13 @@ export const getDataToExportPreInscription = async (id: number) => {
     }
   )
   return {
+    // nombre_completo: `${student.names} ${student.lastNames}`,
+    mes: format(new Date(), 'MMMM', { locale: es }),
+    ano: format(new Date(), 'yyyy', { locale: es }),
+    dia: format(new Date(), 'dd', { locale: es }),
+    orden: '1',
     nivel: student.current_course.level.name,
+    nombre_nivel: student.current_course.level.name,
     mes_inicio: format(
       new Date(
         student.current_course.start_date
@@ -743,6 +816,20 @@ export const getDataToExportPreInscription = async (id: number) => {
     hasExtraActivities: student?.extracurricular_activities ? 'Si' : 'No',
     extra_activities: student?.extracurricular_activities,
     correo: student?.email,
+    emergencia_nombre:
+      student.emergency_representative.names +
+      ' ' +
+      student.emergency_representative.last_names,
+    emergencia_parentesco: student.emergency_representative.relationship,
+    emergencia_telefono: student.emergency_representative.phone_number,
+    autorizacion_nombre:
+      student.secondary_representative.names +
+      ' ' +
+      student.secondary_representative.last_names,
+    autorizacion_cedula: `${student.secondary_representative.id_document_type}-${student.secondary_representative.id_document_number}`,
+    autorizacion_parentesco: student.secondary_representative.relationship,
+    autorizacion_telefono: student.secondary_representative.phone_number,
+
     representantes: representatives.map((representative) => {
       return {
         nombre_completo_representante:

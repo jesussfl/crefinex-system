@@ -168,6 +168,8 @@ model Representative {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  main_represented Student[] @relation("main_represented")
 }
 
 enum Genders {
@@ -208,9 +210,19 @@ model Student {
   state                      String
   extracurricular_activities String?
   current_status             Student_Status
-  id_document_type           Documentos_Identidad
-  id_document_number         String?              @unique
-  id_document_image          String?
+
+  id_main_representative String
+  main_representative    Representative @relation(name: "main_represented", fields: [id_main_representative], references: [id_document_number], onDelete: Cascade, onUpdate: Cascade)
+
+  id_secondary_representative Int
+  secondary_representative    Secondary_Representative @relation(fields: [id_secondary_representative], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  id_emergency_representative Int
+  emergency_representative    Emergency_Representative @relation(fields: [id_emergency_representative], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  id_document_type   Documentos_Identidad
+  id_document_number String?              @unique
+  id_document_image  String?
 
   student_image String?
 
@@ -225,6 +237,28 @@ model Student {
   representatives Representatives_Students[]
   grades          Student_Grades[]
   schedules       Students_Schedules[]
+}
+
+model Emergency_Representative {
+  id                 Int                  @id @default(autoincrement())
+  names              String
+  last_names         String
+  relationship       String
+  phone_number       String
+  id_document_type   Documentos_Identidad
+  id_document_number String
+  student            Student[]
+}
+
+model Secondary_Representative {
+  id                 Int                  @id @default(autoincrement())
+  names              String
+  last_names         String
+  relationship       String
+  phone_number       String
+  id_document_type   Documentos_Identidad
+  id_document_number String
+  student            Student[]
 }
 
 enum Modalities {

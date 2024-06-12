@@ -28,6 +28,8 @@ import { RepresentativeFormType } from '@/types/types'
 import { StudentFields } from './student-fields'
 import { Step, Stepper, useStepper } from '@/modules/common/components/stepper'
 import { Option } from '@/modules/common/components/multiple-selector'
+import { MainRepresentativeFields } from './main-representative-form'
+import { ExtraInfoForm } from './extra-info-form'
 
 export type StudentFormType = {
   names: string
@@ -54,6 +56,25 @@ export type StudentFormType = {
   id_document_number?: string | null
   id_document_image?: string | null
   student_image?: string | null
+
+  id_main_representative: string
+
+  secondary_representative: {
+    names: string
+    last_names: string
+    id_document_type: Documentos_Identidad
+    id_document_number: string
+    relationship: string
+    phone_number: string
+  }
+  emergency_representative: {
+    names: string
+    last_names: string
+    id_document_type: Documentos_Identidad
+    id_document_number: string
+    relationship: string
+    phone_number: string
+  }
 
   representatives: RepresentativeFormType[]
 
@@ -93,8 +114,16 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
       description: 'Agrega la información del estudiante',
     },
     {
-      label: 'Representantes',
-      description: 'Agrega los representantes del estudiante',
+      label: 'Parentescos',
+      description: 'Agrega los parentescos del estudiante',
+    },
+    {
+      label: 'Representante Legal',
+      description: 'Selecciona el representante legal del estudiante',
+    },
+    {
+      label: 'Información Adicional',
+      description: 'Agrega información adicional del estudiante',
     },
   ]
 
@@ -176,9 +205,9 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
               variant="circle-alt"
               initialStep={0}
               steps={steps}
-              onClickStep={(step, setStep) => {
-                setStep(step)
-              }}
+              // onClickStep={(step, setStep) => {
+              //   setStep(step)
+              // }}
               scrollTracking={true}
             >
               {steps.map((stepProps, index) => {
@@ -189,65 +218,84 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
                     </Step>
                   )
                 }
-                return (
-                  <Step key={stepProps.label} {...stepProps}>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        append({
-                          names: '',
-                          lastNames: '',
-                          birthDate: new Date(),
-                          gender: Genders.Masculino,
-                          phone_number: '',
-                          email: '',
-                          address: '',
-                          country: '',
-                          city: '',
-                          state: '',
-                          id_document_type: Documentos_Identidad.V,
-                          id_document_number: '',
-                          id_document_image: '',
-                          relationship: '',
-                          facebook: '',
-                          instagram: '',
-                          tiktok: '',
-                          youtube: '',
-                          work_position: '',
-                          is_working: false,
-                          civil_status: '',
-                        })
-                      }}
-                    >
-                      <PlusIcon className="h-4 w-4" />
-                      Agregar Representante
-                    </Button>
 
-                    {fields.map((field, index) => {
-                      return (
-                        <div key={field.id} className="space-y-4">
-                          <div className="flex justify-between">
-                            <p>Datos del Representante #{index + 1}</p>
-                            <Button
-                              variant="destructive"
-                              onClick={(e) => {
-                                e.preventDefault()
-                                remove(index)
-                              }}
-                            >
-                              Eliminar representante
-                            </Button>
+                if (index === 1) {
+                  return (
+                    <Step key={stepProps.label} {...stepProps}>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          append({
+                            names: '',
+                            lastNames: '',
+                            birthDate: new Date(),
+                            gender: Genders.Masculino,
+                            phone_number: '',
+                            email: '',
+                            address: '',
+                            country: '',
+                            city: '',
+                            state: '',
+                            id_document_type: Documentos_Identidad.V,
+                            id_document_number: '',
+                            id_document_image: '',
+                            relationship: '',
+                            facebook: '',
+                            instagram: '',
+                            tiktok: '',
+                            youtube: '',
+                            work_position: '',
+                            is_working: false,
+                            civil_status: '',
+                          })
+                        }}
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                        Agregar Parentesco
+                      </Button>
+
+                      {fields.map((field, index) => {
+                        return (
+                          <div key={field.id} className="space-y-4">
+                            <div className="flex justify-between">
+                              <p>Datos del Parentesco #{index + 1}</p>
+                              <Button
+                                variant="destructive"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  remove(index)
+                                }}
+                              >
+                                Eliminar parentesco
+                              </Button>
+                            </div>
+                            <div className="space-y-4">
+                              <RepresentativeFields index={index} />
+                            </div>
                           </div>
-                          <div className="space-y-4">
-                            <RepresentativeFields index={index} />
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </Step>
-                )
+                        )
+                      })}
+                    </Step>
+                  )
+                }
+
+                if (index === 2) {
+                  return (
+                    <Step key={stepProps.label} {...stepProps}>
+                      <MainRepresentativeFields />
+                    </Step>
+                  )
+                }
+
+                if (index === 3) {
+                  return (
+                    <Step key={stepProps.label} {...stepProps}>
+                      <ExtraInfoForm />
+                    </Step>
+                  )
+                }
               })}
               <MyStepperFooter
                 isLoading={isLoading}
@@ -290,7 +338,7 @@ function MyStepperFooter({
         </p>
       )}
       <p className="text-xs text-muted-foreground">
-        Paso {activeStep} de {'2'}
+        Paso {activeStep + 1} de {'4'}
       </p>
       <Button
         variant="outline"
@@ -307,7 +355,7 @@ function MyStepperFooter({
       <Button
         disabled={isLoading}
         onClick={(e) => {
-          if (activeStep === 1) return
+          if (activeStep === 3) return
 
           e.preventDefault()
 
@@ -316,7 +364,7 @@ function MyStepperFooter({
       >
         {isLoading ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : activeStep === 1 ? (
+        ) : activeStep === 3 ? (
           'Guardar'
         ) : (
           'Siguiente'
