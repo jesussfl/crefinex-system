@@ -121,8 +121,7 @@ export const StudentFields = () => {
   return (
     <>
       <div className="flex items-start justify-between gap-5">
-        <div className="flex flex-col gap-5">
-          {/* SIGNED EXAMPLE */}
+        <div className="flex flex-row gap-5">
           <div className="flex flex-col gap-3">
             <FormLabel>Foto del estudiante (Opcional):</FormLabel>
             <CldUploadWidget
@@ -152,9 +151,9 @@ export const StudentFields = () => {
           {result ? (
             <div className="flex gap-4">
               <CldImage
-                src={watch('employee_image') || ''}
-                width={result.width}
-                height={result.height}
+                src={watch('student_image') || ''}
+                width={200}
+                height={200}
                 alt="Uploaded Image"
               />
               <Button
@@ -169,6 +168,8 @@ export const StudentFields = () => {
             </div>
           ) : null}
         </div>
+      </div>
+      <div className="flex gap-5 ">
         <FormField
           control={control}
           name="current_status"
@@ -198,8 +199,6 @@ export const StudentFields = () => {
             </FormItem>
           )}
         />
-      </div>
-      <div className="flex gap-5 ">
         <FormField
           control={control}
           name="modalidad"
@@ -234,7 +233,8 @@ export const StudentFields = () => {
             </FormItem>
           )}
         />
-
+      </div>
+      <div className="flex gap-5">
         <FormField
           control={control}
           name="level_id"
@@ -302,77 +302,80 @@ export const StudentFields = () => {
             </FormItem>
           )}
         />
-      </div>
-      <FormField
-        control={control}
-        name="id_current_course"
-        rules={{
-          required: 'Este campo es requerido',
-        }}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Curso:</FormLabel>
+        <FormField
+          control={control}
+          name="id_current_course"
+          rules={{
+            required: 'Este campo es requerido',
+          }}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Curso:</FormLabel>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className={cn(
-                      'w-full justify-between',
-                      !field.value && 'text-muted-foreground'
-                    )}
-                  >
-                    {field.value
-                      ? courses.find((course) => course.value === field.value)
-                          ?.label
-                      : 'Seleccionar curso'}
-                    <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="PopoverContent">
-                <Command>
-                  <CommandInput placeholder="Buscar curso..." className="h-9" />
-                  <ScrollArea className="max-h-56">
-                    <CommandEmpty>No se encontaron resultados.</CommandEmpty>
-                    <CommandGroup>
-                      {isLoading ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        courses.map((course) => (
-                          <CommandItem
-                            value={course.label}
-                            key={course.value}
-                            onSelect={() => {
-                              setValue('id_current_course', course.value, {
-                                shouldDirty: true,
-                              })
-                            }}
-                          >
-                            {course.label}
-                            <CheckIcon
-                              className={cn(
-                                'ml-auto h-4 w-4',
-                                course.value === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                          </CommandItem>
-                        ))
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        'w-full justify-between',
+                        !field.value && 'text-muted-foreground'
                       )}
-                    </CommandGroup>
-                  </ScrollArea>
-                </Command>
-              </PopoverContent>
-            </Popover>
+                    >
+                      {field.value
+                        ? courses.find((course) => course.value === field.value)
+                            ?.label
+                        : 'Seleccionar curso'}
+                      <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="PopoverContent">
+                  <Command>
+                    <CommandInput
+                      placeholder="Buscar curso..."
+                      className="h-9"
+                    />
+                    <ScrollArea className="max-h-56">
+                      <CommandEmpty>No se encontaron resultados.</CommandEmpty>
+                      <CommandGroup>
+                        {isLoading ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          courses.map((course) => (
+                            <CommandItem
+                              value={course.label}
+                              key={course.value}
+                              onSelect={() => {
+                                setValue('id_current_course', course.value, {
+                                  shouldDirty: true,
+                                })
+                              }}
+                            >
+                              {course.label}
+                              <CheckIcon
+                                className={cn(
+                                  'ml-auto h-4 w-4',
+                                  course.value === field.value
+                                    ? 'opacity-100'
+                                    : 'opacity-0'
+                                )}
+                              />
+                            </CommandItem>
+                          ))
+                        )}
+                      </CommandGroup>
+                    </ScrollArea>
+                  </Command>
+                </PopoverContent>
+              </Popover>
 
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
       <FormField
         control={control}
         name="current_schedules"
@@ -601,11 +604,6 @@ export const StudentFields = () => {
           control={control}
           name="school"
           rules={{
-            required: 'Este campo es necesario',
-            minLength: {
-              value: 3,
-              message: 'Debe tener al menos 3 caracteres',
-            },
             maxLength: {
               value: 150,
               message: 'Debe tener un maximo de 150 caracteres',
@@ -623,6 +621,64 @@ export const StudentFields = () => {
           )}
         />
 
+        <FormField
+          control={control}
+          name="degree"
+          rules={{
+            maxLength: {
+              value: 50,
+              message: 'Debe tener un maximo de 50 caracteres',
+            },
+          }}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Grado cursando (Opcional):</FormLabel>
+              <FormControl>
+                <Input type="text" {...field} />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      <div className="flex gap-4">
+        <FormField
+          control={control}
+          name={`liveWith`}
+          rules={{
+            required: 'Campo requerido',
+          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>¿Con quién vive?</FormLabel>
+
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Padre">Padre</SelectItem>
+                  <SelectItem value="Madre">Madre</SelectItem>
+                  <SelectItem value="Tio">Tio</SelectItem>
+                  <SelectItem value="Tia">Tia </SelectItem>
+                  <SelectItem value="Abuelo">Abuelo</SelectItem>
+                  <SelectItem value="Abuela">Abuela</SelectItem>
+                  <SelectItem value="Hermano">Hermano</SelectItem>
+                  <SelectItem value="Hermana">Hermana</SelectItem>
+                  <SelectItem value="Primo">Primo</SelectItem>
+                  <SelectItem value="Prima">Prima</SelectItem>
+
+                  <SelectItem value="Tutor Legal">Tutor Legal</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={control}
           name="gender"

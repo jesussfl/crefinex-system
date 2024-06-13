@@ -76,7 +76,7 @@ export default function GradesTable({
                 className="font-semibold"
               >{`${student?.names} ${student?.lastNames} ${student.id_document_number}`}</TableCell>
 
-              {evaluations.map((evaluation) => {
+              {evaluationsByCourse.map((evaluation) => {
                 const studentData = student.grades.find(
                   (grade) =>
                     grade.evaluation.id === evaluation.id &&

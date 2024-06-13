@@ -5,6 +5,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from '@/modules/common/components/form'
 
 import { Button } from '@/modules/common/components/button'
@@ -49,7 +50,9 @@ export const MainRepresentativeFields = () => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Seleccione el Representante Legal:</FormLabel>
-
+            <FormDescription>
+              Esta lista es de los parentescos agregados en el paso 2
+            </FormDescription>
             <Popover>
               <PopoverTrigger asChild>
                 <FormControl>

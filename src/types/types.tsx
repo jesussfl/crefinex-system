@@ -1,6 +1,13 @@
 import { Option } from '@/modules/common/components/multiple-selector'
 import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
-import { Documentos_Identidad, Genders, Prisma, Rol } from '@prisma/client'
+import {
+  Documentos_Identidad,
+  Genders,
+  Modalities,
+  Prisma,
+  Rol,
+  Student_Status,
+} from '@prisma/client'
 export type RolesWithPermissionsArray = Rol & {
   permisos: Option[]
 }
@@ -32,7 +39,59 @@ export type ComboboxData = {
 export type CourseColumns = {
   title: string
 }
+export type StudentFormType = {
+  names: string
+  lastNames: string
+  birthDate: Date | null
+  current_status: Student_Status
+  liveWith?: string | null
+  degree?: string | null
+  id_current_course: number
+  current_schedules: Option[]
+  modalidad: Modalities
+  gender: Genders
 
+  phone_number?: string | null
+  email?: string | null
+
+  address?: string | null
+  country: string
+  city: string
+  state: string
+  level_id: number
+  extracurricular_activities?: string | null
+
+  id_document_type: Documentos_Identidad
+  id_document_number?: string | null
+  id_document_image?: string | null
+  student_image?: string | null
+
+  id_main_representative?: string | null
+
+  secondary_representative: {
+    names: string
+    last_names: string
+    id_document_type: Documentos_Identidad
+    id_document_number: string
+    relationship: string
+    phone_number: string
+  }
+  emergency_representative: {
+    names: string
+    last_names: string
+    id_document_type: Documentos_Identidad
+    id_document_number: string
+    relationship: string
+    phone_number: string
+  }
+
+  representatives: RepresentativeFormType[]
+
+  school?: string | null
+  birth_place?: string | null
+  can_medicate: boolean
+  medicine?: string | null
+}
 export type RepresentativeFormType = {
   names: string
   lastNames: string

@@ -46,8 +46,7 @@ export const RepresentativeFields = ({ index }: { index: number }) => {
   }
   return (
     <>
-      <div className="flex flex-col gap-5">
-        {/* SIGNED EXAMPLE */}
+      <div className="flex flex-row gap-5">
         <div className="flex flex-col gap-3">
           <FormLabel>Foto del representante</FormLabel>
           <CldUploadWidget
@@ -81,8 +80,8 @@ export const RepresentativeFields = ({ index }: { index: number }) => {
                 watch('representatives.' + index + '.representative_image') ||
                 ''
               }
-              width={result.width}
-              height={result.height}
+              width={200}
+              height={200}
               alt="Uploaded Image"
             />
             <Button

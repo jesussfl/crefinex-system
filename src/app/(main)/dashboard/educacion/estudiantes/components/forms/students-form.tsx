@@ -1,88 +1,42 @@
 'use client'
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useTransition } from 'react'
 
-import {
-  useForm,
-  SubmitHandler,
-  useFormState,
-  useFieldArray,
-  useFormContext,
-} from 'react-hook-form'
 import { Button } from '@/modules/common/components/button'
 import { Form } from '@/modules/common/components/form'
-import { DialogFooter } from '@/modules/common/components/dialog/dialog'
 import { useToast } from '@/modules/common/components/toast/use-toast'
-import {
-  Documentos_Identidad,
-  Genders,
-  Modalities,
-  Student_Status,
-} from '@prisma/client'
+import { Documentos_Identidad, Genders } from '@prisma/client'
+import { Loader2, PlusIcon, Trash } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Loader2, PlusIcon } from 'lucide-react'
-import { createStudent, updateStudent } from '../../lib/actions/students'
+import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form'
 import 'react-phone-input-2/lib/style.css'
+import { createStudent, updateStudent } from '../../lib/actions/students'
 
-import { RepresentativeFields } from './representative-fields'
-import { RepresentativeFormType } from '@/types/types'
-import { StudentFields } from './student-fields'
-import { Step, Stepper, useStepper } from '@/modules/common/components/stepper'
-import { Option } from '@/modules/common/components/multiple-selector'
-import { MainRepresentativeFields } from './main-representative-form'
+import { Step, Stepper } from '@/modules/common/components/stepper'
+import StepperFooter from '@/modules/common/components/stepper/stepper-footer'
+import { StudentFormType } from '@/types/types'
 import { ExtraInfoForm } from './extra-info-form'
+import { MainRepresentativeFields } from './main-representative-form'
+import { RepresentativeFields } from './representative-fields'
+import { steps } from './steps'
+import { StudentFields } from './student-fields'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/modules/common/components/accordion'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/modules/common/components/alert-dialog'
 
-export type StudentFormType = {
-  names: string
-  lastNames: string
-  birthDate: Date | null
-  current_status: Student_Status
-
-  id_current_course: number
-  current_schedules: Option[]
-  modalidad: Modalities
-  gender: Genders
-
-  phone_number?: string | null
-  email?: string | null
-
-  address?: string | null
-  country: string
-  city: string
-  state: string
-  level_id: number
-  extracurricular_activities?: string | null
-
-  id_document_type: Documentos_Identidad
-  id_document_number?: string | null
-  id_document_image?: string | null
-  student_image?: string | null
-
-  id_main_representative: string
-
-  secondary_representative: {
-    names: string
-    last_names: string
-    id_document_type: Documentos_Identidad
-    id_document_number: string
-    relationship: string
-    phone_number: string
-  }
-  emergency_representative: {
-    names: string
-    last_names: string
-    id_document_type: Documentos_Identidad
-    id_document_number: string
-    relationship: string
-    phone_number: string
-  }
-
-  representatives: RepresentativeFormType[]
-
-  school?: string | null
-  birth_place?: string | null
-  can_medicate: boolean
-  medicine?: string | null
-}
 type EditForm = {
   defaultValues: StudentFormType
   studentId: number
@@ -108,34 +62,13 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
     name: 'representatives',
     control,
   })
-  const steps = [
-    {
-      label: 'Datos del Estudiante',
-      description: 'Agrega la información del estudiante',
-    },
-    {
-      label: 'Parentescos',
-      description: 'Agrega los parentescos del estudiante',
-    },
-    {
-      label: 'Representante Legal',
-      description: 'Selecciona el representante legal del estudiante',
-    },
-    {
-      label: 'Información Adicional',
-      description: 'Agrega información adicional del estudiante',
-    },
-  ]
 
   const [isPending, startTransition] = useTransition()
-
-  const [isLoading, setIsLoading] = useState(false)
-
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
     const isEditing = !!defaultValues
 
-    startTransition(() => {
-      if (!isEditing) {
+    if (!isEditing) {
+      startTransition(() => {
         createStudent(values).then((data) => {
           if (data?.error) {
             toast({
@@ -157,10 +90,12 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
             router.back()
           }
         })
+      })
 
-        return
-      }
+      return
+    }
 
+    startTransition(() => {
       updateStudent(studentId, values).then((data) => {
         if (data?.error) {
           toast({
@@ -199,15 +134,20 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
           ...rest,
         }}
       >
+        {isPending && (
+          <div className="flex justify-center items-center fixed inset-0 bg-black/60 z-50">
+            <Loader2 className="animate-spin" size={88} color="white" />
+          </div>
+        )}
         <form onSubmit={rest.handleSubmit(onSubmit)}>
           <div className="px-24 space-y-8">
             <Stepper
               variant="circle-alt"
               initialStep={0}
               steps={steps}
-              // onClickStep={(step, setStep) => {
-              //   setStep(step)
-              // }}
+              onClickStep={(step, setStep) => {
+                setStep(step)
+              }}
               scrollTracking={true}
             >
               {steps.map((stepProps, index) => {
@@ -223,10 +163,15 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
                   return (
                     <Step key={stepProps.label} {...stepProps}>
                       <Button
-                        variant="outline"
-                        className="w-full"
+                        variant="default"
+                        size={'lg'}
+                        className="absolute bottom-[100px] right-[50px] z-50"
                         onClick={(e) => {
                           e.preventDefault()
+                          toast({
+                            title: 'Parentesco agregado',
+                            variant: 'default',
+                          })
                           append({
                             names: '',
                             lastNames: '',
@@ -252,31 +197,66 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
                           })
                         }}
                       >
-                        <PlusIcon className="h-4 w-4" />
+                        <PlusIcon className="h-4 w-4 mr-2" />
                         Agregar Parentesco
                       </Button>
+                      <Accordion type="single" collapsible className="w-full">
+                        {fields.map((field, index) => {
+                          return (
+                            <AccordionItem
+                              key={field.id}
+                              value={String(index)}
+                              className="space-y-4"
+                            >
+                              <AccordionTrigger className="bg-secondary rounded-md px-4 flex justify-between">
+                                Datos del Parentesco #{index + 1}
+                              </AccordionTrigger>
+                              <AccordionContent className="space-y-4 p-8 border rounded-md">
+                                <AlertDialog>
+                                  <div className="flex w-full justify-end">
+                                    <AlertDialogTrigger className="flex justify-end">
+                                      <Trash className="h-4 w-4 mr-2" />
+                                      Eliminar Parentesco
+                                    </AlertDialogTrigger>
+                                  </div>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        Estás seguro que deseas eliminar este
+                                        parentesco
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Los datos que has ingresado se perderán
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>
+                                        Cancelar
+                                      </AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => {
+                                          remove(index)
+                                          setValue('id_main_representative', '')
+                                          toast({
+                                            title: 'Parentesco eliminado',
+                                            description:
+                                              'El parentesco se ha eliminado correctamente',
+                                            variant: 'default',
+                                          })
+                                        }}
+                                      >
+                                        Eliminar
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
 
-                      {fields.map((field, index) => {
-                        return (
-                          <div key={field.id} className="space-y-4">
-                            <div className="flex justify-between">
-                              <p>Datos del Parentesco #{index + 1}</p>
-                              <Button
-                                variant="destructive"
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  remove(index)
-                                }}
-                              >
-                                Eliminar parentesco
-                              </Button>
-                            </div>
-                            <div className="space-y-4">
-                              <RepresentativeFields index={index} />
-                            </div>
-                          </div>
-                        )
-                      })}
+                                <RepresentativeFields index={index} />
+                              </AccordionContent>
+                            </AccordionItem>
+                          )
+                        })}
+                      </Accordion>
                     </Step>
                   )
                 }
@@ -297,79 +277,11 @@ export default function StudentsForm({ defaultValues, studentId }: Props) {
                   )
                 }
               })}
-              <MyStepperFooter
-                isLoading={isLoading}
-                setIsLoading={setIsLoading}
-              />
+              <StepperFooter />
             </Stepper>
           </div>
         </form>
       </Form>
     </div>
-  )
-}
-
-function MyStepperFooter({
-  isLoading,
-  setIsLoading, // scrollToTop,
-}: {
-  isLoading: boolean
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  // scrollToTop: () => void
-}) {
-  const { activeStep, prevStep, nextStep } = useStepper()
-  const { formState, trigger } = useFormContext()
-
-  const handleNextStep = async () => {
-    setIsLoading(true)
-    const isValid = await trigger()
-    if (isValid) {
-      nextStep()
-      // scrollToTop()
-    }
-
-    setIsLoading(false)
-  }
-  return (
-    <DialogFooter className="fixed right-0 bottom-0 bg-white pt-4 border-t border-border gap-4 items-center w-full p-8">
-      {Object.keys(formState.errors).length > 0 && (
-        <p className="text-sm font-medium text-destructive">
-          Corrige los campos en rojo
-        </p>
-      )}
-      <p className="text-xs text-muted-foreground">
-        Paso {activeStep + 1} de {'4'}
-      </p>
-      <Button
-        variant="outline"
-        disabled={activeStep === 0}
-        onClick={(e) => {
-          e.preventDefault()
-          prevStep()
-          // scrollToTop()
-        }}
-      >
-        Volver
-      </Button>
-
-      <Button
-        disabled={isLoading}
-        onClick={(e) => {
-          if (activeStep === 3) return
-
-          e.preventDefault()
-
-          handleNextStep()
-        }}
-      >
-        {isLoading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : activeStep === 3 ? (
-          'Guardar'
-        ) : (
-          'Siguiente'
-        )}
-      </Button>
-    </DialogFooter>
   )
 }

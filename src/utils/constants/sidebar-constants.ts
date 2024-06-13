@@ -10,6 +10,7 @@ import {
   PencilRuler,
   BookOpen,
   UserCog2,
+  BarChart2,
 } from 'lucide-react'
 import { SideMenuItem } from '@/types/types'
 
@@ -41,6 +42,7 @@ export enum SECTION_NAMES {
   USUARIOS = 'USUARIOS',
   ESTUDIANTES = 'ESTUDIANTES',
   AUDITORIA = 'AUDITORIA',
+  MARKETING = 'MARKETING',
   ADMINISTRACION_ACADEMICA = 'ADMINISTRACION_ACADEMICA',
   CONFIGURACION = 'CONFIGURACION',
   LIBROS = 'LIBROS',
@@ -88,7 +90,13 @@ export const SIDE_MENU_ITEMS: SideMenuItem[] = [
       },
     ],
   },
-
+  {
+    title: 'Marketing',
+    path: '/dashboard/marketing',
+    identifier: SECTION_NAMES.MARKETING,
+    icon: BarChart2,
+    requiredPermissions: [SECTION_NAMES.MARKETING, SECTION_NAMES.TODAS],
+  },
   {
     title: 'Personal',
     path: '/dashboard/personal',

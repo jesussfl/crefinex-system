@@ -18,6 +18,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'petapixel.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 }

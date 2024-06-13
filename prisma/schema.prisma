@@ -210,9 +210,10 @@ model Student {
   state                      String
   extracurricular_activities String?
   current_status             Student_Status
-
-  id_main_representative String
-  main_representative    Representative @relation(name: "main_represented", fields: [id_main_representative], references: [id_document_number], onDelete: Cascade, onUpdate: Cascade)
+  liveWith                   String?
+  degree                     String?
+  id_main_representative     String?
+  main_representative        Representative? @relation(name: "main_represented", fields: [id_main_representative], references: [id_document_number], onDelete: SetNull, onUpdate: Cascade)
 
   id_secondary_representative Int
   secondary_representative    Secondary_Representative @relation(fields: [id_secondary_representative], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -246,7 +247,7 @@ model Emergency_Representative {
   relationship       String
   phone_number       String
   id_document_type   Documentos_Identidad
-  id_document_number String
+  id_document_number String               @unique
   student            Student[]
 }
 
@@ -257,7 +258,7 @@ model Secondary_Representative {
   relationship       String
   phone_number       String
   id_document_type   Documentos_Identidad
-  id_document_number String
+  id_document_number String               @unique
   student            Student[]
 }
 
@@ -475,4 +476,25 @@ enum Contract_Periods {
   Indefinido
   Por_Proyecto
   Temporal
+}
+
+enum Post_States {
+  Publicado
+  En_Borrador
+  Pendiente
+  Rechazado
+}
+
+model Post {
+  id          Int         @id @default(autoincrement())
+  title       String?
+  description String?
+  copy        String?
+  image       String?
+  hashtags    String?
+  date        DateTime
+  status      Post_States
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
