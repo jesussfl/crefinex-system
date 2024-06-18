@@ -1,17 +1,9 @@
-// components/AttendanceTable.tsx
 'use client'
 
-import { Evaluation, Post, Prisma } from '@prisma/client'
-import { ComboboxData } from '@/types/types'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from '@/modules/common/components/card/card'
+import { Post, Prisma } from '@prisma/client'
 import { SocialMediaPost } from './social-media-post'
-import previousTuesday from 'date-fns/esm/previousTuesday'
 import { useState } from 'react'
-import { eachDayOfInterval, endOfMonth, format, startOfMonth } from 'date-fns'
+import { format } from 'date-fns'
 import { Input } from '@/modules/common/components/input/input'
 import {
   Select,
@@ -22,6 +14,7 @@ import {
 } from '@/modules/common/components/select/select'
 import { es } from 'date-fns/locale'
 import { ScrollArea } from '@/modules/common/components/scroll-area/scroll-area'
+import { usePostStore } from './lib/providers'
 
 export type StudentWithGrades = Prisma.StudentGetPayload<{
   include: {
@@ -37,23 +30,11 @@ interface Props {
   posts: Post[]
 }
 export default function PostsContainer({ posts }: Props) {
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [searchText, setSearchText] = useState('')
-  const [selectedYear, setSelectedYear] = useState<number>(
-    currentMonth.getFullYear()
+  const { currentMonth, handleMonthChange, handleYearChange } = usePostStore(
+    (state) => state
   )
 
-  const handleMonthChange = (value: string) => {
-    const newMonth = new Date(currentMonth.setMonth(parseInt(value)))
-    setCurrentMonth(newMonth)
-  }
-
-  const handleYearChange = (value: string) => {
-    const newYear = parseInt(value)
-    setSelectedYear(newYear)
-    const newMonth = new Date(currentMonth.setFullYear(newYear))
-    setCurrentMonth(newMonth)
-  }
+  const [searchText, setSearchText] = useState('')
 
   const filteredPosts = posts.filter((post) => {
     const postDate = new Date(post.date)
@@ -109,7 +90,12 @@ export default function PostsContainer({ posts }: Props) {
               <ScrollArea className="h-[200px]">
                 {Array.from({ length: 12 }).map((_, index) => (
                   <SelectItem key={index} value={String(index)}>
-                    {format(new Date(2021, index), 'MMMM', { locale: es })}
+                    {format(new Date(2021, index), 'MMMM', { locale: es })
+                      .charAt(0)
+                      .toUpperCase() +
+                      format(new Date(2021, index), 'MMMM', {
+                        locale: es,
+                      }).slice(1)}
                   </SelectItem>
                 ))}
               </ScrollArea>

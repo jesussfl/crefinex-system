@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState, useTransition } from 'react'
 
-import { useForm, SubmitHandler, useFormContext } from 'react-hook-form'
+import { useForm, SubmitHandler } from 'react-hook-form'
 import { Button } from '@/modules/common/components/button'
 import {
   Form,
@@ -14,7 +14,7 @@ import {
 } from '@/modules/common/components/form'
 import { DialogFooter } from '@/modules/common/components/dialog/dialog'
 import { useToast } from '@/modules/common/components/toast/use-toast'
-import { Employee, Post, Post_States } from '@prisma/client'
+import { Post, Post_States } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 
@@ -78,7 +78,31 @@ export default function PostsForm({ defaultValues, postId }: Props) {
     const isEditing = !!defaultValues
 
     if (!isEditing) {
-      createPost(values).then((data) => {
+      startTransition(() => {
+        createPost(values).then((data) => {
+          if (data?.error) {
+            toast({
+              title: 'Parece que hubo un problema',
+              description: data.error,
+              variant: 'destructive',
+            })
+            return
+          }
+          if (data?.success) {
+            toast({
+              title: 'Post creado',
+              description: 'El post se ha creado correctamente',
+              variant: 'success',
+            })
+            router.back()
+          }
+        })
+      })
+      return
+    }
+
+    startTransition(() => {
+      updatePost(values, postId).then((data) => {
         if (data?.error) {
           toast({
             title: 'Parece que hubo un problema',
@@ -89,32 +113,13 @@ export default function PostsForm({ defaultValues, postId }: Props) {
         }
         if (data?.success) {
           toast({
-            title: 'Post creado',
-            description: 'El post se ha creado correctamente',
+            title: 'Post actualizado',
+            description: 'El post se ha actualizado correctamente',
             variant: 'success',
           })
-          router.back()
         }
+        router.back()
       })
-      return
-    }
-    updatePost(values, postId).then((data) => {
-      if (data?.error) {
-        toast({
-          title: 'Parece que hubo un problema',
-          description: data.error,
-          variant: 'destructive',
-        })
-        return
-      }
-      if (data?.success) {
-        toast({
-          title: 'Post actualizado',
-          description: 'El post se ha actualizado correctamente',
-          variant: 'success',
-        })
-      }
-      router.back()
     })
   }
   return (
