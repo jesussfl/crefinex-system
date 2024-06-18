@@ -125,19 +125,4 @@ export const SIDE_MENU_ITEMS: SideMenuItem[] = [
     icon: FolderSearch,
     requiredPermissions: [SECTION_NAMES.AUDITORIA, SECTION_NAMES.TODAS],
   },
-
-  {
-    title: 'Respaldo',
-    identifier: SECTION_NAMES.CONFIGURACION,
-    path: '/dashboard/configuracion',
-    icon: Settings,
-    requiredPermissions: [SECTION_NAMES.CONFIGURACION, SECTION_NAMES.TODAS],
-  },
-  {
-    title: 'Ayuda',
-    identifier: SECTION_NAMES.AYUDA,
-    path: '/dashboard/ayuda',
-    icon: HelpCircle,
-    requiredPermissions: [SECTION_NAMES.AYUDA, SECTION_NAMES.TODAS],
-  },
 ]

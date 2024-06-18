@@ -1,4 +1,4 @@
-import { BookOpen, Plus, UserCog2 } from 'lucide-react'
+import { BarChart2, BookOpen, Plus, UserCog2 } from 'lucide-react'
 import { Metadata } from 'next'
 import {
   HeaderLeftSide,
@@ -38,7 +38,7 @@ export default async function Page() {
       <PageHeader>
         <HeaderLeftSide>
           <PageHeaderTitle>
-            <UserCog2 size={24} />
+            <BarChart2 size={24} />
             Marketing
           </PageHeaderTitle>
           <PageHeaderDescription>
@@ -65,7 +65,7 @@ export default async function Page() {
                   Agregar Post
                 </Link>
               </CardHeader>
-              <CardContent>
+              <CardContent className={'pb-8'}>
                 <PostsContainer posts={posts} />
               </CardContent>
             </Card>

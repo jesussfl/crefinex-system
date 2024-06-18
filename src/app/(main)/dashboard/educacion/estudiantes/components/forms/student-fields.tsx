@@ -148,7 +148,7 @@ export const StudentFields = () => {
             </CldUploadWidget>
           </div>
 
-          {result ? (
+          {result || watch('student_image') ? (
             <div className="flex gap-4">
               <CldImage
                 src={watch('student_image') || ''}

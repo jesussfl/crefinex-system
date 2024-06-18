@@ -33,33 +33,6 @@ export type StudentWithGrades = Prisma.StudentGetPayload<{
   }
 }>
 
-const posts = [
-  {
-    id: 1,
-    cover: 'https://petapixel.com/assets/uploads/2022/12/what-is-unsplash.jpg',
-    title: 'la serie de los gastos: los gastos emocionales',
-    description:
-      'Este es una descripcion de pruebas para el postt. Este post trata sobre publicaciones realizadas en redes sociales, espero que te guste este contenido da like y comparte',
-  },
-  {
-    id: 2,
-    cover: 'https://petapixel.com/assets/uploads/2022/12/what-is-unsplash.jpg',
-    title: 'la serie de los gastos: los gastos emocionales',
-    description: '',
-  },
-  {
-    id: 3,
-    cover: 'https://petapixel.com/assets/uploads/2022/12/what-is-unsplash.jpg',
-    title: 'la serie de los gastos: los gastos emocionales',
-    description: '',
-  },
-  {
-    id: 4,
-    cover: 'https://petapixel.com/assets/uploads/2022/12/what-is-unsplash.jpg',
-    title: 'la serie de los gastos: los gastos emocionales',
-    description: '',
-  },
-]
 interface Props {
   posts: Post[]
 }

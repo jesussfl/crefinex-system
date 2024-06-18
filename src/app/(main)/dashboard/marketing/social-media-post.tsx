@@ -16,6 +16,7 @@ import { Badge } from '@/modules/common/components/badge'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { deletePost } from './lib/actions/post-actions'
+import { CldImage } from 'next-cloudinary'
 
 interface SocialMediaPost extends React.HTMLAttributes<HTMLDivElement> {
   post: any
@@ -37,21 +38,15 @@ export function SocialMediaPost({
       <ContextMenu>
         <ContextMenuTrigger>
           <Link href={`/dashboard/marketing/post/${post.id}`}>
-            <div className="space-y-3 hover:cursor-pointer hover:scale-105 transition-all">
-              <div className="overflow-hidden rounded-md">
-                {post.cover ? (
+            <div className="space-y-3 hover:cursor-pointer hover:scale-105 transition-all p-3 border border-gray-300 rounded-md">
+              <div className="overflow-hidden rounded-md ">
+                {post.image ? (
                   <div className="relative">
-                    <Image
-                      src={post.cover}
-                      alt={post.title}
+                    <CldImage
+                      src={post.image || ''}
                       width={width}
                       height={height}
-                      className={cn(
-                        'h-auto w-auto object-cover transition-all hover:scale-105',
-                        aspectRatio === 'portrait'
-                          ? 'aspect-[3/4]'
-                          : 'aspect-square'
-                      )}
+                      alt="Uploaded Image"
                     />
                     <Badge
                       variant="secondary"

@@ -73,7 +73,8 @@ export const RepresentativeFields = ({ index }: { index: number }) => {
           </CldUploadWidget>
         </div>
 
-        {result ? (
+        {result ||
+        watch('representatives.' + index + '.representative_image') ? (
           <div className="flex gap-4">
             <CldImage
               src={

@@ -134,14 +134,16 @@ export default function PostsForm({ defaultValues, postId }: Props) {
         }}
       >
         <form onSubmit={rest.handleSubmit(onSubmit)}>
-          <div className="px-24">
+          <div className="px-24 space-y-4 mb-36">
             <div className="flex flex-row gap-5">
               <div className="flex flex-col gap-3">
                 <FormLabel>Portada del post (Opcional):</FormLabel>
                 <CldUploadWidget
+                  config={{}}
                   options={{
                     sources: ['local'],
                     multiple: false,
+                    language: 'es',
                   }}
                   signatureEndpoint="/api/sign-image"
                   onSuccess={(result) => {
@@ -162,7 +164,7 @@ export default function PostsForm({ defaultValues, postId }: Props) {
                 </CldUploadWidget>
               </div>
 
-              {result ? (
+              {result || rest.watch('image') ? (
                 <div className="flex gap-4">
                   <CldImage
                     src={rest.watch('image') || ''}
@@ -356,7 +358,7 @@ export default function PostsForm({ defaultValues, postId }: Props) {
                 },
               }}
               render={({ field }) => (
-                <FormItem className="mb-36">
+                <FormItem>
                   <FormLabel>Hashtags</FormLabel>
                   <FormControl>
                     <textarea
