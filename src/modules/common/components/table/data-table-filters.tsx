@@ -55,7 +55,7 @@ export default function DataTableFilters({
   return (
     <div className="flex flex-1 justify-between items-center py-4">
       <Input
-        placeholder="Filtrar..."
+        placeholder="Buscar..."
         value={filtering}
         onChange={(event) => setFiltering(event.target.value)}
         // value={(table.getColumn('nombre')?.getFilterValue() as string) ?? ''}

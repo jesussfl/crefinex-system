@@ -52,6 +52,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/modules/common/components/popover/popover'
+import { FilterIcon } from 'lucide-react'
 declare module '@tanstack/table-core' {
   interface FilterFns {
     fuzzy: FilterFn<unknown>
@@ -225,18 +226,38 @@ export function DataTable<TData extends { id: any }, TValue>({
                           : ''
                       }
                     >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                      {header.column.getCanFilter() &&
-                      !COLUMNS_TO_EXCLUDE.includes(header.column.id) ? (
-                        <div>
-                          <Filter column={header.column} table={table} />
-                        </div>
-                      ) : null}
+                      <div className="flex items-center">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                        {header.column.getCanFilter() &&
+                        !COLUMNS_TO_EXCLUDE.includes(header.column.id) ? (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant={
+                                  header.column.getFilterValue()
+                                    ? 'default'
+                                    : 'ghost'
+                                }
+                                size="sm"
+                              >
+                                <FilterIcon className="h-3 w-3" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80">
+                              <Filter
+                                key={header.id}
+                                column={header.column}
+                                table={table}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        ) : null}
+                      </div>
                     </TableHead>
                   )
                 })}
@@ -407,7 +428,8 @@ function Filter({
   }
 
   return typeof firstValue === 'number' ? (
-    <div>
+    <div className="flex flex-col gap-2">
+      <p className="text-sm text-muted-foreground"> Filtrar por rango </p>
       <div className="flex space-x-2">
         <DebouncedInput
           type="number"
@@ -418,8 +440,9 @@ function Filter({
             column.setFilterValue((old: [number, number]) => [value, old?.[1]])
           }
           placeholder={`Min.`}
-          className="w-24 border rounded text-xs"
+          className="flex-1 border rounded text-xs"
         />
+
         <DebouncedInput
           type="number"
           min={Number(column.getFacetedMinMaxValues()?.[0] ?? '')}
@@ -429,10 +452,9 @@ function Filter({
             column.setFilterValue((old: [number, number]) => [old?.[0], value])
           }
           placeholder={`Max.`}
-          className="w-24 border rounded text-xs"
+          className="flex-1 border rounded text-xs"
         />
       </div>
-      <div className="h-1" />
     </div>
   ) : (
     <>
@@ -446,7 +468,7 @@ function Filter({
         value={(columnFilterValue ?? '') as string}
         onChange={(value) => column.setFilterValue(value)}
         placeholder={`Buscar...`}
-        className="w-36 border rounded text-xs"
+        className="flex-1 border rounded text-xs"
         list={column.id + 'list'}
       />
       <div className="h-1" />
