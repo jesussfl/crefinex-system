@@ -14,7 +14,9 @@ import {
 } from '@/modules/common/components/select/select'
 import { es } from 'date-fns/locale'
 import { ScrollArea } from '@/modules/common/components/scroll-area/scroll-area'
-import { usePostStore } from './lib/providers'
+
+import { usePostStore } from './lib/stores/posts-store'
+import { useStore } from './lib/hooks'
 
 export type StudentWithGrades = Prisma.StudentGetPayload<{
   include: {
@@ -30,11 +32,13 @@ interface Props {
   posts: Post[]
 }
 export default function PostsContainer({ posts }: Props) {
-  const { currentMonth, handleMonthChange, handleYearChange } = usePostStore(
-    (state) => state
-  )
+  const store = useStore(usePostStore, (state) => state)
 
   const [searchText, setSearchText] = useState('')
+
+  if (!store?.currentMonth) return <div>No hay posts</div>
+  const currentMonth = new Date(store?.currentMonth)
+  const currentYear = currentMonth.getFullYear()
 
   const filteredPosts = posts.filter((post) => {
     const postDate = new Date(post.date)
@@ -80,7 +84,7 @@ export default function PostsContainer({ posts }: Props) {
             onChange={(e) => setSearchText(e.target.value)}
           />
           <Select
-            onValueChange={handleMonthChange}
+            onValueChange={store?.handleMonthChange}
             defaultValue={String(currentMonth.getMonth())}
           >
             <SelectTrigger>
@@ -102,7 +106,7 @@ export default function PostsContainer({ posts }: Props) {
             </SelectContent>
           </Select>
           <Select
-            onValueChange={handleYearChange}
+            onValueChange={store?.handleYearChange}
             defaultValue={String(currentMonth.getFullYear())}
           >
             <SelectTrigger>

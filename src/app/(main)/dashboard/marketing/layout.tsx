@@ -14,5 +14,5 @@ export default async function Layout({
   if (!isAuthorized) {
     redirect('/dashboard')
   }
-  return <PostStoreProvider>{children}</PostStoreProvider>
+  return <> {children} </>
 }
