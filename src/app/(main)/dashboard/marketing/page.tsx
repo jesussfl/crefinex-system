@@ -71,7 +71,7 @@ export default async function Page() {
             </Card>
           </PageContent>
         </TabsContent>
-        <TabsContent value="planner">
+        <TabsContent value="metrics">
           <PageContent>
             <Card>
               <CardHeader className="flex flex-row justify-between">
