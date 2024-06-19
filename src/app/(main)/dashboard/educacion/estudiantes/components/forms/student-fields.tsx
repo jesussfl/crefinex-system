@@ -598,6 +598,31 @@ export const StudentFields = () => {
             </FormItem>
           )}
         />
+        <FormField
+          control={control}
+          name="gender"
+          rules={{
+            required: 'Campo requerido',
+          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sexo</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Masculino">Masculino</SelectItem>
+                  <SelectItem value="Femenino">Femenino</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
       <div className="flex gap-4">
         <FormField
@@ -642,69 +667,7 @@ export const StudentFields = () => {
           )}
         />
       </div>
-      <div className="flex gap-4">
-        <FormField
-          control={control}
-          name={`liveWith`}
-          rules={{
-            required: 'Campo requerido',
-          }}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>¿Con quién vive?</FormLabel>
 
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Padre">Padre</SelectItem>
-                  <SelectItem value="Madre">Madre</SelectItem>
-                  <SelectItem value="Tio">Tio</SelectItem>
-                  <SelectItem value="Tia">Tia </SelectItem>
-                  <SelectItem value="Abuelo">Abuelo</SelectItem>
-                  <SelectItem value="Abuela">Abuela</SelectItem>
-                  <SelectItem value="Hermano">Hermano</SelectItem>
-                  <SelectItem value="Hermana">Hermana</SelectItem>
-                  <SelectItem value="Primo">Primo</SelectItem>
-                  <SelectItem value="Prima">Prima</SelectItem>
-
-                  <SelectItem value="Tutor Legal">Tutor Legal</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name="gender"
-          rules={{
-            required: 'Campo requerido',
-          }}
-          render={({ field }) => (
-            <FormItem className="flex-1 gap-4 justify-between">
-              <FormLabel className="">Sexo</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Masculino">Masculino</SelectItem>
-                  <SelectItem value="Femenino">Femenino</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
       <div className="flex gap-4">
         <FormField
           control={control}
@@ -818,26 +781,64 @@ export const StudentFields = () => {
           )}
         />
       </div>
-      <FormField
-        control={control}
-        name="address"
-        rules={{
-          maxLength: {
-            value: 100,
-            message: 'Debe tener un maximo de 100 caracteres',
-          },
-        }}
-        render={({ field }) => (
-          <FormItem className="flex-1">
-            <FormLabel>Dirección (Opcional):</FormLabel>
-            <FormControl>
-              <Input {...field} value={field.value || ''} />
-            </FormControl>
+      <div className="flex gap-4">
+        <FormField
+          control={control}
+          name="address"
+          rules={{
+            maxLength: {
+              value: 100,
+              message: 'Debe tener un maximo de 100 caracteres',
+            },
+          }}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Dirección de domicilio (Opcional):</FormLabel>
+              <FormControl>
+                <Input {...field} value={field.value || ''} />
+              </FormControl>
 
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name={`liveWith`}
+          rules={{
+            required: 'Campo requerido',
+          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>¿Con quién vive?</FormLabel>
+
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Padre">Padre</SelectItem>
+                  <SelectItem value="Madre">Madre</SelectItem>
+                  <SelectItem value="Tio">Tio</SelectItem>
+                  <SelectItem value="Tia">Tia </SelectItem>
+                  <SelectItem value="Abuelo">Abuelo</SelectItem>
+                  <SelectItem value="Abuela">Abuela</SelectItem>
+                  <SelectItem value="Hermano">Hermano</SelectItem>
+                  <SelectItem value="Hermana">Hermana</SelectItem>
+                  <SelectItem value="Primo">Primo</SelectItem>
+                  <SelectItem value="Prima">Prima</SelectItem>
+
+                  <SelectItem value="Tutor Legal">Tutor Legal</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
       <div className="flex  gap-5">
         <FormField
           control={control}

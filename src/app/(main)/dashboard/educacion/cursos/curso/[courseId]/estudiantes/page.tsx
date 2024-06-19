@@ -4,8 +4,6 @@ import {
   HeaderLeftSide,
   PageContent,
   PageHeader,
-  PageHeaderDescription,
-  PageHeaderTitle,
 } from '@/modules/layout/templates/page'
 import { DataTable } from '@/modules/common/components/table/data-table'
 import {
@@ -17,9 +15,6 @@ import {
 } from '@/modules/common/components/card/card'
 // import ButtonExport from './components/button-export'
 import { getStudentsByCourse } from '../../../../estudiantes/lib/actions/students'
-import { columns } from '../../../../estudiantes/columns'
-import ModalForm from '@/modules/common/components/modal-form'
-import ChangeStudentStateForm from './components/forms/student-states-form'
 import {
   StudentByCourseType,
   studentsByCourseColumns,
@@ -31,7 +26,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/modules/common/components/breadcrumb'
 import Link from 'next/link'
