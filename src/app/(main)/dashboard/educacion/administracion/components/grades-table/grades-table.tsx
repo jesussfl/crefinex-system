@@ -36,19 +36,26 @@ export default function GradesTable({
   evaluations,
   courses,
 }: Props) {
-  const [searchText, setSearchText] = useState('')
   const {
     selectedCourse,
     setSelectedCourse,
     studentsByCourse,
     evaluationsByCourse,
+    searchText,
+    setSearchText,
   } = useGradesTableFilters({ studentsWithGrades, evaluations })
-
+  const filteredStudents = studentsByCourse.filter((student) => {
+    const fullNames = `${student.names} ${student.lastNames}`
+    return fullNames.toLowerCase().includes(searchText.toLowerCase())
+  })
   return (
     <div className="flex flex-col gap-8">
       <TableFilters
         selectedCourse={selectedCourse}
         setSelectedCourse={setSelectedCourse}
+        studentsByCourse={studentsByCourse}
+        setSearchText={setSearchText}
+        searchText={searchText}
         courses={courses}
       />
 
@@ -66,7 +73,7 @@ export default function GradesTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {studentsByCourse.map((student) => (
+          {filteredStudents.map((student) => (
             <TableRow key={student.id}>
               <TableCell
                 style={{

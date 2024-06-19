@@ -21,19 +21,24 @@ import {
 } from '@/modules/common/components/command/command'
 import ModalForm from '@/modules/common/components/modal-form'
 import EvaluationForm from '../../forms/evaluation-form'
+import { StudentWithGrades } from '../grades-table'
 
 type Props = {
   selectedCourse?: number
   setSelectedCourse: (value: number) => void
+  setSearchText: (value: string) => void
+  searchText: string
+  studentsByCourse: StudentWithGrades[]
   courses: ComboboxData[]
 }
 export default function TableFilters({
   selectedCourse,
   setSelectedCourse,
+
+  setSearchText,
+  searchText,
   courses,
 }: Props) {
-  const [searchText, setSearchText] = useState('')
-
   return (
     <div className="flex flex-col gap-8">
       <div className="flex justify-start items-center gap-4">

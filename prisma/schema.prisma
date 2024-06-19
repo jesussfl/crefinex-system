@@ -486,14 +486,18 @@ enum Post_States {
 }
 
 model Post {
-  id          Int         @id @default(autoincrement())
-  title       String?
-  description String?
-  copy        String?
-  image       String?
-  hashtags    String?
-  date        DateTime
-  status      Post_States
+  id           Int       @id @default(autoincrement())
+  title        String?
+  description  String?
+  copy         String?
+  image        String?
+  hashtags     String?
+  date         DateTime?
+  duration     String?
+  title_status String?
+  cover_status String?
+
+  status Post_States
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

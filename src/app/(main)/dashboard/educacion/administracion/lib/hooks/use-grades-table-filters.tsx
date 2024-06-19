@@ -17,7 +17,7 @@ export default function useGradesTableFilters({
   const [evaluationsByCourse, setEvaluationsByCourse] = useState<Evaluation[]>(
     []
   )
-
+  const [searchText, setSearchText] = useState('')
   useEffect(() => {
     if (selectedCourse) {
       setStudentsByCourse(
@@ -36,6 +36,8 @@ export default function useGradesTableFilters({
   return {
     selectedCourse,
     setSelectedCourse,
+    searchText,
+    setSearchText,
     studentsByCourse,
     evaluationsByCourse,
   }

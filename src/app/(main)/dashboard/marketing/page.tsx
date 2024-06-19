@@ -50,7 +50,7 @@ export default async function Page() {
       <Tabs defaultValue="planner">
         <TabsList className="mx-5">
           <TabsTrigger value="planner">Planner Mensual</TabsTrigger>
-          <TabsTrigger value="strategies">Estrategias Mensuales</TabsTrigger>
+          <TabsTrigger value="metrics">Metricas</TabsTrigger>
         </TabsList>
         <TabsContent value="planner">
           <PageContent>
@@ -68,6 +68,16 @@ export default async function Page() {
               <CardContent className={'pb-8'}>
                 <PostsContainer posts={posts} />
               </CardContent>
+            </Card>
+          </PageContent>
+        </TabsContent>
+        <TabsContent value="planner">
+          <PageContent>
+            <Card>
+              <CardHeader className="flex flex-row justify-between">
+                <CardTitle className="text-md">Métricas</CardTitle>
+              </CardHeader>
+              <CardContent className={'pb-8'}></CardContent>
             </Card>
           </PageContent>
         </TabsContent>

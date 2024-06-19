@@ -267,13 +267,17 @@ const generateStudentCode = async (
   const courseStartDate = course.start_date
     ? new Date(course.start_date)
     : new Date()
+
+  const courseEndDate = course.end_date ? new Date(course.end_date) : new Date()
+
   const courseStartMonth = courseStartDate.getMonth() + 1
+  const courseEndMonth = courseEndDate.getMonth() + 1
   const courseStartYear = courseStartDate.getFullYear()
   const code = await generateCode(
     courseLevel,
     course.id,
     courseModality,
-    courseStartMonth,
+    courseEndMonth,
     courseStartYear,
     id_student
   )
