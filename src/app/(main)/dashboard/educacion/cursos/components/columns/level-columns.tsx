@@ -15,6 +15,9 @@ import {
   DropdownMenuTrigger,
 } from '@/modules/common/components/dropdown-menu/dropdown-menu'
 import Link from 'next/link'
+import ProtectedTableActions from '@/modules/common/components/table-actions'
+import { SECTION_NAMES } from '@/utils/constants/sidebar-constants'
+import { deleteLevel } from '../../lib/actions/level-actions'
 
 export const levelColumns: ColumnDef<Level>[] = [
   SELECT_COLUMN,
@@ -93,25 +96,19 @@ export const levelColumns: ColumnDef<Level>[] = [
       const data = row.original
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir Menú</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(String(data.id))}
-            >
-              Copiar código
-            </DropdownMenuItem>
-            <Link href={`/dashboard/educacion/cursos/curso/${data.id}`}>
-              <DropdownMenuItem>Editar</DropdownMenuItem>
-            </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProtectedTableActions
+          sectionName={SECTION_NAMES.CURSOS}
+          editConfig={{
+            href: `/dashboard/educacion/cursos/nivel/${data.id}`,
+          }}
+          deleteConfig={{
+            alertTitle: '¿Estás seguro de eliminar este nivel?',
+            alertDescription: `Estas a punto de eliminar este nivel y todas sus dependencias.`,
+            onConfirm: () => {
+              return deleteLevel(data.id)
+            },
+          }}
+        ></ProtectedTableActions>
       )
     },
   },

@@ -119,6 +119,38 @@ export const updateLevel = async (
 
   return {
     error: false,
-    success: 'Curso actualizado exitosamente',
+    success: 'Nivel actualizado exitosamente',
+  }
+}
+
+export const deleteLevel = async (id: number) => {
+  const sessionResponse = await validateUserSession()
+
+  if (sessionResponse.error || !sessionResponse.session) {
+    return sessionResponse
+  }
+
+  const permissionsResponse = validateUserPermissions({
+    sectionName: SECTION_NAMES.CURSOS,
+    actionName: 'ELIMINAR',
+    userPermissions: sessionResponse.session?.user.rol.permisos,
+  })
+
+  if (!permissionsResponse.success) {
+    return permissionsResponse
+  }
+
+  await prisma.level.delete({
+    where: {
+      id,
+    },
+  })
+
+  await registerAuditAction('Se eliminó el nivel: ' + id)
+  revalidatePath('/dashboard/educacion/cursos')
+
+  return {
+    error: false,
+    success: 'Nivel eliminado exitosamente',
   }
 }
