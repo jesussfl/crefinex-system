@@ -47,6 +47,10 @@ import { format } from 'date-fns'
 import MultipleSelector, {
   Option,
 } from '@/modules/common/components/multiple-selector'
+import DatePicker, { registerLocale } from 'react-datepicker'
+import es from 'date-fns/locale/es'
+registerLocale('es', es)
+import 'react-datepicker/dist/react-datepicker.css'
 interface UploadedAssetData {
   public_id: string
   width: number
@@ -562,20 +566,15 @@ export const StudentFields = () => {
             <FormItem className="flex-1">
               <FormLabel>Fecha de Nacimiento (Opcional):</FormLabel>
               <FormControl>
-                <Input
-                  type="date"
-                  id="birthDate"
-                  {...field}
-                  value={
-                    field.value
-                      ? new Date(field.value).toISOString().split('T')[0]
-                      : ''
-                  }
-                  onChange={(e) => {
-                    field.onChange(new Date(e.target.value))
-                  }}
-                  className="w-full"
-                  max={new Date().toISOString().split('T')[0]}
+                <DatePicker
+                  placeholderText="Seleccionar fecha"
+                  onChange={(date) => field.onChange(date)}
+                  selected={field.value}
+                  locale={es}
+                  peekNextMonth
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
                 />
               </FormControl>
 

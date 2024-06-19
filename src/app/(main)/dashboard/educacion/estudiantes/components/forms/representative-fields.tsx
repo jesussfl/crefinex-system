@@ -21,6 +21,8 @@ import PhoneInput from 'react-phone-input-2'
 import { CldImage, CldUploadWidget } from 'next-cloudinary'
 import { Button } from '@/modules/common/components/button'
 import { Switch } from '@/modules/common/components/switch/switch'
+import DatePicker, { registerLocale } from 'react-datepicker'
+import es from 'date-fns/locale/es'
 interface UploadedAssetData {
   public_id: string
   width: number
@@ -252,20 +254,28 @@ export const RepresentativeFields = ({ index }: { index: number }) => {
             <FormItem className="flex-1">
               <FormLabel>Fecha de Nacimiento</FormLabel>
               <FormControl>
-                <Input
-                  type="date"
-                  id="birthDate"
-                  {...field}
-                  value={
-                    field.value
-                      ? new Date(field.value).toISOString().split('T')[0]
-                      : ''
-                  }
-                  onChange={(e) => {
-                    field.onChange(new Date(e.target.value))
-                  }}
-                  className="w-full"
-                  max={new Date().toISOString().split('T')[0]}
+                <FormField
+                  control={rest.control}
+                  name="birthDate"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Fecha de Nacimiento (Opcional):</FormLabel>
+                      <FormControl>
+                        <DatePicker
+                          placeholderText="Seleccionar fecha"
+                          onChange={(date) => field.onChange(date)}
+                          selected={field.value}
+                          locale={es}
+                          peekNextMonth
+                          showMonthDropdown
+                          showYearDropdown
+                          dropdownMode="select"
+                        />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </FormControl>
 

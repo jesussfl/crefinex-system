@@ -50,7 +50,8 @@ import {
 } from '@/modules/common/components/popover/popover'
 import { CaretSortIcon } from '@radix-ui/react-icons'
 import { EvaluationFields } from './evaluation-fields'
-
+import DatePicker, { registerLocale } from 'react-datepicker'
+import es from 'date-fns/locale/es'
 type StudentsRelation = Omit<
   Students_Courses,
   'id_course' | 'id' | 'fecha_creacion' | 'ultima_actualizacion'
@@ -394,19 +395,15 @@ export default function CoursesForm({ defaultValues, students }: Props) {
                 <FormItem className="flex-1">
                   <FormLabel>Fecha de Inicio</FormLabel>
                   <FormControl>
-                    <Input
-                      type="date"
-                      id="start_date"
-                      {...field}
-                      value={
-                        field.value
-                          ? new Date(field.value).toISOString().split('T')[0]
-                          : ''
-                      }
-                      onChange={(e) => {
-                        field.onChange(new Date(e.target.value))
-                      }}
-                      className="w-full"
+                    <DatePicker
+                      placeholderText="Seleccionar fecha..."
+                      onChange={(date) => field.onChange(date)}
+                      selected={field.value}
+                      locale={es}
+                      peekNextMonth
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode="select"
                     />
                   </FormControl>
 
@@ -424,19 +421,15 @@ export default function CoursesForm({ defaultValues, students }: Props) {
                 <FormItem className="flex-1">
                   <FormLabel>Fecha de Culminación</FormLabel>
                   <FormControl>
-                    <Input
-                      type="date"
-                      id="end_date"
-                      {...field}
-                      value={
-                        field.value
-                          ? new Date(field.value).toISOString().split('T')[0]
-                          : ''
-                      }
-                      onChange={(e) => {
-                        field.onChange(new Date(e.target.value))
-                      }}
-                      className="w-full"
+                    <DatePicker
+                      placeholderText="Seleccionar fecha..."
+                      onChange={(date) => field.onChange(date)}
+                      selected={field.value}
+                      locale={es}
+                      peekNextMonth
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode="select"
                     />
                   </FormControl>
 
