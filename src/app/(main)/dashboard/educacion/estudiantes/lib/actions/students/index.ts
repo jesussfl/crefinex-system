@@ -241,13 +241,14 @@ const generateCode = async (
   courseId: number,
   courseModality: number,
   courseEndMonth: number,
-  courseStartYear: number
+  courseStartYear: number,
+  id_student?: number
 ): Promise<string> => {
   // Obtener el número total de estudiantes en la base de datos
   const studentCount = await prisma.student.count()
 
   // El siguiente ID del estudiante será studentCount + 1
-  const studentId = studentCount + 1
+  const studentId = id_student ? id_student : studentCount + 1
 
   // Formatear mes y año
   const formattedMonth = courseEndMonth.toString().padStart(2, '0')
@@ -258,7 +259,8 @@ const generateCode = async (
   return code
 }
 const generateStudentCode = async (
-  course: Prisma.CoursesGetPayload<{ include: { level: true } }>
+  course: Prisma.CoursesGetPayload<{ include: { level: true } }>,
+  id_student?: number
 ) => {
   const courseLevel = course.level.order || 1
   const courseModality = course.modality === 'Presencial' ? 1 : 2
@@ -272,7 +274,8 @@ const generateStudentCode = async (
     course.id,
     courseModality,
     courseStartMonth,
-    courseStartYear
+    courseStartYear,
+    id_student
   )
 
   return code
@@ -456,7 +459,7 @@ export const updateStudent = async (id: number, data: StudentFormType) => {
     }
   }
 
-  const codigo = await generateStudentCode(course)
+  const codigo = await generateStudentCode(course, id)
   const {
     level_id,
     emergency_representative,
