@@ -151,7 +151,7 @@ export function DataTable<TData extends { id: any }, TValue>({
 
   useEffect(() => {
     if (!onSelectedRowsChange) return
-    onSelectedRowsChange(lastSelectedRow)
+    onSelectedRowsChange(selectedRows)
   }, [selectedRows])
 
   const table = useReactTable({

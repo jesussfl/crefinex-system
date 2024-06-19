@@ -44,12 +44,9 @@ export const MainRepresentativeFields = () => {
       <FormField
         control={control}
         name="id_main_representative"
-        rules={{
-          required: 'Este campo es requerido',
-        }}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Seleccione el Representante Legal:</FormLabel>
+            <FormLabel>Seleccione el Representante Legal (Opcional):</FormLabel>
             <FormDescription>
               Esta lista es de los parentescos agregados en el paso 2
             </FormDescription>

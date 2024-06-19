@@ -206,8 +206,8 @@ model Student {
   email                      String?
   address                    String?
   country                    String
-  city                       String
-  state                      String
+  city                       String?
+  state                      String?
   extracurricular_activities String?
   current_status             Student_Status
   liveWith                   String?
@@ -215,11 +215,11 @@ model Student {
   id_main_representative     String?
   main_representative        Representative? @relation(name: "main_represented", fields: [id_main_representative], references: [id_document_number], onDelete: SetNull, onUpdate: Cascade)
 
-  id_secondary_representative Int
-  secondary_representative    Secondary_Representative @relation(fields: [id_secondary_representative], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_secondary_representative Int?
+  secondary_representative    Secondary_Representative? @relation(fields: [id_secondary_representative], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  id_emergency_representative Int
-  emergency_representative    Emergency_Representative @relation(fields: [id_emergency_representative], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_emergency_representative Int?
+  emergency_representative    Emergency_Representative? @relation(fields: [id_emergency_representative], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   id_document_type   Documentos_Identidad
   id_document_number String?              @unique

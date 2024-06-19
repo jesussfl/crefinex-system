@@ -336,16 +336,20 @@ export const createStudent = async (data: StudentFormType) => {
       prisma.student.create({
         data: {
           ...rest,
-          emergency_representative: {
-            create: {
-              ...rest.emergency_representative,
-            },
-          },
-          secondary_representative: {
-            create: {
-              ...rest.secondary_representative,
-            },
-          },
+          emergency_representative: rest.emergency_representative
+            ? {
+                create: {
+                  ...rest.emergency_representative,
+                },
+              }
+            : undefined,
+          secondary_representative: rest.secondary_representative
+            ? {
+                create: {
+                  ...rest.secondary_representative,
+                },
+              }
+            : undefined,
 
           id_main_representative: undefined,
           main_representative: data.id_main_representative
@@ -874,18 +878,18 @@ export const getDataToExportPreInscription = async (id: number) => {
     extra_activities: student?.extracurricular_activities,
     correo: student?.email,
     emergencia_nombre:
-      student.emergency_representative.names +
+      student.emergency_representative?.names +
       ' ' +
-      student.emergency_representative.last_names,
-    emergencia_parentesco: student.emergency_representative.relationship,
-    emergencia_telefono: student.emergency_representative.phone_number,
+      student.emergency_representative?.last_names,
+    emergencia_parentesco: student.emergency_representative?.relationship,
+    emergencia_telefono: student.emergency_representative?.phone_number,
     autorizacion_nombre:
-      student.secondary_representative.names +
+      student.secondary_representative?.names +
       ' ' +
-      student.secondary_representative.last_names,
-    autorizacion_cedula: `${student.secondary_representative.id_document_type}-${student.secondary_representative.id_document_number}`,
-    autorizacion_parentesco: student.secondary_representative.relationship,
-    autorizacion_telefono: student.secondary_representative.phone_number,
+      student.secondary_representative?.last_names,
+    autorizacion_cedula: `${student.secondary_representative?.id_document_type}-${student.secondary_representative?.id_document_number}`,
+    autorizacion_parentesco: student.secondary_representative?.relationship,
+    autorizacion_telefono: student.secondary_representative?.phone_number,
     representante: {
       nombre_completo_representante:
         student.main_representative?.names +

@@ -56,8 +56,8 @@ export type StudentFormType = {
 
   address?: string | null
   country: string
-  city: string
-  state: string
+  city?: string | null
+  state?: string | null
   level_id: number
   extracurricular_activities?: string | null
 
@@ -68,22 +68,22 @@ export type StudentFormType = {
 
   id_main_representative?: string | null
 
-  secondary_representative: {
+  secondary_representative?: {
     names: string
     last_names: string
     id_document_type: Documentos_Identidad
     id_document_number: string
     relationship: string
     phone_number: string
-  }
-  emergency_representative: {
+  } | null
+  emergency_representative?: {
     names: string
     last_names: string
     id_document_type: Documentos_Identidad
     id_document_number: string
     relationship: string
     phone_number: string
-  }
+  } | null
 
   representatives: RepresentativeFormType[]
 

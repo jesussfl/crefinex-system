@@ -781,11 +781,6 @@ export const StudentFields = () => {
           control={control}
           name="state"
           rules={{
-            required: 'Este campo es necesario',
-            minLength: {
-              value: 3,
-              message: 'Debe tener al menos 3 caracteres',
-            },
             maxLength: {
               value: 100,
               message: 'Debe tener un maximo de 100 caracteres',
@@ -793,7 +788,7 @@ export const StudentFields = () => {
           }}
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Estado</FormLabel>
+              <FormLabel>Estado (Opcional):</FormLabel>
               <FormControl>
                 <Input {...field} value={field.value || ''} />
               </FormControl>
@@ -806,11 +801,6 @@ export const StudentFields = () => {
           control={control}
           name="city"
           rules={{
-            required: 'Este campo es necesario',
-            minLength: {
-              value: 3,
-              message: 'Debe tener al menos 3 caracteres',
-            },
             maxLength: {
               value: 100,
               message: 'Debe tener un maximo de 100 caracteres',
@@ -818,7 +808,7 @@ export const StudentFields = () => {
           }}
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Ciudad</FormLabel>
+              <FormLabel>Ciudad (Opcional):</FormLabel>
               <FormControl>
                 <Input {...field} value={field.value || ''} />
               </FormControl>
@@ -832,11 +822,6 @@ export const StudentFields = () => {
         control={control}
         name="address"
         rules={{
-          required: 'Este campo es necesario',
-          minLength: {
-            value: 3,
-            message: 'Debe tener al menos 3 caracteres',
-          },
           maxLength: {
             value: 100,
             message: 'Debe tener un maximo de 100 caracteres',
@@ -844,7 +829,7 @@ export const StudentFields = () => {
         }}
         render={({ field }) => (
           <FormItem className="flex-1">
-            <FormLabel>Dirección</FormLabel>
+            <FormLabel>Dirección (Opcional):</FormLabel>
             <FormControl>
               <Input {...field} value={field.value || ''} />
             </FormControl>
