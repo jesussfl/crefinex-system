@@ -885,18 +885,22 @@ export const getDataToExportPreInscription = async (id: number) => {
     extra_activities: student?.extracurricular_activities,
     correo: student?.email,
     emergencia_nombre:
-      student.emergency_representative?.names +
-      ' ' +
-      student.emergency_representative?.last_names,
-    emergencia_parentesco: student.emergency_representative?.relationship,
-    emergencia_telefono: student.emergency_representative?.phone_number,
+      student.emergency_representative?.names ||
+      'No definido' + ' ' + student.emergency_representative?.last_names ||
+      'No definido',
+    emergencia_parentesco:
+      student.emergency_representative?.relationship || 'No definido',
+    emergencia_telefono:
+      student.emergency_representative?.phone_number || 'No definido',
     autorizacion_nombre:
-      student.secondary_representative?.names +
-      ' ' +
-      student.secondary_representative?.last_names,
+      student.secondary_representative?.names ||
+      'No definido' + ' ' + student.secondary_representative?.last_names ||
+      'No definido',
     autorizacion_cedula: `${student.secondary_representative?.id_document_type}-${student.secondary_representative?.id_document_number}`,
-    autorizacion_parentesco: student.secondary_representative?.relationship,
-    autorizacion_telefono: student.secondary_representative?.phone_number,
+    autorizacion_parentesco:
+      student.secondary_representative?.relationship || 'No definido',
+    autorizacion_telefono:
+      student.secondary_representative?.phone_number || 'No definido',
     representante: {
       nombre_completo_representante:
         student.main_representative?.names +
