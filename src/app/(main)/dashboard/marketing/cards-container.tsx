@@ -41,7 +41,7 @@ export default function PostsContainer({ posts }: Props) {
   const currentYear = currentMonth.getFullYear()
 
   const filteredPosts = posts.filter((post) => {
-    const postDate = new Date(post.date)
+    const postDate = !post.date ? new Date() : new Date(post.date)
     const postMonth = postDate.getMonth()
     const postYear = postDate.getFullYear()
     const postTitle =
