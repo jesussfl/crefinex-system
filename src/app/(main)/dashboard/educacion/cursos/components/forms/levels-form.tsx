@@ -82,16 +82,16 @@ export default function LevelsForm({ defaultValues }: Props) {
       }
 
       //   const dirtyValues = getDirtyValues(dirtyFields, values) as FormValues
-      //   updateLevel(defaultValues.id, dirtyValues).then((data) => {
-      //     if (data?.success) {
-      //       toast({
-      //         title: 'Nivel actualizado',
-      //         description: 'El nivel se ha actualizado correctamente',
-      //         variant: 'success',
-      //       })
-      //     }
-      //     router.back()
-      //   })
+      updateLevel(values, defaultValues?.id).then((data) => {
+        if (data?.success) {
+          toast({
+            title: 'Nivel actualizado',
+            description: 'El nivel se ha actualizado correctamente',
+            variant: 'success',
+          })
+        }
+        router.back()
+      })
     })
   }
 
