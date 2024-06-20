@@ -1,8 +1,7 @@
-import { BarChart2, BookOpen, Plus, UserCog2 } from 'lucide-react'
+import { BarChart2, Plus } from 'lucide-react'
 import { Metadata } from 'next'
 import {
   HeaderLeftSide,
-  HeaderRightSide,
   PageContent,
   PageHeader,
   PageHeaderDescription,
@@ -25,6 +24,7 @@ import PostsContainer from './cards-container'
 import Link from 'next/link'
 import { buttonVariants } from '@/modules/common/components/button'
 import { getAllPosts } from './lib/actions/post-actions'
+import PostsContainerWithoutMonth from './cards-container-without-month'
 
 export const metadata: Metadata = {
   title: 'Marketing',
@@ -45,12 +45,13 @@ export default async function Page() {
             Visualiza todo lo relacionado a redes sociales
           </PageHeaderDescription>
         </HeaderLeftSide>
-        <HeaderRightSide></HeaderRightSide>
       </PageHeader>
       <Tabs defaultValue="planner">
         <TabsList className="mx-5">
           <TabsTrigger value="planner">Planner Mensual</TabsTrigger>
-          <TabsTrigger value="metrics">Metricas</TabsTrigger>
+          <TabsTrigger value="planner-without-month">
+            Planner sin Meses
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="planner">
           <PageContent>
@@ -71,13 +72,22 @@ export default async function Page() {
             </Card>
           </PageContent>
         </TabsContent>
-        <TabsContent value="metrics">
+        <TabsContent value="planner-without-month">
           <PageContent>
             <Card>
               <CardHeader className="flex flex-row justify-between">
-                <CardTitle className="text-md">Métricas</CardTitle>
+                <CardTitle className="text-md">Planner Mensual</CardTitle>
+                <Link
+                  href="/dashboard/marketing/post"
+                  className={buttonVariants({ variant: 'default' })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Agregar Post
+                </Link>
               </CardHeader>
-              <CardContent className={'pb-8'}></CardContent>
+              <CardContent className={'pb-8'}>
+                <PostsContainerWithoutMonth posts={posts} />
+              </CardContent>
             </Card>
           </PageContent>
         </TabsContent>

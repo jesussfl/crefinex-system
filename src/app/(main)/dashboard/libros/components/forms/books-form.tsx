@@ -19,7 +19,10 @@ import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { createBook, updateBook } from '../../lib/actions/book-actions'
 // import { createSystem, updateSystem } from '../../lib/actions/systems'
-
+import DatePicker, { registerLocale } from 'react-datepicker'
+import es from 'date-fns/locale/es'
+registerLocale('es', es)
+import 'react-datepicker/dist/react-datepicker.css'
 interface Props {
   defaultValues?: Book
 }
@@ -223,22 +226,18 @@ export default function BooksForm({ defaultValues }: Props) {
               control={form.control}
               name="publication_date"
               render={({ field }) => (
-                <FormItem className="flex-1">
+                <FormItem className="flex flex-col flex-1">
                   <FormLabel>Fecha de Publicación</FormLabel>
                   <FormControl>
-                    <Input
-                      type="date"
-                      id="publication_date"
-                      {...field}
-                      value={
-                        field.value
-                          ? new Date(field.value).toISOString().split('T')[0]
-                          : ''
-                      }
-                      onChange={(e) => {
-                        field.onChange(new Date(e.target.value))
-                      }}
-                      className="w-full"
+                    <DatePicker
+                      placeholderText="Seleccionar fecha"
+                      onChange={(date) => field.onChange(date)}
+                      selected={field.value}
+                      locale={es}
+                      peekNextMonth
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode="select"
                     />
                   </FormControl>
 

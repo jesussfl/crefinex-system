@@ -1,15 +1,8 @@
-import Image from 'next/image'
-import { PlusCircledIcon } from '@radix-ui/react-icons'
-
 import { cn } from '@/utils/utils'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuSub,
-  ContextMenuSubContent,
-  ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from '@/modules/common/components/context-menu'
 import { Badge } from '@/modules/common/components/badge'
@@ -19,7 +12,6 @@ import { deletePost } from './lib/actions/post-actions'
 import { CldImage } from 'next-cloudinary'
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -28,10 +20,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/modules/common/components/alert-dialog'
-import { Button } from '@/modules/common/components/button'
+import { Post } from '@prisma/client'
 
 interface SocialMediaPost extends React.HTMLAttributes<HTMLDivElement> {
-  post: any
+  post: Post
   aspectRatio?: 'portrait' | 'square'
   width?: number
   height?: number
@@ -45,6 +37,24 @@ export function SocialMediaPost({
   className,
   ...props
 }: SocialMediaPost) {
+  const getBadgeStatus = (status: string | null) => {
+    switch (status) {
+      case 'En Revisión':
+        return 'warning'
+      case 'Publicado':
+        return 'success'
+      case 'Rechazado':
+        return 'destructive'
+      case 'Pendiente':
+        return 'secondary'
+      case 'Aprobado':
+        return 'success'
+
+      default:
+        return 'secondary'
+    }
+  }
+
   return (
     <div className={cn('space-y-3', className)} {...props}>
       <AlertDialog>
@@ -62,7 +72,7 @@ export function SocialMediaPost({
                         alt="Uploaded Image"
                       />
                       <Badge
-                        variant="secondary"
+                        variant={getBadgeStatus(post.status)}
                         className="absolute top-2 right-2"
                       >
                         {post.status}
@@ -79,7 +89,7 @@ export function SocialMediaPost({
                         )}
                       />
                       <Badge
-                        variant="secondary"
+                        variant={getBadgeStatus(post.status)}
                         className="text-sm absolute top-2 right-2"
                       >
                         {post.status}
@@ -95,8 +105,28 @@ export function SocialMediaPost({
                     {post.description}
                   </p>
                   <p className="text-sm truncate font-medium">
-                    {format(post.date, 'dd/MM/yyyy HH:mm')}
+                    {post.date
+                      ? format(post.date, 'dd/MM/yyyy HH:mm')
+                      : 'Sin fecha'}
                   </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm truncate font-regular">Título:</p>
+                    <Badge
+                      variant={getBadgeStatus(post.title_status)}
+                      className="text-sm top-2 right-2"
+                    >
+                      {post.title_status ? post.title_status : 'En Revisión'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm truncate font-regular">Portada:</p>
+                    <Badge
+                      variant={getBadgeStatus(post.cover_status)}
+                      className="text-sm top-2 right-2"
+                    >
+                      {post.cover_status ? post.cover_status : 'En Revisión'}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </Link>
@@ -110,7 +140,7 @@ export function SocialMediaPost({
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-h-[90vh]">
           <AlertDialogHeader>
             <AlertDialogTitle>{post.title}</AlertDialogTitle>
             <AlertDialogDescription>{post.description}</AlertDialogDescription>

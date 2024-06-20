@@ -52,6 +52,8 @@ import { CaretSortIcon } from '@radix-ui/react-icons'
 import { EvaluationFields } from './evaluation-fields'
 import DatePicker, { registerLocale } from 'react-datepicker'
 import es from 'date-fns/locale/es'
+registerLocale('es', es)
+import 'react-datepicker/dist/react-datepicker.css'
 type StudentsRelation = Omit<
   Students_Courses,
   'id_course' | 'id' | 'fecha_creacion' | 'ultima_actualizacion'

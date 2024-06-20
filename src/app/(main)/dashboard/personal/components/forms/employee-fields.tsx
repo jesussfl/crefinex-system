@@ -22,6 +22,12 @@ import { CldImage, CldUploadWidget } from 'next-cloudinary'
 import { Button } from '@/modules/common/components/button'
 
 import { Contract_Periods, Employee_Status } from '@prisma/client'
+
+import DatePicker, { registerLocale } from 'react-datepicker'
+import es from 'date-fns/locale/es'
+registerLocale('es', es)
+import 'react-datepicker/dist/react-datepicker.css'
+
 interface UploadedAssetData {
   public_id: string
   width: number
@@ -267,89 +273,81 @@ export const EmployeeFields = () => {
           )}
         />
       </div>
-      <FormField
-        control={control}
-        name={`civil_status`}
-        rules={{
-          required: 'Campo requerido',
-        }}
-        render={({ field }) => (
-          <FormItem className="flex-1 gap-4 justify-between">
-            <FormLabel className="">Estado Civil</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+      <div className="flex gap-8">
+        <FormField
+          control={control}
+          name={`civil_status`}
+          rules={{
+            required: 'Campo requerido',
+          }}
+          render={({ field }) => (
+            <FormItem className="flex-1 gap-4 justify-between">
+              <FormLabel className="">Estado Civil</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Casado">Casado</SelectItem>
+                  <SelectItem value="Soltero">Soltero</SelectItem>
+                  <SelectItem value="Divorciado">Divorciado</SelectItem>
+                  <SelectItem value="Viudo">Viudo</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name="admission_date"
+          rules={{
+            required: 'Este campo es necesario',
+          }}
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-2">
+              <FormLabel>Fecha de admisión </FormLabel>
               <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar..." />
-                </SelectTrigger>
+                <DatePicker
+                  placeholderText="Seleccionar fecha"
+                  onChange={(date) => field.onChange(date)}
+                  selected={field.value}
+                  locale={es}
+                  peekNextMonth
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                />
               </FormControl>
-              <SelectContent>
-                <SelectItem value="Casado">Casado</SelectItem>
-                <SelectItem value="Soltero">Soltero</SelectItem>
-                <SelectItem value="Divorciado">Divorciado</SelectItem>
-                <SelectItem value="Viudo">Viudo</SelectItem>
-              </SelectContent>
-            </Select>
 
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="admission_date"
-        rules={{
-          required: 'Este campo es necesario',
-        }}
-        render={({ field }) => (
-          <FormItem className="flex-1">
-            <FormLabel>Fecha de admisión </FormLabel>
-            <FormControl>
-              <Input
-                type="date"
-                id="fecha_admission"
-                {...field}
-                value={
-                  field.value
-                    ? new Date(field.value).toISOString().split('T')[0]
-                    : ''
-                }
-                onChange={(e) => {
-                  field.onChange(new Date(e.target.value))
-                }}
-                className="w-full"
-                max={new Date().toISOString().split('T')[0]}
-              />
-            </FormControl>
-
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
       <div className="flex gap-4">
         <FormField
           control={control}
           name="start_date_contract"
           render={({ field }) => (
-            <FormItem className="flex-1">
+            <FormItem className="flex flex-col flex-1">
               <FormLabel>Fecha de Inicio del Contrato</FormLabel>
               <FormDescription>Este campo es opcional</FormDescription>
 
               <FormControl>
-                <Input
-                  type="date"
-                  id="start_date_contract"
-                  {...field}
-                  value={
-                    field.value
-                      ? new Date(field.value).toISOString().split('T')[0]
-                      : ''
-                  }
-                  onChange={(e) => {
-                    field.onChange(new Date(e.target.value))
-                  }}
-                  className="w-full"
-                  max={new Date().toISOString().split('T')[0]}
+                <DatePicker
+                  placeholderText="Seleccionar fecha"
+                  onChange={(date) => field.onChange(date)}
+                  selected={field.value}
+                  locale={es}
+                  peekNextMonth
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
                 />
               </FormControl>
 
@@ -395,25 +393,19 @@ export const EmployeeFields = () => {
             required: 'Este campo es necesario',
           }}
           render={({ field }) => (
-            <FormItem className="flex-1">
+            <FormItem className="flex flex-col gap-2">
               <FormLabel>Fecha de Nacimiento</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  id="birthDate"
-                  {...field}
-                  value={
-                    field.value
-                      ? new Date(field.value).toISOString().split('T')[0]
-                      : ''
-                  }
-                  onChange={(e) => {
-                    field.onChange(new Date(e.target.value))
-                  }}
-                  className="w-full"
-                  max={new Date().toISOString().split('T')[0]}
-                />
-              </FormControl>
+
+              <DatePicker
+                placeholderText="Seleccionar fecha"
+                onChange={(date) => field.onChange(date)}
+                selected={field.value}
+                locale={es}
+                peekNextMonth
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+              />
 
               <FormMessage />
             </FormItem>
@@ -584,7 +576,9 @@ export const EmployeeFields = () => {
           render={({ field }) => (
             <FormItem className="flex-1">
               <FormLabel>Salario Base en Bs</FormLabel>
-              <FormDescription>Este campo es opcional</FormDescription>
+              <FormDescription>
+                Este salario está indexado al BCV
+              </FormDescription>
 
               <FormControl>
                 <Input type="number" {...field} value={field.value || ''} />
@@ -599,8 +593,10 @@ export const EmployeeFields = () => {
           name="bonus"
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Bonificación en BS</FormLabel>
-              <FormDescription>Este campo es opcional</FormDescription>
+              <FormLabel>Bonificación en Dólares (Opcional): </FormLabel>
+              <FormDescription>
+                Esta bonificación está indexada al BCV
+              </FormDescription>
               <FormControl>
                 <Input type="number" {...field} value={field.value || ''} />
               </FormControl>

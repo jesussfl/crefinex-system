@@ -23,6 +23,8 @@ import { Button } from '@/modules/common/components/button'
 import { Switch } from '@/modules/common/components/switch/switch'
 import DatePicker, { registerLocale } from 'react-datepicker'
 import es from 'date-fns/locale/es'
+registerLocale('es', es)
+import 'react-datepicker/dist/react-datepicker.css'
 interface UploadedAssetData {
   public_id: string
   width: number

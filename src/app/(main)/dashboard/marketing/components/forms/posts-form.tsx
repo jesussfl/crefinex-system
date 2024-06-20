@@ -16,7 +16,7 @@ import { DialogFooter } from '@/modules/common/components/dialog/dialog'
 import { useToast } from '@/modules/common/components/toast/use-toast'
 import { Post, Post_States } from '@prisma/client'
 import { useRouter } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
+import { Loader2, TrashIcon } from 'lucide-react'
 
 import 'react-phone-input-2/lib/style.css'
 
@@ -31,7 +31,10 @@ import {
 } from '@/modules/common/components/select/select'
 import { format } from 'date-fns'
 import { createPost, updatePost } from '../../lib/actions/post-actions'
-
+import DatePicker, { registerLocale } from 'react-datepicker'
+import es from 'date-fns/locale/es'
+registerLocale('es', es)
+import 'react-datepicker/dist/react-datepicker.css'
 type EditForm = {
   defaultValues: Post
   postId: number
@@ -167,6 +170,36 @@ export default function PostsForm({ defaultValues, postId }: Props) {
                     </Button>
                   )}
                 </CldUploadWidget>
+                <FormField
+                  control={control}
+                  name="cover_status"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Estado de la portada </FormLabel>
+
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value || 'Pendiente'}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Rechazado"> Rechazada </SelectItem>
+                          <SelectItem value="Aprobado"> Aprobada </SelectItem>
+                          <SelectItem value="En Revisión">
+                            {' '}
+                            En Revisión{' '}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               {result || rest.watch('image') ? (
@@ -221,41 +254,61 @@ export default function PostsForm({ defaultValues, postId }: Props) {
               />
               <FormField
                 control={control}
+                name="title_status"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Estado del titulo </FormLabel>
+
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value || 'Pendiente'}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Rechazado"> Rechazado </SelectItem>
+                        <SelectItem value="Aprobado"> Aprobado </SelectItem>
+                        <SelectItem value="En Revisión">En Revisión</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
                 name={`date`}
-                rules={{
-                  required: true,
-                }}
                 render={({ field }) => {
                   return (
-                    <FormItem className="flex-1">
+                    <FormItem className="flex flex-col gap-2">
                       <FormLabel>Fecha de Publicación</FormLabel>
-
-                      <Input
-                        type="datetime-local"
-                        id="date"
-                        {...field}
-                        value={
-                          field.value
-                            ? format(
-                                new Date(field.value),
-                                "yyyy-MM-dd'T'HH:mm"
-                              )
-                            : ''
-                        }
-                        onBlur={() => {
-                          trigger('date')
-                        }}
-                        onChange={(e) => {
-                          if (!e.target.value) {
-                            //@ts-ignore
-                            setValue('date', null)
-                            return
-                          }
-
-                          setValue('date', new Date(e.target.value))
-                        }}
-                        className="w-full"
-                      />
+                      <div className="flex gap-2">
+                        <DatePicker
+                          placeholderText="Seleccionar fecha"
+                          onChange={(date) => field.onChange(date)}
+                          selected={field.value}
+                          locale={es}
+                          peekNextMonth
+                          showMonthDropdown
+                          showYearDropdown
+                          showTimeSelect
+                          dateFormat="d MMMM, yyyy h:mm aa"
+                          dropdownMode="select"
+                        />
+                        <Button
+                          variant={'secondary'}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            field.onChange(null)
+                          }}
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </Button>
+                      </div>
 
                       <FormMessage />
                     </FormItem>

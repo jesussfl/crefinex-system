@@ -56,7 +56,11 @@ export const createEmployee = async (data: Prisma.EmployeeCreateInput) => {
   }
 
   await prisma.employee.create({
-    data,
+    data: {
+      ...data,
+      base_salary: Number(data.base_salary),
+      bonus: Number(data.bonus),
+    },
   })
 
   await registerAuditAction('Se creó un nuevo empleado: ' + data.names)
